@@ -12,7 +12,17 @@
 **Autonomous, Explainable & Enterprise-Grade Claims Adjudication & Forensic Investigation Platform**  
 *Azentio Hackathon 2026: AI for Insurance Claims Intelligence & Financial Leakage Prevention*
 
-[Architecture](#-end-to-end-system-architecture) • [Level 1: Validation & Detection](#-level-1-claims-validation--leakage-detection) • [Level 2: Forensic Investigation](#-level-2-forensic-investigation--settlement-corrections) • [Jury Guide](#-jury-demonstration-guide--pre-packaged-datasets) • [API Reference](#-comprehensive-api-reference) • [Quick Start](#-quick-start--verification)
+[Architecture](#-end-to-end-system-architecture) • [UI Visual Tour](#-platform-ui--forensic-investigation-tour) • [Level 1: Validation & Detection](#-level-1-claims-validation--leakage-detection) • [Level 2: Forensic Investigation](#-level-2-forensic-investigation--settlement-corrections) • [Jury Guide](#-jury-demonstration-guide--pre-packaged-datasets) • [API Reference](#-comprehensive-api-reference) • [Quick Start](#-quick-start--verification)
+
+</div>
+
+---
+
+<div align="center">
+
+<img src="screenshorts/01_executive_dashboard_kpis.jpeg" alt="Azentio.ai Executive KPI Dashboard & Visual Analytics" width="100%" style="border-radius: 12px; border: 1.5px solid #10b981; box-shadow: 0 8px 30px rgba(16, 185, 129, 0.15);" />
+
+*Figure 1: Azentio.ai Executive Studio — Live KPI Ribbon (₹6,23,250 Prevented Leakage, 72.5% Recovery Rate), Leakage Analytics by Scenario, Severity Distribution, and Active Claims Portfolio Table.*
 
 </div>
 
@@ -20,27 +30,28 @@
 
 ## 📑 Table of Contents
 1. [Executive Summary & Problem Statement](#-executive-summary--problem-statement)
-2. [End-to-End System Architecture](#-end-to-end-system-architecture)
-3. [Level 1: Claims Validation & Leakage Detection](#-level-1-claims-validation--leakage-detection)
+2. [Platform UI & Forensic Investigation Tour](#-platform-ui--forensic-investigation-tour)
+3. [End-to-End System Architecture](#-end-to-end-system-architecture)
+4. [Level 1: Claims Validation & Leakage Detection](#-level-1-claims-validation--leakage-detection)
    - [Step 1: Multi-Format Claims Ingestion Pipeline](#step-1-multi-format-claims-ingestion-pipeline)
    - [Step 2: 8-Stage Policy Rule Waterfall Engine](#step-2-8-stage-policy-rule-waterfall-engine)
    - [Step 3: 4-Tier Duplicate Detection & Clinical Embeddings](#step-3-4-tier-duplicate-detection--clinical-embeddings)
    - [Step 4: Deterministic Arithmetic Discrepancy Proofs](#step-4-deterministic-arithmetic-discrepancy-proofs)
    - [Step 5: Interactive Alert Dashboard & Adjudication Studio](#step-5-interactive-alert-dashboard--adjudication-studio)
-4. [Level 2: Forensic Investigation & Settlement Corrections](#-level-2-forensic-investigation--settlement-corrections)
+5. [Level 2: Forensic Investigation & Settlement Corrections](#-level-2-forensic-investigation--settlement-corrections)
    - [1. Cross-Claim Multi-Entity Correlation](#1-cross-claim-multi-entity-correlation)
    - [2. Supporting Document & Invoice Evidence Reconciliation](#2-supporting-document--invoice-evidence-reconciliation)
    - [3. Claims Investigation Workspace](#3-claims-investigation-workspace)
    - [4. Recommended Settlement Corrections](#4-recommended-settlement-corrections)
    - [5. Analyst Review & Escalation Dossier](#5-analyst-review--escalation-dossier)
-5. [End-to-End Claims Validation & Audit Sequence](#-end-to-end-claims-validation--audit-sequence)
-6. [Settlement Report & Explanation of Benefits (EOB)](#-settlement-report--explanation-of-benefits-eob)
-7. [Jury Demonstration Guide & Pre-Packaged Datasets](#-jury-demonstration-guide--pre-packaged-datasets)
-8. [Comprehensive API Reference](#-comprehensive-api-reference)
-9. [Repository Structure](#-repository-structure)
-10. [Configuration & Environment Variables](#-configuration--environment-variables)
-11. [Quick Start & Verification](#-quick-start--verification)
-12. [Automated Test Suite](#-automated-test-suite)
+6. [End-to-End Claims Validation & Audit Sequence](#-end-to-end-claims-validation--audit-sequence)
+7. [Settlement Report & Explanation of Benefits (EOB)](#-settlement-report--explanation-of-benefits-eob)
+8. [Jury Demonstration Guide & Pre-Packaged Datasets](#-jury-demonstration-guide--pre-packaged-datasets)
+9. [Comprehensive API Reference](#-comprehensive-api-reference)
+10. [Repository Structure](#-repository-structure)
+11. [Configuration & Environment Variables](#-configuration--environment-variables)
+12. [Quick Start & Verification](#-quick-start--verification)
+13. [Automated Test Suite](#-automated-test-suite)
 
 ---
 
@@ -55,7 +66,55 @@ Insurance carriers process massive volumes of healthcare, motor, and general cla
 - **Cross-Claim Collusion**: High-velocity provider billing rings and split stay unbundling designed to bypass individual policy authorization limits.
 
 > [!IMPORTANT]
-> **Azentio.ai** combines **deterministic mathematical rule engines** with **Groq Qwen clinical intelligence**, **vector embeddings**, and **forensic document reconciliation** into a single unified claims studio.
+> **Azentio.ai** combines **deterministic mathematical rule engines** with **Groq Qwen clinical intelligence**, **vector embeddings**, and **forensic document reconciliation** into a single unified claims studio in our emerald and mint green enterprise UI.
+
+---
+
+## 📸 Platform UI & Forensic Investigation Tour
+
+Here is a visual walkthrough of the **Azentio.ai Claims Adjudication & Investigation Studio**:
+
+### 1. Executive KPI Portfolio & Real-Time Analytics
+<div align="center">
+
+<img src="screenshorts/01_executive_dashboard_kpis.jpeg" alt="Executive KPI Dashboard" width="95%" style="border-radius: 10px; border: 1px solid #10b981; margin-bottom: 8px;" />
+
+*Figure A: Portfolio overview featuring the Executive KPI Ribbon (₹6,23,250 Exact Leakage Prevented, ₹1,50,000 Suspected Pricing Outliers, 72.5% Recovery Rate), Leakage Breakdown Doughnut, Severity Distribution Bar Chart, Hospital Provider League, and Searchable Claim Ledger.*
+
+</div>
+
+---
+
+### 2. Claims Investigation Workspace & Deterministic Arithmetic Proofs
+<div align="center">
+
+<img src="screenshorts/02_investigation_workspace_proof.jpeg" alt="Claims Investigation Workspace & Proofs" width="95%" style="border-radius: 10px; border: 1px solid #10b981; margin-bottom: 8px;" />
+
+*Figure B: 360° Claims Dossier (`CLM-CORR-001`) displaying Patient clinical context (ICD-10 K35.8), Policy Terms & Sub-Limits summary card (₹5,00,000 Sum Insured, ₹5,000/day Room Rent Cap, Active Proportionate Clause), and Step 4 Deterministic Arithmetic Discrepancy Proof (`(Daily Billed Room Rent - Daily Policy Limit) × Inpatient Days = ₹20,000.00`).*
+
+</div>
+
+---
+
+### 3. Financial Waterfall Reconciliation & AI Clinical Rationale
+<div align="center">
+
+<img src="screenshorts/03_waterfall_reconciliation_ai.jpeg" alt="Policy Waterfall Reconciliation" width="95%" style="border-radius: 10px; border: 1px solid #10b981; margin-bottom: 8px;" />
+
+*Figure C: Line-item evidence discrepancy ledger with verbatim source quotes, 8-Stage IRDAI Policy Waterfall Reconciliation card (Total Invoiced ₹1,80,000 $\rightarrow$ Admissible Settlement ₹76,500), Financial Leakage Prevention Impact (₹1,03,500 Direct Overpayment Prevented), and Groq Qwen AI Clinical & Regulatory Reasoning.*
+
+</div>
+
+---
+
+### 4. Human-in-the-Loop Analyst Review & Adjudication Modal
+<div align="center">
+
+<img src="screenshorts/04_analyst_decision_modal.jpeg" alt="Adjudicator Decision Modal" width="95%" style="border-radius: 10px; border: 1px solid #10b981; margin-bottom: 8px;" />
+
+*Figure D: Adjudication Action Modal enforcing 5 regulatory decision options (`Confirm Discrepancy`, `Mark as False Positive with Mandatory Reason`, `Request Additional Evidence`, `Escalate to Senior Reviewer or SIU`, `Accept Recommended Correction`), recorded by Senior Claims Auditor - Level 2.*
+
+</div>
 
 ---
 
@@ -396,6 +455,14 @@ Generates a formal mathematical breakdown for every discrepancy:
 - **Calculated Leakage**: Exact numerical excess.
 - **Audit Explanation**: Clear, human-readable narrative.
 
+<div align="center">
+
+<img src="screenshorts/02_investigation_workspace_proof.jpeg" alt="Step 4 Deterministic Arithmetic Proof Card" width="95%" style="border-radius: 10px; border: 1px solid #10b981; margin: 12px 0;" />
+
+*Figure 2: Step 4 Deterministic Arithmetic Discrepancy Proof Card displaying exact algebraic equation, variable inputs, and ₹20,000.00 room rent overage.*
+
+</div>
+
 ```json
 {
   "finding_id": "FIND-CLM-001-EXACT-01",
@@ -412,6 +479,14 @@ Generates a formal mathematical breakdown for every discrepancy:
 ---
 
 ### Step 5: Interactive Alert Dashboard & Adjudication Studio
+
+<div align="center">
+
+<img src="screenshorts/03_waterfall_reconciliation_ai.jpeg" alt="Policy Waterfall Reconciliation & AI Notes" width="95%" style="border-radius: 10px; border: 1px solid #10b981; margin: 12px 0;" />
+
+*Figure 3: Adjudication Studio View — Line-item rate inflation table with source citations, 8-stage financial waterfall reconciliation box, and Qwen AI clinical rationale.*
+
+</div>
 
 - **KPI Ribbon**: Total portfolio billed, exact prevented leakage, suspected leakage, flag rate.
 - **Visual Analytics**: Chart.js charts for leakage by scenario, severity breakdown, and hospital provider distribution.
@@ -514,6 +589,15 @@ Replaces generic warnings with specific, actionable adjustments:
 
 ### 5. Analyst Review & Escalation Dossier
 Enforces full regulatory decision workflows on every finding:
+
+<div align="center">
+
+<img src="screenshorts/04_analyst_decision_modal.jpeg" alt="Analyst Review Modal" width="95%" style="border-radius: 10px; border: 1px solid #10b981; margin: 12px 0;" />
+
+*Figure 4: Analyst Review & Decision Modal — Live demonstration of recorded finding decision with 5 supported actions and reviewer identity tagging.*
+
+</div>
+
 - **5 Supported Decisions**:
   1. `Confirm Discrepancy`: Validates leakage deduction as audited fact.
   2. `Mark as False Positive (with Reason)`: Enforces **mandatory justification reason** (API rejects empty reasons). Automatically credits back the discrepancy to the claimant.
@@ -651,6 +735,12 @@ Azentio_Hackathon-/
 ├── README.md                         # Enterprise platform documentation & architecture diagrams
 ├── requirements.txt                  # Python dependencies (FastAPI, Scikit-learn, etc.)
 ├── run_detection_benchmark.py        # Benchmark verification script
+│
+├── screenshorts/                     # High-resolution UI screenshots of the platform
+│   ├── 01_executive_dashboard_kpis.jpeg
+│   ├── 02_investigation_workspace_proof.jpeg
+│   ├── 03_waterfall_reconciliation_ai.jpeg
+│   └── 04_analyst_decision_modal.jpeg
 │
 ├── claims-ingestion/                 # Canonical ingestion microservice
 │   ├── app/
