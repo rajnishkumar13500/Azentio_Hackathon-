@@ -33,6 +33,7 @@ from src.engine import validation_engine
 from src.ingestion import ingestion_service, IngestionResult
 from src.repository import claims_repository
 from src.report_generator import generate_customer_report_html
+from src.email_service import email_service
 from src.ai.groq_client import groq_agent
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,12 @@ console = Console()
 
 # In-memory adjudication decision store
 _adjudications: Dict[str, Dict[str, Any]] = {}
+
+class SendEmailReportRequest(BaseModel):
+    recipient_email: Optional[str] = None
+    recipient_name: Optional[str] = None
+    subject: Optional[str] = None
+    notes: Optional[str] = None
 
 class AdjudicationActionRequest(BaseModel):
     claim_id: str
@@ -421,6 +428,37 @@ def get_customer_report_endpoint(claim_id: str, download: bool = False):
         headers["Content-Disposition"] = f'attachment; filename="Azentio_Settlement_Report_{claim_id}.html"'
 
     return Response(content=html_content, media_type="text/html", headers=headers)
+
+@app.post("/api/v1/claims/{claim_id}/send-email")
+@app.post("/api/claims/{claim_id}/send-email")
+def send_email_report_endpoint(claim_id: str, req: Optional[SendEmailReportRequest] = None):
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
+    policies_data, _ = load_data()
+    policy_dict = policies_data.get(claim.policy_id, policies_data.get("POL-COMPREHENSIVE-01"))
+    policy = Policy(**policy_dict)
+    report = validation_engine.validate_claim(claim, policy)
+    adjudication = _adjudications.get(claim_id, {})
+
+    payload = req or SendEmailReportRequest()
+    return email_service.send_settlement_report(
+        claim=claim,
+        policy=policy,
+        report=report,
+        adjudication=adjudication,
+        recipient_email=payload.recipient_email,
+        subject=payload.subject,
+        auditor_notes=payload.notes,
+    )
+
+@app.get("/api/v1/claims/{claim_id}/email-history")
+@app.get("/api/claims/{claim_id}/email-history")
+def get_email_history_endpoint(claim_id: str):
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
+    return email_service.get_email_history_for_claim(claim_id)
 
 @app.post("/api/v1/claims/seed-demo")
 def seed_demo_claims():

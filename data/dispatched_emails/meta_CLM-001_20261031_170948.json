@@ -1,0 +1,14 @@
+{
+  "claim_id": "CLM-001",
+  "recipient_email": "rohan.gupta@insurance-client.com",
+  "recipient_name": "Rohan Gupta",
+  "subject": "[Azentio.ai] Official Settlement Statement & Explanation of Benefits \u2014 Claim CLM-001",
+  "gross_claimed": 135000.0,
+  "admissible_amount": 74552.76,
+  "prevented_leakage": 70447.24,
+  "dispatch_mode": "LIVE_SMTP",
+  "dispatch_timestamp": "2026-10-31T11:39:44.053964+00:00",
+  "archive_file": "email_CLM-001_20261031_170948.html",
+  "auditor_notes": "CORRECT SETTLEMENT: Proposed settlement (\u20b9145,000.00) exceeds policy calculated entitlement (\u20b974,552.76) by \u20b970,447.24.",
+  "error_warning": null
+}

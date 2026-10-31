@@ -1,0 +1,14 @@
+{
+  "claim_id": "CLM-001",
+  "recipient_email": "rajnishkumar13500@gmail.com",
+  "recipient_name": "Rohan Gupta",
+  "subject": "[Azentio.ai] Official Settlement Statement & Mathematical Breakdown \u2014 Claim CLM-001",
+  "gross_claimed": 135000.0,
+  "admissible_amount": 74552.76,
+  "prevented_leakage": 70447.24,
+  "dispatch_mode": "LIVE_SMTP",
+  "dispatch_timestamp": "2026-10-31T11:37:10.811285+00:00",
+  "archive_file": "email_CLM-001_20261031_170715.html",
+  "auditor_notes": "Detailed audit with room rent cap, proportionate surgeon deduction cascade, and IRDAI non-payable exclusions.",
+  "error_warning": null
+}

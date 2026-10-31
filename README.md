@@ -197,6 +197,7 @@ The web application (`static/index.html`) is an enterprise UI built with Tailwin
   - **Adjust Settlement**: Confirms adjusted admissible entitlement.
   - **Dismiss Alert**: Approves claim as legitimate exception.
   - **📥 Download Customer Report**: Generates and downloads an official Explanation of Benefits (EOB) audit document (`Azentio_Settlement_Report_{claim_id}.html`) ready to send to policyholders and hospitals, containing the full financial waterfall, Step 4 arithmetic proof, itemized line decisions, digital certification seal, and IRDAI grievance notes.
+  - **📧 Email Customer Report**: Dispatches the official Explanation of Benefits (EOB) report and digital audit certificate directly to the policyholder's inbox via live SMTP or persistent simulated audit archive. Available directly on the report document and in the adjudication studio.
   - Persists auditor notes and updates portfolio metrics live.
 
 ---

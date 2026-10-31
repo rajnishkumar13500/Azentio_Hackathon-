@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Azentio.ai Settlement Report - CLM-001</title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            background: #fff;
+            margin: 0;
+            padding: 24px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .action-bar-top {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .btn-top {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .print-btn {
+            background: #059669;
+            color: #fff;
+        }
+        .print-btn:hover { background: #047857; }
+        .email-btn {
+            background: #2563eb;
+            color: #fff;
+        }
+        .email-btn:hover { background: #1d4ed8; }
+        
+        /* Modal Styles */
+        .email-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .email-modal-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .email-modal-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        @media print {
+            .action-bar-top, .email-modal-overlay { display: none !important; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Action Ribbon -->
+    <div class="action-bar-top">
+        <button onclick="window.print()" class="btn-top print-btn">
+            <span>🖨️</span>
+            <span>Print / Save as PDF</span>
+        </button>
+        <button onclick="openEmailModal()" class="btn-top email-btn" id="btnEmailReportTrigger">
+            <span>📧</span>
+            <span>Send Email to Customer</span>
+        </button>
+    </div>
+
+    <!-- Email Dispatch Modal -->
+    <div id="emailModal" class="email-modal-overlay">
+        <div class="email-modal-card">
+            <div class="email-modal-header">
+                <div style="font-weight: 700; font-size: 14px; color: #064e3b; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">📧</span>
+                    <span>Send Settlement Report to Policyholder</span>
+                </div>
+                <button onclick="closeEmailModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #64748b; line-height: 1;">✕</button>
+            </div>
+            <div style="padding: 18px 20px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">Policyholder / Claimant Name</label>
+                    <input type="text" id="reportEmailRecipientName" value="Rohan Gupta" readonly style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; background: #f8fafc; color: #334155;">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">Destination Customer Email Address <span style="color: #dc2626;">*</span></label>
+                    <input type="email" id="reportEmailRecipient" value="rohan.gupta@insurance-client.com" placeholder="customer@example.com" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; font-family: monospace;">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">Email Subject</label>
+                    <input type="text" id="reportEmailSubject" value="[Azentio.ai] Official Settlement Statement & Explanation of Benefits — Claim CLM-001" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px;">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">Auditor Remarks / Notes Included in Message</label>
+                    <textarea id="reportEmailNotes" rows="2" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; resize: vertical;">CORRECT SETTLEMENT: Proposed settlement (₹145,000.00) exceeds policy calculated entitlement (₹74,552.76) by ₹70,447.24.</textarea>
+                </div>
+                <div id="reportEmailStatusAlert" style="display: none; padding: 10px 12px; border-radius: 6px; font-size: 11px; margin-bottom: 12px;"></div>
+                <p style="font-size: 11px; color: #64748b; margin: 0;">
+                    Attaches the complete official Explanation of Benefits (EOB) HTML audit certificate and financial waterfall.
+                </p>
+            </div>
+            <div style="background: #f8fafc; padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="closeEmailModal()" style="padding: 8px 14px; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">Cancel</button>
+                <button id="btnSendReportEmailSubmit" onclick="executeReportEmailDispatch()" style="padding: 8px 18px; background: #059669; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <span>Send Email Now</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header & Letterhead -->
+    <div style="border-bottom: 3px solid #10b981; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 28px; height: 28px; background: #10b981; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 16px;">🛡️</div>
+                <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #064e3b; letter-spacing: -0.5px;">Azentio<span style="color: #10b981;">.ai</span></h1>
+            </div>
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">Claims Intelligence, Policy Audit & Overpayment Prevention Engine</p>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase;">Explanation of Benefits (EOB)</div>
+            <div style="font-size: 11px; color: #64748b;">Report Ref: DOC-AZN-CLM-001</div>
+            <div style="font-size: 11px; color: #64748b;">Generated: 31 October 2026, 04:54 PM</div>
+        </div>
+    </div>
+
+    <!-- Status Verdict Banner -->
+    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <div style="font-size: 10px; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px;">Adjudication Decision</div>
+            <div style="font-size: 15px; font-weight: 800; color: #92400e;">PARTIALLY APPROVED WITH POLICY DEDUCTIONS</div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">Net Admissible Payable</div>
+            <div style="font-size: 18px; font-weight: 800; color: #047857; font-family: monospace;">₹74,552.76</div>
+        </div>
+    </div>
+
+    <!-- Claimant & Incident Profile -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 11px;">
+        <tr style="background: #f8fafc;">
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0; width: 25%;"><strong>Claim ID:</strong> CLM-001</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0; width: 25%;"><strong>Policy ID:</strong> POL-COMPREHENSIVE-01 (Health Shield Comprehensive)</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0; width: 25%;"><strong>Patient Name:</strong> Rohan Gupta</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0; width: 25%;"><strong>Age / Rel:</strong> 36y / SELF</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0;"><strong>Hospital:</strong> Max Healthcare Saket</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0;"><strong>Admission:</strong> 2026-08-10</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0;"><strong>Discharge:</strong> 2026-08-14</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0;"><strong>Diagnosis:</strong> Acute Appendicitis with Localized Peritonitis</td>
+        </tr>
+    </table>
+
+    <!-- Financial Waterfall Summary Table -->
+    <div style="margin-bottom: 20px;">
+        <div style="font-weight: 700; font-size: 12px; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">1. Policy Settlement Financial Waterfall</div>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left; font-size: 11px;">
+                    <th style="padding: 6px 10px;">Waterfall Stage</th>
+                    <th style="padding: 6px 10px;">Calculation Basis</th>
+                    <th style="padding: 6px 10px; text-align: right;">Amount (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 6px 10px; font-weight: 600;">Total Invoiced / Claimed</td>
+                    <td style="padding: 6px 10px;">Sum of all itemized charges submitted</td>
+                    <td style="padding: 6px 10px; text-align: right; font-family: monospace;">₹135,000.00</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0; color: #b91c1c;">
+                    <td style="padding: 6px 10px;">(-) Non-Payable Consumables & Admin</td>
+                    <td style="padding: 6px 10px;">Disallowed under IRDAI Non-Payable Schedule (PPE, Gloves, etc.)</td>
+                    <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-₹6,500.00</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0; color: #b91c1c;">
+                    <td style="padding: 6px 10px;">(-) Daily Room Rent Sub-Limit Excess</td>
+                    <td style="padding: 6px 10px;">Excess daily room rent above policy cap of ₹5,000.00/day</td>
+                    <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-₹10,000.00</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0; color: #b91c1c;">
+                    <td style="padding: 6px 10px;">(-) Proportionate Associated Charges Cascade</td>
+                    <td style="padding: 6px 10px;">Mandatory proportionate scaling on surgeon, doctor and nursing fees</td>
+                    <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-₹30,663.60</td>
+                </tr>
+                
+                <tr style="border-bottom: 1px solid #e2e8f0; color: #b45309;">
+                    <td style="padding: 6px 10px;">(-) Policy Deductible Applied</td>
+                    <td style="padding: 6px 10px;">Standard contractual deductible</td>
+                    <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-₹5,000.00</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0; color: #b45309;">
+                    <td style="padding: 6px 10px;">(-) Mandatory Co-Payment (10.0%)</td>
+                    <td style="padding: 6px 10px;">Agreed cost-sharing co-payment deducted from admissible sum</td>
+                    <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-₹8,283.64</td>
+                </tr>
+                
+                <tr style="background: #f0fdf4; border-top: 2px solid #10b981; font-weight: bold; color: #047857;">
+                    <td style="padding: 8px 10px;">Final Admissible Payable Settlement</td>
+                    <td style="padding: 8px 10px;">Payable to Policyholder / Hospital</td>
+                    <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-size: 13px;">₹74,552.76</td>
+                </tr>
+                <tr style="background: #fff1f2; font-weight: bold; color: #b91c1c;">
+                    <td style="padding: 8px 10px;">Disallowed / Prevented Overpayment</td>
+                    <td style="padding: 8px 10px;">Excess proposed over entitlement</td>
+                    <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-size: 13px;">₹70,447.24</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Step 4 Arithmetic Proof -->
+    
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 15px;">
+            <div style="font-weight: 700; color: #166534; font-size: 12px; margin-bottom: 6px;">STEP 4: ROOM RENT LIMIT BREACH ARITHMETIC PROOF</div>
+            <div style="font-family: monospace; font-size: 11px; color: #1e293b; line-height: 1.6;">
+                <div><strong>Applied Formula :</strong> (Daily Room Rent Billed - Daily Policy Limit) × Inpatient Days</div>
+                <div><strong>Discrepancy Amount:</strong> <span style="color: #b91c1c; font-weight: bold;">₹10,000.00</span></div>
+            </div>
+            <p style="font-size: 11px; color: #166534; margin: 6px 0 0 0;">The daily room rent breached the policy entitlement ceiling. Mandatory proportionate deduction was cascaded across associated surgeon and consultant charges.</p>
+        </div>
+        
+
+    <!-- Itemized Bill Breakdown -->
+    <div style="margin-top: 20px;">
+        <div style="font-weight: 700; font-size: 12px; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">2. Itemized Bill Line-Level Audit</div>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left; font-size: 11px;">
+                    <th style="padding: 6px 10px;">Line</th>
+                    <th style="padding: 6px 10px;">Category</th>
+                    <th style="padding: 6px 10px;">Description & Rule Note</th>
+                    <th style="padding: 6px 10px; text-align: right;">Billed ₹</th>
+                    <th style="padding: 6px 10px; text-align: right;">Admissible ₹</th>
+                    <th style="padding: 6px 10px; text-align: right;">Disallowed ₹</th>
+                    <th style="padding: 6px 10px; text-align: center;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+        <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px;">
+            <td style="padding: 8px 10px; font-family: monospace; color: #64748b;">L1</td>
+            <td style="padding: 8px 10px; font-weight: 600; color: #1e293b;">ROOM_RENT</td>
+            <td style="padding: 8px 10px; color: #334155;">Single Deluxe Private Room (4 days)<br><span style="font-size: 10px; color: #64748b;">Policy caps standard room rent at ₹5,000.00/day. Billed at ₹7,500.00/day for 4 days. Calculated excess: ₹10,000.00.</span></td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace;">₹30,000.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 600; color: #047857;">₹20,000.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 700; color: #b91c1c;">₹10,000.00</td>
+            <td style="padding: 8px 10px; text-align: center;">
+                <span style="background: #fffbeb; color: #d97706; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;">RuleStatus.BREACHED</span>
+            </td>
+        </tr>
+        
+        <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px;">
+            <td style="padding: 8px 10px; font-family: monospace; color: #64748b;">L2</td>
+            <td style="padding: 8px 10px; font-weight: 600; color: #1e293b;">SURGERY</td>
+            <td style="padding: 8px 10px; color: #334155;">Laparoscopic Appendectomy Surgical Fee<br><span style="font-size: 10px; color: #64748b;">Room rent limit was breached. Under policy proportionate deduction clause, surgery charge is scaled by ratio 66.67%. Ineligible excess: ₹26,664.00.</span></td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace;">₹80,000.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 600; color: #047857;">₹53,336.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 700; color: #b91c1c;">₹26,664.00</td>
+            <td style="padding: 8px 10px; text-align: center;">
+                <span style="background: #fffbeb; color: #d97706; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;">RuleStatus.BREACHED</span>
+            </td>
+        </tr>
+        
+        <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px;">
+            <td style="padding: 8px 10px; font-family: monospace; color: #64748b;">L3</td>
+            <td style="padding: 8px 10px; font-weight: 600; color: #1e293b;">CONSULTATION</td>
+            <td style="padding: 8px 10px; color: #334155;">Surgeon & Anesthetist Visit Charges (4 days)<br><span style="font-size: 10px; color: #64748b;">Room rent limit was breached. Under policy proportionate deduction clause, consultation charge is scaled by ratio 66.67%. Ineligible excess: ₹3,999.60.</span></td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace;">₹12,000.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 600; color: #047857;">₹8,000.40</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 700; color: #b91c1c;">₹3,999.60</td>
+            <td style="padding: 8px 10px; text-align: center;">
+                <span style="background: #fffbeb; color: #d97706; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;">RuleStatus.BREACHED</span>
+            </td>
+        </tr>
+        
+        <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px;">
+            <td style="padding: 8px 10px; font-family: monospace; color: #64748b;">L4</td>
+            <td style="padding: 8px 10px; font-weight: 600; color: #1e293b;">CONSUMABLE</td>
+            <td style="padding: 8px 10px; color: #334155;">Surgical PPE Kits & Face Shields (4 sets)<br><span style="font-size: 10px; color: #64748b;">Matches IRDAI Non-Payable item: 'ppe' - Invoiced under category CONSUMABLE.</span></td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace;">₹4,800.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 600; color: #047857;">₹0.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 700; color: #b91c1c;">₹4,800.00</td>
+            <td style="padding: 8px 10px; text-align: center;">
+                <span style="background: #fef2f2; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;">RuleStatus.EXCLUDED</span>
+            </td>
+        </tr>
+        
+        <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px;">
+            <td style="padding: 8px 10px; font-family: monospace; color: #64748b;">L5</td>
+            <td style="padding: 8px 10px; font-weight: 600; color: #1e293b;">CONSUMABLE</td>
+            <td style="padding: 8px 10px; color: #334155;">Nitrile Gloves & Cotton Swabs Box<br><span style="font-size: 10px; color: #64748b;">Matches IRDAI Non-Payable item: 'gloves' - Invoiced under category CONSUMABLE.</span></td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace;">₹1,700.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 600; color: #047857;">₹0.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 700; color: #b91c1c;">₹1,700.00</td>
+            <td style="padding: 8px 10px; text-align: center;">
+                <span style="background: #fef2f2; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;">RuleStatus.EXCLUDED</span>
+            </td>
+        </tr>
+        
+        <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px;">
+            <td style="padding: 8px 10px; font-family: monospace; color: #64748b;">L6</td>
+            <td style="padding: 8px 10px; font-weight: 600; color: #1e293b;">INVESTIGATION</td>
+            <td style="padding: 8px 10px; color: #334155;">Pre-op Ultrasound Abdomen & CBC<br><span style="font-size: 10px; color: #64748b;">Complies with policy terms</span></td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace;">₹6,500.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 600; color: #047857;">₹6,500.00</td>
+            <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 700; color: #b91c1c;">-</td>
+            <td style="padding: 8px 10px; text-align: center;">
+                <span style="background: #ecfdf5; color: #059669; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;">RuleStatus.PASSED</span>
+            </td>
+        </tr>
+        
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Auditor Remarks & Signature Block -->
+    <div style="margin-top: 24px; border-top: 2px solid #e2e8f0; padding-top: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="max-width: 60%;">
+                <div style="font-weight: 700; font-size: 11px; text-transform: uppercase; color: #475569;">Adjudicator Comments & Regulatory Audit Notes</div>
+                <p style="font-size: 11px; color: #334155; margin: 4px 0 0 0; background: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    CORRECT SETTLEMENT: Proposed settlement (₹145,000.00) exceeds policy calculated entitlement (₹74,552.76) by ₹70,447.24.
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 11px; font-weight: 700; color: #1e293b;">Certified Adjudicator</div>
+                <div style="font-size: 11px; color: #059669; font-weight: 600;">Senior Claims Adjudicator</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Azentio.ai Claims Audit Team</div>
+                <div style="margin-top: 6px; font-size: 9px; color: #94a3b8; font-family: monospace;">DIGITALLY VERIFIED VIA AZENTIO ENGINE</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Support & Grievance Notice -->
+    <div style="margin-top: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; font-size: 10px; color: #64748b; text-align: center;">
+        In accordance with IRDAI claims adjudication guidelines. For grievances or clarifications regarding this Explanation of Benefits, please reach out to claims-support@azentio.ai referencing Claim ID <strong>CLM-001</strong>.
+    </div>
+
+    <!-- Interactive Client Scripts for Direct Email Dispatch -->
+    <script>
+    function openEmailModal() {
+        document.getElementById('emailModal').style.display = 'flex';
+        document.getElementById('reportEmailStatusAlert').style.display = 'none';
+        const submitBtn = document.getElementById('btnSendReportEmailSubmit');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Send Email Now</span>';
+    }
+
+    function closeEmailModal() {
+        document.getElementById('emailModal').style.display = 'none';
+    }
+
+    async function executeReportEmailDispatch() {
+        const recipientInput = document.getElementById('reportEmailRecipient');
+        const email = recipientInput.value.trim();
+        if (!email || !email.includes('@')) {
+            alert('Please provide a valid recipient email address.');
+            recipientInput.focus();
+            return;
+        }
+
+        const submitBtn = document.getElementById('btnSendReportEmailSubmit');
+        const alertBox = document.getElementById('reportEmailStatusAlert');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>⏳ Dispatching...</span>';
+        alertBox.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/v1/claims/CLM-001/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    recipient_email: email,
+                    recipient_name: document.getElementById('reportEmailRecipientName').value.trim(),
+                    subject: document.getElementById('reportEmailSubject').value.trim(),
+                    notes: document.getElementById('reportEmailNotes').value.trim()
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.detail || 'Email transmission was rejected by server.');
+            }
+
+            alertBox.style.display = 'block';
+            alertBox.style.background = '#ecfdf5';
+            alertBox.style.color = '#065f46';
+            alertBox.style.border = '1px solid #a7f3d0';
+            alertBox.innerHTML = '<strong>✔ Success:</strong> ' + (data.message || 'Settlement report emailed successfully.');
+            submitBtn.innerHTML = '<span>✔ Email Dispatched</span>';
+
+            // Also update the trigger button in top ribbon
+            const triggerBtn = document.getElementById('btnEmailReportTrigger');
+            if (triggerBtn) {
+                triggerBtn.style.background = '#059669';
+                triggerBtn.innerHTML = '<span>✔</span><span>Email Sent to Customer</span>';
+            }
+
+            setTimeout(() => {
+                closeEmailModal();
+            }, 2200);
+
+        } catch (err) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = '#fef2f2';
+            alertBox.style.color = '#991b1b';
+            alertBox.style.border = '1px solid #fecaca';
+            alertBox.innerHTML = '<strong>Transmission Error:</strong> ' + err.message;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Retry Dispatch</span>';
+        }
+    }
+
+    // Close modal on escape key or backdrop click
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeEmailModal();
+    });
+    document.getElementById('emailModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEmailModal();
+    });
+    </script>
+
+</body>
+</html>

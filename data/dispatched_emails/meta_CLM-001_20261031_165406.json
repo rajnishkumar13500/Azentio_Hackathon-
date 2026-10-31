@@ -1,0 +1,13 @@
+{
+  "claim_id": "CLM-001",
+  "recipient_email": "test.claimant@example.com",
+  "recipient_name": "Rohan Gupta",
+  "subject": "Test Settlement Statement",
+  "admissible_amount": 74552.76,
+  "prevented_leakage": 70447.24,
+  "dispatch_mode": "SIMULATED",
+  "dispatch_timestamp": "2026-10-31T11:24:06.200305+00:00",
+  "archive_file": "email_CLM-001_20261031_165406.html",
+  "auditor_notes": "Audited via Test Suite",
+  "error_warning": null
+}
