@@ -1,0 +1,105 @@
+{
+  "icd10_codes": {
+    "K35.8": {
+      "code": "K35.8",
+      "display_name": "Acute Appendicitis, other and unspecified",
+      "policy_procedure_key": "appendicitis",
+      "is_pre_existing_prone": false,
+      "specific_disease_waiting": false
+    },
+    "H25.9": {
+      "code": "H25.9",
+      "display_name": "Age-related cataract, unspecified",
+      "policy_procedure_key": "cataract",
+      "is_pre_existing_prone": false,
+      "specific_disease_waiting": true
+    },
+    "M17.0": {
+      "code": "M17.0",
+      "display_name": "Bilateral primary osteoarthritis of knee",
+      "policy_procedure_key": "knee_replacement",
+      "is_pre_existing_prone": true,
+      "specific_disease_waiting": true
+    },
+    "E11.9": {
+      "code": "E11.9",
+      "display_name": "Type 2 diabetes mellitus without complications",
+      "policy_procedure_key": "diabetes_management",
+      "is_pre_existing_prone": true,
+      "specific_disease_waiting": false
+    },
+    "I21.9": {
+      "code": "I21.9",
+      "display_name": "Acute myocardial infarction, unspecified",
+      "policy_procedure_key": "cardiac_care",
+      "is_pre_existing_prone": true,
+      "specific_disease_waiting": false
+    }
+  },
+  "procedure_aliases": {
+    "phacoemulsification": "cataract",
+    "phaco with foldable iol": "cataract",
+    "cataract surgery": "cataract",
+    "laparoscopic appendectomy": "appendicitis",
+    "appendectomy": "appendicitis",
+    "total knee replacement": "knee_replacement",
+    "tkr bilateral": "knee_replacement",
+    "knee arthroplasty": "knee_replacement"
+  },
+  "irdai_non_payable_consumables": [
+    "gloves",
+    "surgical gloves",
+    "examination gloves",
+    "nitrile gloves",
+    "ppe kit",
+    "ppe",
+    "face mask",
+    "n95 mask",
+    "disposable mask",
+    "face shield",
+    "sanitizer",
+    "hand rub",
+    "spirit",
+    "betadine",
+    "cotton swab",
+    "gauze piece",
+    "disposable syringe",
+    "syringe 5ml",
+    "syringe 10ml",
+    "iv cannula",
+    "butterfly needle",
+    "extension line",
+    "trocar cannula",
+    "surgical drape",
+    "thermometer",
+    "tissue paper",
+    "towel",
+    "admission fee",
+    "registration fee",
+    "administrative charge",
+    "documentation fee",
+    "diet charges for attendant",
+    "food and beverage",
+    "luxury charge",
+    "ac charge",
+    "tv charge"
+  ],
+  "procedure_benchmarks": {
+    "appendicitis": {
+      "procedure_name": "Laparoscopic Appendectomy",
+      "benchmark_median": 65000.0,
+      "anomaly_threshold": 110000.0
+    },
+    "cataract": {
+      "procedure_name": "Cataract Surgery (Phaco with IOL)",
+      "benchmark_median": 30000.0,
+      "anomaly_threshold": 50000.0
+    },
+    "knee_replacement": {
+      "procedure_name": "Total Knee Arthroplasty (Unilateral)",
+      "benchmark_median": 160000.0,
+      "anomaly_threshold": 230000.0
+    }
+  }
+}
+

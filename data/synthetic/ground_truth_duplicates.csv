@@ -1,0 +1,8 @@
+case_id,claim_id,scenario_type,target_level,flagged_line_ids,matched_claim_id,matched_line_id,leakage_amount,leakage_classification,rationale
+GT-CASE-01,CLM-INCOMING-101,EXACT_DUPLICATE_CLAIM,CLAIM,LIN-C1-01;LIN-C1-02;LIN-C1-03,CLM-HIST-001,,32000.0,CALCULATED_EXACT,Exact duplicate submission of settled invoice INV-MAX-88901 from provider PRV-MAX-01 for claimant CUST-5001.
+GT-CASE-02,CLM-INCOMING-102,INTRA_CLAIM_DUPLICATE_LINE,LINE_ITEM,LIN-C2-02,CLM-INCOMING-102,LIN-C2-01,1800.0,CALCULATED_EXACT,Duplicate charge on same invoice: Thyroid Profile Total billed twice on 2024-10-12.
+GT-CASE-03,CLM-INCOMING-103,CROSS_CLAIM_DUPLICATE_LINE,LINE_ITEM,LIN-C3-01,CLM-HIST-001,LIN-H1-02,8500.0,CALCULATED_EXACT,Cross-claim duplicate charge: MRI Left Knee Joint was already claimed and settled under CLM-HIST-001.
+GT-CASE-04,CLM-INCOMING-104,NEAR_DUPLICATE_CLAIM,CLAIM,LIN-C4-01;LIN-C4-02;LIN-C4-03,CLM-HIST-002,,42500.0,SUSPECTED_ESTIMATED,"High-confidence near duplicate of settled claim CLM-HIST-002. Invoice # has 1-char typo ('INV-AP0-55421' vs 'INV-APO-55421'), dates shift by 1 day, same provider and procedure."
+GT-CASE-05,CLM-INCOMING-105,LEGITIMATE_REPEAT_SERVICE,NONE,,,,0.0,NONE,"Valid recurring post-op physiotherapy sessions on distinct dates (Oct 5, 7, 9, 11) with explicit session numbers. No duplicate leakage."
+GT-CASE-06,CLM-INCOMING-106,CLEAN_VALID_CLAIM,NONE,,,,0.0,NONE,Clean valid independent claim with no duplicate charges.
+GT-CASE-07,CLM-INCOMING-107,POLICY_LIMIT_BREACH,LINE_ITEM,LIN-C7-01,,,6000.0,CALCULATED_EXACT,"Daily room rent ₹7,000 exceeds policy limit of ₹5,000 by ₹2,000 for 3 days = ₹6,000 calculated excess."

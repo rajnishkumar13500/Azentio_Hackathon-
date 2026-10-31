@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azentio.ai | Claims Leakage Intelligence & Alert Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Top Navbar -->
+  <header class="bg-brand-950 text-white border-b border-brand-800/80 sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-brand-300 flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <svg class="w-6 h-6 text-brand-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xl font-extrabold tracking-tight text-white">Azentio<span class="text-brand-400">.ai</span></span>
+            <span class="text-xs uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-400/30">Hackathon Ed.</span>
+          </div>
+          <p class="text-xs text-brand-200/70">Claims Leakage Prevention & Audit Intelligence</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <span class="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brand-900 border border-brand-700 text-brand-200">
+          <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse mr-2"></span>
+          Engine Active &bull; 4 Tiers + Clinical Embeddings
+        </span>
+        <button onclick="fetchData()" class="px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-sm transition-all flex items-center space-x-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
+
+    <!-- Executive KPI Ribbon -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="kpiRibbon">
+      <!-- Card 1 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+        <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Claims Processed</div>
+        <div class="text-2xl font-bold text-slate-900" id="kpiTotalClaims">--</div>
+        <div class="text-xs text-slate-500 mt-2 flex items-center" id="kpiTotalAmount">Total: ₹--</div>
+        <div class="absolute -right-2 -bottom-2 w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center opacity-60">
+          <svg class="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+        <div class="text-xs font-semibold uppercase tracking-wider text-rose-600 mb-1">Flagged Claims</div>
+        <div class="text-2xl font-bold text-rose-600" id="kpiFlaggedClaims">--</div>
+        <div class="text-xs font-medium text-rose-500 mt-2 flex items-center space-x-1" id="kpiFlagRate">
+          <span>Rate: --%</span>
+        </div>
+        <div class="absolute -right-2 -bottom-2 w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center opacity-60">
+          <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+        <div class="text-xs font-semibold uppercase tracking-wider text-brand-700 mb-1">Calculated Leakage</div>
+        <div class="text-2xl font-bold text-brand-700" id="kpiCalcLeakage">₹--</div>
+        <div class="text-xs text-brand-600 font-medium mt-2">Deterministic Overpayment</div>
+        <div class="absolute -right-2 -bottom-2 w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center opacity-60">
+          <svg class="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+        <div class="text-xs font-semibold uppercase tracking-wider text-amber-600 mb-1">Suspected Leakage</div>
+        <div class="text-2xl font-bold text-amber-600" id="kpiSuspLeakage">₹--</div>
+        <div class="text-xs text-amber-600 font-medium mt-2">Under Adjuster Review</div>
+        <div class="absolute -right-2 -bottom-2 w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center opacity-60">
+          <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="bg-gradient-to-br from-brand-900 to-brand-950 text-white p-5 rounded-2xl shadow-sm relative overflow-hidden">
+        <div class="text-xs font-semibold uppercase tracking-wider text-brand-300 mb-1">Total Leakage Exposure</div>
+        <div class="text-2xl font-extrabold text-white" id="kpiOverallLeakage">₹--</div>
+        <div class="text-xs text-brand-300/80 mt-2" id="kpiSavingsRate">Recovery Potential: --%</div>
+        <div class="w-full bg-brand-800 rounded-full h-1.5 mt-2 overflow-hidden">
+          <div class="bg-brand-400 h-1.5 rounded-full" id="kpiProgressBar" style="width: 0%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Analytics Charts Row -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <!-- Donut Chart: Leakage by Category -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>
+          <span>Leakage by Detection Scenario</span>
+        </h3>
+        <p class="text-xs text-slate-500 mb-4">Financial volume (₹) categorized by rule</p>
+        <div class="h-56 relative flex items-center justify-center">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Bar Chart: Severity Breakdown -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <span>Claims Severity Distribution</span>
+        </h3>
+        <p class="text-xs text-slate-500 mb-4">Count of claims per risk severity level</p>
+        <div class="h-56 relative flex items-center justify-center">
+          <canvas id="severityChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Bar Chart: Provider Risk Exposure -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span>Hospital / Provider Risk</span>
+        </h3>
+        <p class="text-xs text-slate-500 mb-4">Identified leakage by medical provider</p>
+        <div class="h-56 relative flex items-center justify-center">
+          <canvas id="providerChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Multi-Dimensional Filter Toolbar -->
+    <section class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Live Search -->
+        <div class="relative flex-1 min-w-[260px]">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search Claim ID, Claimant, Hospital, or Invoice..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+        </div>
+
+        <!-- Filter Dropdowns -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Severity Filter -->
+          <select id="filterSeverity" onchange="applyFilters()" class="text-xs py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
+            <option value="ALL">All Severities</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="NONE">None (Clean)</option>
+          </select>
+
+          <!-- Leakage Category Filter -->
+          <select id="filterCategory" onchange="applyFilters()" class="text-xs py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
+            <option value="ALL">All Scenarios</option>
+            <option value="EXACT_DUPLICATE_CLAIM">Exact Duplicate Claim</option>
+            <option value="INTRA_CLAIM_DUPLICATE_LINE">Intra-Claim Duplicate Line</option>
+            <option value="CROSS_CLAIM_DUPLICATE_LINE">Cross-Claim Duplicate Line</option>
+            <option value="NEAR_DUPLICATE_CLAIM">Near-Duplicate Claim</option>
+            <option value="POLICY_LIMIT_BREACH">Policy Limit Breach</option>
+            <option value="CLEAN">Clean / Allowed</option>
+          </select>
+
+          <!-- Provider Filter -->
+          <select id="filterProvider" onchange="applyFilters()" class="text-xs py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
+            <option value="ALL">All Providers</option>
+          </select>
+
+          <!-- Reset Button -->
+          <button onclick="resetFilters()" class="text-xs py-2 px-3 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl font-medium transition-colors">
+            Reset
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Claims Alert Table -->
+    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Claims Audit & Alert Queue</h2>
+          <p class="text-xs text-slate-500" id="tableRecordCount">Showing all evaluated claims</p>
+        </div>
+        <span class="text-xs font-semibold px-2.5 py-1 bg-brand-50 text-brand-700 border border-brand-200/60 rounded-full">
+          Step 4 & 5 Verification
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50/70 border-b border-slate-200/60 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <th class="py-3 px-4">Claim ID</th>
+              <th class="py-3 px-4">Claimant / Policy</th>
+              <th class="py-3 px-4">Hospital Provider</th>
+              <th class="py-3 px-4 text-right">Claim Amount</th>
+              <th class="py-3 px-4 text-right text-brand-700">Calculated ₹</th>
+              <th class="py-3 px-4 text-right text-amber-600">Suspected ₹</th>
+              <th class="py-3 px-4 text-center">Severity</th>
+              <th class="py-3 px-4 text-center">Adjudication</th>
+              <th class="py-3 px-4 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="claimsTableBody" class="divide-y divide-slate-100 text-xs">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Claim Detail Inspector Modal (Step 4 & 5 Drill-Down) -->
+  <div id="inspectorModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden transform transition-all animate-in fade-in zoom-in-95">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-brand-950 text-white flex items-center justify-between border-b border-brand-800">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-brand-500/20 border border-brand-400/40 flex items-center justify-center text-brand-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-base font-extrabold" id="modalClaimId">CLM-XXXX</span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" id="modalSeverityBadge">CRITICAL</span>
+            </div>
+            <p class="text-xs text-brand-200/70" id="modalClaimSubtitle">Claimant &bull; Hospital</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-brand-900 hover:bg-brand-800 text-brand-300 flex items-center justify-center transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 space-y-6 overflow-y-auto flex-1">
+
+        <!-- Executive Finding Card -->
+        <div class="p-4 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4" id="modalFindingCard">
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500" id="modalRuleCode">RULE-XXX</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-white/80 border text-slate-700" id="modalConfidence">Conf: 100%</span>
+            </div>
+            <h4 class="text-base font-extrabold text-slate-900" id="modalScenarioTitle">Scenario</h4>
+            <p class="text-xs text-slate-600 max-w-xl" id="modalExplanation">Explanation text</p>
+          </div>
+          <div class="text-right">
+            <div class="text-xs font-medium text-slate-500">Calculated Leakage</div>
+            <div class="text-2xl font-black text-brand-700" id="modalLeakageAmount">₹0.00</div>
+            <div class="text-[11px] font-semibold text-slate-500" id="modalClassification">CALCULATED_EXACT</div>
+          </div>
+        </div>
+
+        <!-- Step 4 Mathematical Proof Box -->
+        <div class="bg-brand-50/60 border border-brand-200/80 rounded-2xl p-4 space-y-2" id="modalProofSection">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center space-x-1.5">
+              <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              <span>Step 4: Arithmetic Leakage Proof</span>
+            </span>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-brand-100 text-brand-800">Deterministic Formula</span>
+          </div>
+          <div class="bg-white rounded-xl p-3 border border-brand-200 font-mono text-xs space-y-1 text-slate-700">
+            <div><span class="text-slate-400">Formula:</span> <span class="font-semibold text-brand-900" id="proofFormula">--</span></div>
+            <div><span class="text-slate-400">Inputs :</span> <span class="font-semibold text-brand-700" id="proofValues">--</span></div>
+            <div><span class="text-slate-400">Result :</span> <span class="font-bold text-rose-600" id="proofResult">--</span></div>
+          </div>
+          <p class="text-xs text-brand-900/80" id="proofExplanation">Step-by-step calculation explanation</p>
+        </div>
+
+        <!-- Matched Historical Evidence Comparison -->
+        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50 space-y-3" id="modalEvidenceSection">
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+            <span>Matched Historical Evidence</span>
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs" id="evidenceComparison">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Itemized Line Items Table -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Itemized Bill Lines & Line-Level Audit</h4>
+            <span class="text-xs text-slate-500" id="modalLinesCount">X Lines</span>
+          </div>
+          <div class="border border-slate-200 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b border-slate-200 font-semibold text-slate-500 text-[11px]">
+                <tr>
+                  <th class="py-2.5 px-3">Line ID</th>
+                  <th class="py-2.5 px-3">Date</th>
+                  <th class="py-2.5 px-3">Code & Description</th>
+                  <th class="py-2.5 px-3 text-right">Qty</th>
+                  <th class="py-2.5 px-3 text-right">Unit Price</th>
+                  <th class="py-2.5 px-3 text-right">Total ₹</th>
+                  <th class="py-2.5 px-3 text-center">Audit Status</th>
+                </tr>
+              </thead>
+              <tbody id="modalLinesTableBody" class="divide-y divide-slate-100">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Adjudicator Action Center -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+            <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Claims Officer Adjudication Decision</span>
+          </h4>
+          <div class="space-y-2">
+            <textarea id="actionNotes" rows="2" placeholder="Enter auditor / adjudicator reasoning..." class="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"></textarea>
+            <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+              <button onclick="submitAction('CONFIRM')" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center space-x-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                <span>Confirm & Disallow Leakage</span>
+              </button>
+              <button onclick="submitAction('ADJUST')" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center space-x-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                <span>Adjust Claim</span>
+              </button>
+              <button onclick="submitAction('DISMISS')" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center space-x-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>Approve / Dismiss Alert</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-slate-700 text-xs font-semibold hidden flex items-center space-x-2 transition-all">
+    <span class="w-2 h-2 rounded-full bg-brand-400"></span>
+    <span id="toastMsg">Action recorded successfully!</span>
+  </div>
+
+  <footer class="mt-auto py-4 border-t border-slate-200 text-center text-xs text-slate-500">
+    Azentio.ai &bull; Insurance Claims Leakage Detection Agent &bull; Hackathon Level 1: Steps 1 through 5
+  </footer>
+
+  <!-- Dashboard Controller Script -->
+  <script>
+    let allClaims = [];
+    let currentModalClaim = null;
+    let categoryChartInstance = null;
+    let severityChartInstance = null;
+    let providerChartInstance = null;
+
+    async function fetchData() {
+      try {
+        const [claimsRes, kpiRes] = await Promise.all([
+          fetch('/api/claims'),
+          fetch('/api/kpis')
+        ]);
+        const claimsData = await claimsRes.json();
+        const kpiData = await kpiRes.json();
+
+        allClaims = claimsData.claims || [];
+        renderKpis(kpiData);
+        populateProviderFilter(allClaims);
+        applyFilters();
+        renderCharts(kpiData);
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+      }
+    }
+
+    function renderKpis(kpis) {
+      document.getElementById('kpiTotalClaims').innerText = kpis.total_claims_processed;
+      document.getElementById('kpiTotalAmount').innerText = `Volume: ₹${kpis.total_claimed_amount.toLocaleString()}`;
+      document.getElementById('kpiFlaggedClaims').innerText = kpis.flagged_claims_count;
+      document.getElementById('kpiFlagRate').innerText = `Flag Rate: ${kpis.flag_rate_percentage}%`;
+      document.getElementById('kpiCalcLeakage').innerText = `₹${kpis.total_calculated_leakage.toLocaleString()}`;
+      document.getElementById('kpiSuspLeakage').innerText = `₹${kpis.total_suspected_leakage.toLocaleString()}`;
+      document.getElementById('kpiOverallLeakage').innerText = `₹${kpis.overall_leakage_exposure.toLocaleString()}`;
+      document.getElementById('kpiSavingsRate').innerText = `Recovery Potential: ${kpis.potential_savings_rate}%`;
+      document.getElementById('kpiProgressBar').style.width = `${Math.min(100, kpis.potential_savings_rate * 1.5)}%`;
+    }
+
+    function populateProviderFilter(claims) {
+      const select = document.getElementById('filterProvider');
+      const providers = [...new Set(claims.map(c => c.provider_name))];
+      select.innerHTML = '<option value="ALL">All Providers</option>';
+      providers.forEach(p => {
+        select.innerHTML += `<option value="${p}">${p}</option>`;
+      });
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const sevFilter = document.getElementById('filterSeverity').value;
+      const catFilter = document.getElementById('filterCategory').value;
+      const prvFilter = document.getElementById('filterProvider').value;
+
+      const filtered = allClaims.filter(c => {
+        const res = c.detection_result;
+        const finding = res.findings[0] || null;
+
+        // Search text
+        const matchesSearch = !search ||
+          c.claim_id.toLowerCase().includes(search) ||
+          c.claimant_name.toLowerCase().includes(search) ||
+          c.provider_name.toLowerCase().includes(search) ||
+          c.invoice_number.toLowerCase().includes(search);
+
+        // Severity
+        const matchesSev = (sevFilter === 'ALL') || (res.summary.highest_severity === sevFilter);
+
+        // Provider
+        const matchesPrv = (prvFilter === 'ALL') || (c.provider_name === prvFilter);
+
+        // Category
+        let matchesCat = (catFilter === 'ALL');
+        if (catFilter === 'CLEAN') {
+          matchesCat = !res.has_duplicate_leakage;
+        } else if (finding) {
+          matchesCat = (finding.scenario_type === catFilter);
+        }
+
+        return matchesSearch && matchesSev && matchesPrv && matchesCat;
+      });
+
+      renderTable(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterSeverity').value = 'ALL';
+      document.getElementById('filterCategory').value = 'ALL';
+      document.getElementById('filterProvider').value = 'ALL';
+      applyFilters();
+    }
+
+    function renderTable(claims) {
+      const tbody = document.getElementById('claimsTableBody');
+      tbody.innerHTML = '';
+
+      document.getElementById('tableRecordCount').innerText = `Showing ${claims.length} of ${allClaims.length} records`;
+
+      if (claims.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-400">No claims match the filter criteria.</td></tr>`;
+        return;
+      }
+
+      claims.forEach(c => {
+        const res = c.detection_result;
+        const isFlagged = res.has_duplicate_leakage;
+        const sev = res.summary.highest_severity;
+
+        let sevPill = `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600">NONE</span>`;
+        if (sev === 'CRITICAL') sevPill = `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">CRITICAL</span>`;
+        else if (sev === 'HIGH') sevPill = `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-orange-100 text-orange-700">HIGH</span>`;
+        else if (sev === 'MEDIUM') sevPill = `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700">MEDIUM</span>`;
+
+        let adjStatus = c.adjudication?.status || (isFlagged ? 'PENDING_REVIEW' : 'AUTO_APPROVED');
+        let adjBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">${adjStatus}</span>`;
+        if (adjStatus === 'CONFIRMED_LEAKAGE') adjBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-800">DISALLOWED</span>`;
+        else if (adjStatus === 'AUTO_APPROVED' || adjStatus === 'DISMISSED_FALSE_ALERT') adjBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-100 text-brand-800">APPROVED</span>`;
+
+        const row = `
+          <tr class="hover:bg-slate-50/80 transition-colors ${isFlagged ? 'bg-amber-50/10' : ''}">
+            <td class="py-3 px-4 font-mono font-bold text-slate-900">${c.claim_id}</td>
+            <td class="py-3 px-4">
+              <div class="font-semibold text-slate-800">${c.claimant_name}</div>
+              <div class="text-[11px] text-slate-400 font-mono">${c.policy_number}</div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-medium text-slate-700">${c.provider_name}</div>
+              <div class="text-[11px] text-slate-400">Inv: ${c.invoice_number}</div>
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-medium">₹${c.total_claimed_amount.toLocaleString()}</td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-brand-700">₹${res.summary.total_leakage_calculated.toLocaleString()}</td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-amber-600">₹${res.summary.total_leakage_suspected.toLocaleString()}</td>
+            <td class="py-3 px-4 text-center">${sevPill}</td>
+            <td class="py-3 px-4 text-center">${adjBadge}</td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="openModal('${c.claim_id}')" class="px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-800 font-semibold border border-brand-200 transition-all text-xs">
+                Inspect 🔍
+              </button>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function openModal(claimId) {
+      const claim = allClaims.find(c => c.claim_id === claimId);
+      if (!claim) return;
+      currentModalClaim = claim;
+
+      const res = claim.detection_result;
+      const finding = res.findings[0] || null;
+
+      document.getElementById('modalClaimId').innerText = claim.claim_id;
+      document.getElementById('modalClaimSubtitle').innerText = `${claim.claimant_name} &bull; ${claim.provider_name} (Inv: ${claim.invoice_number})`;
+
+      // Severity badge
+      const sevBadge = document.getElementById('modalSeverityBadge');
+      sevBadge.innerText = res.summary.highest_severity;
+      sevBadge.className = `text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+        res.summary.highest_severity === 'CRITICAL' ? 'bg-rose-500 text-white' :
+        res.summary.highest_severity === 'HIGH' ? 'bg-orange-500 text-white' :
+        res.summary.highest_severity === 'MEDIUM' ? 'bg-amber-500 text-white' : 'bg-brand-500 text-white'
+      }`;
+
+      // Finding Header
+      const findingCard = document.getElementById('modalFindingCard');
+      if (finding) {
+        findingCard.className = "p-4 rounded-2xl border border-rose-200 bg-rose-50/30 flex flex-col md:flex-row md:items-center justify-between gap-4";
+        document.getElementById('modalRuleCode').innerText = finding.rule_code;
+        document.getElementById('modalConfidence').innerText = `Confidence: ${(finding.confidence_score * 100).toFixed(0)}%`;
+        document.getElementById('modalScenarioTitle').innerText = finding.scenario_type.replace(/_/g, ' ');
+        document.getElementById('modalExplanation').innerText = finding.explanation;
+        document.getElementById('modalLeakageAmount').innerText = `₹${res.summary.overall_leakage_amount.toLocaleString()}`;
+        document.getElementById('modalClassification').innerText = finding.leakage_classification;
+      } else {
+        findingCard.className = "p-4 rounded-2xl border border-brand-200 bg-brand-50/40 flex flex-col md:flex-row md:items-center justify-between gap-4";
+        document.getElementById('modalRuleCode').innerText = "RULE-CLEAN";
+        document.getElementById('modalConfidence').innerText = "Confidence: 100%";
+        document.getElementById('modalScenarioTitle').innerText = "Verified Clean / Legitimate Repeat";
+        document.getElementById('modalExplanation').innerText = "All charges and billing lines comply with policy rules. No duplicate leakage detected.";
+        document.getElementById('modalLeakageAmount').innerText = "₹0.00";
+        document.getElementById('modalClassification').innerText = "NONE";
+      }
+
+      // Step 4 Arithmetic Proof
+      const proofSection = document.getElementById('modalProofSection');
+      if (finding && finding.arithmetic_proof) {
+        proofSection.classList.remove('hidden');
+        document.getElementById('proofFormula').innerText = finding.arithmetic_proof.formula;
+        document.getElementById('proofValues').innerText = finding.arithmetic_proof.input_values;
+        document.getElementById('proofResult').innerText = `₹${finding.arithmetic_proof.calculated_discrepancy.toLocaleString()}`;
+        document.getElementById('proofExplanation').innerText = finding.arithmetic_proof.explanation;
+      } else {
+        proofSection.classList.add('hidden');
+      }
+
+      // Matched Evidence
+      const evidenceSection = document.getElementById('modalEvidenceSection');
+      const comparisonDiv = document.getElementById('evidenceComparison');
+      if (finding && finding.evidence) {
+        evidenceSection.classList.remove('hidden');
+        comparisonDiv.innerHTML = `
+          <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1">
+            <span class="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Current Submission</span>
+            <div class="font-semibold text-slate-800">${finding.current_line_description || 'Full Claim Submission'}</div>
+            <div class="font-mono text-slate-600">Amount: ₹${(finding.current_line_amount || claim.total_claimed_amount).toLocaleString()}</div>
+            <div class="text-slate-400">Date: ${claim.incident_date}</div>
+          </div>
+          <div class="bg-brand-50/70 p-3 rounded-xl border border-brand-200 space-y-1">
+            <span class="font-bold text-brand-800 uppercase tracking-wider text-[10px]">Matched Reference (${finding.evidence.source_type})</span>
+            <div class="font-semibold text-brand-950">${finding.evidence.matched_service_description || finding.evidence.matched_claim_id || 'Policy Term'}</div>
+            <div class="font-mono text-brand-700">Matched Ref: ${finding.evidence.matched_invoice_number || finding.evidence.matched_claim_id || 'Limit Cap'}</div>
+            <div class="text-brand-600">Similarity Score: ${(finding.evidence.similarity_score * 100).toFixed(1)}%</div>
+          </div>
+        `;
+      } else {
+        evidenceSection.classList.add('hidden');
+      }
+
+      // Line items table
+      const linesTable = document.getElementById('modalLinesTableBody');
+      linesTable.innerHTML = '';
+      document.getElementById('modalLinesCount').innerText = `${claim.line_items.length} line items`;
+
+      const flaggedLineIds = new Set(res.findings.map(f => f.current_line_id).filter(Boolean));
+
+      claim.line_items.forEach(line => {
+        const isOffending = flaggedLineIds.has(line.line_id);
+        const row = `
+          <tr class="${isOffending ? 'bg-rose-50/70 font-semibold' : 'hover:bg-slate-50'}">
+            <td class="py-2 px-3 font-mono text-slate-600">${line.line_id}</td>
+            <td class="py-2 px-3 text-slate-500">${line.service_date}</td>
+            <td class="py-2 px-3">
+              <span class="text-slate-900">${line.service_description}</span>
+              ${line.is_recurring_treatment ? '<span class="ml-1 px-1.5 py-0.2 text-[9px] bg-emerald-100 text-emerald-800 rounded font-bold">RECURRING VALID</span>' : ''}
+            </td>
+            <td class="py-2 px-3 text-right font-mono">${line.quantity}</td>
+            <td class="py-2 px-3 text-right font-mono">₹${line.unit_price.toLocaleString()}</td>
+            <td class="py-2 px-3 text-right font-mono font-bold">₹${line.total_amount.toLocaleString()}</td>
+            <td class="py-2 px-3 text-center">
+              ${isOffending ?
+                '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-200 text-rose-900">FLAGGED LEAKAGE</span>' :
+                '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">APPROVED</span>'
+              }
+            </td>
+          </tr>
+        `;
+        linesTable.innerHTML += row;
+      });
+
+      // Show modal
+      document.getElementById('inspectorModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('inspectorModal').classList.add('hidden');
+      currentModalClaim = null;
+    }
+
+    async function submitAction(actionType) {
+      if (!currentModalClaim) return;
+      const notes = document.getElementById('actionNotes').value;
+
+      try {
+        const res = await fetch('/api/action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            claim_id: currentModalClaim.claim_id,
+            action: actionType,
+            notes: notes
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Adjudication saved: ${actionType} for ${currentModalClaim.claim_id}`);
+          closeModal();
+          fetchData(); // Refresh data
+        }
+      } catch (err) {
+        console.error("Action submit error:", err);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3500);
+    }
+
+    function renderCharts(kpis) {
+      // 1. Category Donut Chart
+      const catCtx = document.getElementById('categoryChart').getContext('2d');
+      const catLabels = Object.keys(kpis.leakage_by_category).map(k => k.replace(/_/g, ' '));
+      const catValues = Object.values(kpis.leakage_by_category);
+
+      if (categoryChartInstance) categoryChartInstance.destroy();
+      categoryChartInstance = new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+          labels: catLabels,
+          datasets: [{
+            data: catValues,
+            backgroundColor: ['#059669', '#10b981', '#34d399', '#f59e0b', '#f43f5e']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+          }
+        }
+      });
+
+      // 2. Severity Chart
+      const sevCtx = document.getElementById('severityChart').getContext('2d');
+      const sevLabels = Object.keys(kpis.severity_distribution);
+      const sevValues = Object.values(kpis.severity_distribution);
+
+      if (severityChartInstance) severityChartInstance.destroy();
+      severityChartInstance = new Chart(sevCtx, {
+        type: 'bar',
+        data: {
+          labels: sevLabels,
+          datasets: [{
+            label: 'Claims Count',
+            data: sevValues,
+            backgroundColor: ['#e11d48', '#f97316', '#f59e0b', '#3b82f6', '#10b981'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
+            x: { ticks: { font: { size: 10 } } }
+          }
+        }
+      });
+
+      // 3. Provider Risk Chart
+      const prvCtx = document.getElementById('providerChart').getContext('2d');
+      const prvLabels = Object.keys(kpis.provider_breakdown).map(p => p.split(' ')[0]);
+      const prvValues = Object.values(kpis.provider_breakdown).map(p => p.leakage);
+
+      if (providerChartInstance) providerChartInstance.destroy();
+      providerChartInstance = new Chart(prvCtx, {
+        type: 'bar',
+        data: {
+          labels: prvLabels,
+          datasets: [{
+            label: 'Leakage ₹',
+            data: prvValues,
+            backgroundColor: '#059669',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+            x: { ticks: { font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    // Initialize on load
+    window.onload = fetchData;
+  </script>
+</body>
+</html>
+

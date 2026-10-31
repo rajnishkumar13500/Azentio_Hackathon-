@@ -1,0 +1,54 @@
+[
+  {
+    "policy_number": "POL-HLTH-1001",
+    "policy_type": "COMPREHENSIVE_HEALTH",
+    "claimant_id": "CUST-5001",
+    "claimant_name": "Aarav Sharma",
+    "sum_insured": 500000.0,
+    "deductible": 5000.0,
+    "copay_percentage": 10.0,
+    "daily_room_rent_limit": 5000.0,
+    "icu_limit": 10000.0,
+    "effective_start_date": "2024-01-01",
+    "effective_end_date": "2024-12-31"
+  },
+  {
+    "policy_number": "POL-HLTH-1002",
+    "policy_type": "FAMILY_FLOATER",
+    "claimant_id": "CUST-5002",
+    "claimant_name": "Priya Patel",
+    "sum_insured": 1000000.0,
+    "deductible": 0.0,
+    "copay_percentage": 0.0,
+    "daily_room_rent_limit": 8000.0,
+    "icu_limit": 15000.0,
+    "effective_start_date": "2024-01-01",
+    "effective_end_date": "2024-12-31"
+  },
+  {
+    "policy_number": "POL-HLTH-1003",
+    "policy_type": "SENIOR_CITIZEN_HEALTH",
+    "claimant_id": "CUST-5003",
+    "claimant_name": "Ramesh Verma",
+    "sum_insured": 300000.0,
+    "deductible": 10000.0,
+    "copay_percentage": 20.0,
+    "daily_room_rent_limit": 3000.0,
+    "icu_limit": 6000.0,
+    "effective_start_date": "2024-01-01",
+    "effective_end_date": "2024-12-31"
+  },
+  {
+    "policy_number": "POL-HLTH-1004",
+    "policy_type": "CORPORATE_GROUP_HEALTH",
+    "claimant_id": "CUST-5004",
+    "claimant_name": "Neha Gupta",
+    "sum_insured": 750000.0,
+    "deductible": 0.0,
+    "copay_percentage": 5.0,
+    "daily_room_rent_limit": 7000.0,
+    "icu_limit": 12000.0,
+    "effective_start_date": "2024-01-01",
+    "effective_end_date": "2024-12-31"
+  }
+]
