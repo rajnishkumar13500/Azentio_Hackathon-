@@ -15,26 +15,19 @@ def test_health_endpoint():
     data = response.json()
     assert data["status"] == "healthy"
     assert data["groq_model"] == settings.GROQ_MODEL
-    assert data.get("pipeline_mounted") is True
+    assert data.get("canonical_ingestion_available") is True
 
 
-def test_ingestion_pipeline_mounted_without_colliding_studio_routes():
-    pipeline_health = client.get("/pipeline/health")
-    assert pipeline_health.status_code == 200
-    body = pipeline_health.json()
-    assert body["status"] == "healthy"
-    assert "Ingestion" in body.get("service", "")
-
+def test_studio_dashboard_routes_are_unchanged():
     studio_claims = client.get("/api/v1/claims")
     assert studio_claims.status_code == 200
     assert "total_claims" in studio_claims.json()
+    assert "portfolio_metrics" in studio_claims.json()
 
-    pipeline_imports = client.get("/pipeline/api/v1/imports")
-    assert pipeline_imports.status_code == 200
-    assert isinstance(pipeline_imports.json(), list)
-
-    missing = client.post("/api/v1/ingest/from-pipeline/CLM-DOES-NOT-EXIST")
-    assert missing.status_code == 404
+    ui = client.get("/")
+    assert ui.status_code == 200
+    assert "Claims Leakage Detection Studio" in ui.text
+    assert "streamlit" not in ui.text.lower()
 
 def test_portfolio_lifecycle_empty_and_seed():
     # 1. Clear portfolio
@@ -106,26 +99,14 @@ def test_v1_chat_completions():
     assert data["choices"][0]["message"]["role"] == "assistant"
 
 
-def test_pipeline_sample_commit_promotes_into_studio_portfolio():
-    job_res = client.post("/pipeline/api/v1/imports/sample-datasets?dataset_name=small")
-    assert job_res.status_code == 200
-    job = job_res.json()
-    assert job["valid_records"] > 0
+def test_canonical_sample_lands_in_existing_studio_portfolio():
+    res = client.post("/api/v1/ingest/canonical-sample?dataset_name=small")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["ingestion_status"] in ("SUCCESS", "PARTIAL_SUCCESS")
+    assert data["ingestion_result"]["valid_records_count"] >= 1
+    assert len(data["validation_reports"]) >= 1
 
-    commit_res = client.post(
-        f"/pipeline/api/v1/imports/{job['import_id']}/commit",
-        json={
-            "confirm": True,
-            "include_valid": True,
-            "include_reviewed_warnings": True,
-            "acknowledged_warning_count": job.get("warning_records", 0),
-        },
-    )
-    assert commit_res.status_code == 200
-    assert commit_res.json()["imported_records"] > 0
-
-    promote = client.post("/api/v1/ingest/from-pipeline/CLM-1001")
-    assert promote.status_code == 200
     studio = client.get("/api/v1/claims/CLM-1001")
     assert studio.status_code == 200
     assert studio.json()["claim_id"] == "CLM-1001"

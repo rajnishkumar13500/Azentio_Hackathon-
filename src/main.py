@@ -31,7 +31,12 @@ from src.config import settings
 from src.schemas import Claim, Policy, ValidationReport
 from src.engine import validation_engine
 from src.ingestion import ingestion_service, IngestionResult
-from src.ingestion.pipeline_bridge import map_pipeline_claim_to_studio
+from src.ingestion.canonical_ingest import (
+    canonical_pipeline_available,
+    ingest_bytes_via_canonical,
+    ingest_sample_dataset_via_canonical,
+    looks_like_canonical_payload,
+)
 from src.repository import claims_repository
 from src.report_generator import generate_customer_report_html
 from src.ai.groq_client import groq_agent
@@ -63,21 +68,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the standalone claims-ingestion FastAPI app under /pipeline so its
-# /api/v1/imports and /api/v1/claims routes cannot collide with studio APIs.
-CLAIMS_INGESTION_ROOT = Path(__file__).resolve().parent.parent / "claims-ingestion"
-if CLAIMS_INGESTION_ROOT.exists() and str(CLAIMS_INGESTION_ROOT) not in sys.path:
-    sys.path.insert(0, str(CLAIMS_INGESTION_ROOT))
-
-claims_ingestion_app = None
-try:
-    from app.main import app as claims_ingestion_app  # type: ignore
-
-    app.mount("/pipeline", claims_ingestion_app)
-    logger.info("Claims data ingestion pipeline mounted at /pipeline")
-except Exception as e:
-    logger.warning("Claims ingestion pipeline not mounted: %s", e)
-
 def load_data():
     with open(settings.POLICIES_FILE, "r", encoding="utf-8") as f:
         policies_data = json.load(f)
@@ -100,7 +90,7 @@ def health_check():
         "version": settings.VERSION,
         "groq_configured": bool(settings.GROQ_API_KEY and not settings.GROQ_API_KEY.startswith("your_")),
         "groq_model": settings.GROQ_MODEL,
-        "pipeline_mounted": claims_ingestion_app is not None,
+        "canonical_ingestion_available": canonical_pipeline_available(),
     }
 
 def get_available_models() -> List[Dict[str, Any]]:
@@ -451,49 +441,52 @@ def clear_portfolio_claims():
     claims_repository.clear()
     return {"message": "Portfolio cleared. Ready for fresh file upload."}
 
-@app.post("/api/v1/ingest/from-pipeline/{claim_id}")
-def ingest_committed_pipeline_claim(claim_id: str):
+def _ingest_uploaded_bytes(filename: str, content: bytes) -> IngestionResult:
     """
-    Promote a claim already committed in the canonical ingestion database
-    into the leakage-prevention studio portfolio without changing pipeline APIs.
+    Route an upload to the existing studio parser, or to the canonical
+    claims-ingestion backend when the payload matches that schema / document types.
     """
-    if claims_ingestion_app is None:
-        raise HTTPException(status_code=503, detail="Claims ingestion pipeline is not available.")
-    try:
-        from app.persistence.database import SessionLocal  # type: ignore
-        from app.persistence.models.claim_models import Claim as PipelineClaim  # type: ignore
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Pipeline database is not available: {e}")
+    if looks_like_canonical_payload(filename, content) and canonical_pipeline_available():
+        return ingest_bytes_via_canonical(filename, content)
+    return ingestion_service.ingest_file(filename, content)
 
-    db = SessionLocal()
-    try:
-        row = db.query(PipelineClaim).filter(PipelineClaim.claim_id == claim_id).first()
-        if not row:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Claim '{claim_id}' not found in canonical ingestion database. Commit the import job first.",
-            )
-        studio_claim = map_pipeline_claim_to_studio(row)
-        claims_repository.add_claims([studio_claim])
+
+def _validate_ingested_claims(result: IngestionResult) -> dict:
+    if not result.success and len(result.claims) == 0:
         return {
-            "status": "SUCCESS",
-            "claim_id": studio_claim.claim_id,
-            "policy_id": studio_claim.policy_id,
-            "message": f"Claim {studio_claim.claim_id} promoted into the studio portfolio.",
+            "ingestion_status": "FAILED",
+            "ingestion_result": result,
+            "validation_reports": [],
         }
-    finally:
-        db.close()
+
+    if result.claims:
+        claims_repository.add_claims(result.claims)
+
+    policies_data, _ = load_data()
+    validation_reports: List[ValidationReport] = []
+    for claim in result.claims:
+        if claim.policy_id not in policies_data:
+            policy = Policy(**policies_data.get("POL-COMPREHENSIVE-01"))
+        else:
+            policy = Policy(**policies_data[claim.policy_id])
+        validation_reports.append(validation_engine.validate_claim(claim, policy))
+
+    return {
+        "ingestion_status": "SUCCESS" if result.success else "PARTIAL_SUCCESS",
+        "ingestion_result": result,
+        "validation_reports": validation_reports,
+    }
 
 
 @app.post("/api/v1/ingest/upload", response_model=IngestionResult)
 async def upload_claims_file(file: UploadFile = File(...)):
     """
-    Ingests and validates claims data across CSV, Excel (.xlsx), JSON, or text documents.
-    Validates identifiers, amounts, dates, and mandatory fields without silently ignoring bad records.
+    Ingests and validates claims data across CSV, Excel (.xlsx), JSON, documents,
+    and canonical pipeline formats (PDF/images and operational CSV/JSON bundles).
     Persists valid claims into the active portfolio.
     """
     content = await file.read()
-    result = ingestion_service.ingest_file(file.filename, content)
+    result = _ingest_uploaded_bytes(file.filename, content)
     if result.claims:
         claims_repository.add_claims(result.claims)
     return result
@@ -504,35 +497,25 @@ async def upload_and_validate(file: UploadFile = File(...)):
     Full pipeline: Ingests file -> Validates data integrity -> Persists claims -> Runs policy rule engine.
     """
     content = await file.read()
-    result = ingestion_service.ingest_file(file.filename, content)
-    
-    if not result.success and len(result.claims) == 0:
-        return {
-            "ingestion_status": "FAILED",
-            "ingestion_result": result,
-            "validation_reports": [],
-        }
+    result = _ingest_uploaded_bytes(file.filename, content)
+    return _validate_ingested_claims(result)
 
-    # Persist valid claims into repository
-    claims_repository.add_claims(result.claims)
 
-    policies_data, _ = load_data()
-    validation_reports: List[ValidationReport] = []
-
-    for claim in result.claims:
-        if claim.policy_id not in policies_data:
-            # Fallback to default comprehensive policy if unknown policy cited
-            policy = Policy(**policies_data.get("POL-COMPREHENSIVE-01"))
-        else:
-            policy = Policy(**policies_data[claim.policy_id])
-        report = validation_engine.validate_claim(claim, policy)
-        validation_reports.append(report)
-
-    return {
-        "ingestion_status": "SUCCESS" if result.success else "PARTIAL_SUCCESS",
-        "ingestion_result": result,
-        "validation_reports": validation_reports,
-    }
+@app.post("/api/v1/ingest/canonical-sample")
+def ingest_canonical_sample(dataset_name: str = "small"):
+    """
+    Runs the claims-ingestion backend sample dataset (no Streamlit UI) and
+    loads committed claims into the existing studio portfolio + policy engine.
+    """
+    if not canonical_pipeline_available():
+        raise HTTPException(status_code=503, detail="Canonical ingestion backend is not available.")
+    try:
+        result = ingest_sample_dataset_via_canonical(dataset_name)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return _validate_ingested_claims(result)
 
 @app.get("/api/v1/ingest/samples/{file_format}")
 def download_sample_file(file_format: str):

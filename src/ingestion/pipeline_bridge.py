@@ -25,7 +25,9 @@ def map_pipeline_claim_to_studio(db_claim: Any) -> Claim:
     policy = getattr(db_claim, "policy", None)
     policy_id = "POL-COMPREHENSIVE-01"
     if policy is not None:
-        policy_id = policy.policy_number or policy.policy_id or policy_id
+        raw_policy = str(policy.policy_number or policy.policy_id or "")
+        if raw_policy.startswith("POL-COMPREHENSIVE") or raw_policy.startswith("POL-BASIC"):
+            policy_id = raw_policy
 
     invoices = list(getattr(db_claim, "invoices", None) or [])
     first_invoice = invoices[0] if invoices else None

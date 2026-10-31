@@ -76,6 +76,20 @@ def test_api_upload_and_validate():
     assert rep1["claim_id"] == "CLM-CSV-101"
     assert rep1["summary"]["total_claimed"] == 99000.0
 
+
+def test_canonical_operational_csv_uses_backend_via_existing_upload_api():
+    csv_path = Path(__file__).resolve().parents[2] / "claims-ingestion" / "sample_data" / "small" / "claims.csv"
+    with open(csv_path, "rb") as f:
+        files = {"file": ("claims.csv", f, "text/csv")}
+        response = client.post("/api/v1/ingest/upload-and-validate", files=files)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ingestion_status"] in ("SUCCESS", "PARTIAL_SUCCESS")
+    assert data["ingestion_result"]["valid_records_count"] >= 1
+    claim_ids = [r["claim_id"] for r in data["validation_reports"]]
+    assert "CLM-1001" in claim_ids
+
 def test_ingest_pdf():
     pdf_path = Path(__file__).resolve().parents[2] / "claims-ingestion" / "sample_data" / "documents" / "hospital_bill.pdf"
     if pdf_path.exists():

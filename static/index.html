@@ -177,7 +177,7 @@
         <div class="max-w-md mx-auto">
           <h3 class="text-lg font-bold text-slate-900">No Claims In Active Portfolio</h3>
           <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-            Your workspace starts clean. Ingest a batch of claims across CSV, Excel (.xlsx), JSON, or raw medical text invoices, or load the pre-configured hackathon demo batch.
+            Your workspace starts clean. Ingest a batch of claims across CSV, Excel (.xlsx), JSON, PDF/image bills, or raw medical text invoices, or load the pre-configured hackathon demo batch.
           </p>
         </div>
         <div class="flex flex-wrap justify-center gap-3 pt-2">
@@ -577,7 +577,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-slate-900">Ingest Claims Batch</h3>
-            <p class="text-xs text-slate-500">Multi-Format Automated Intake • CSV • Excel • JSON • Text Bill</p>
+            <p class="text-xs text-slate-500">Multi-Format Automated Intake • CSV • Excel • JSON • PDF/Image • Text Bill</p>
           </div>
         </div>
         <button onclick="toggleUploadModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
@@ -591,8 +591,8 @@
         <div class="text-xs text-slate-800 font-semibold" id="dropZoneLabel">
           Click to browse or drag & drop claims file here
         </div>
-        <p class="text-[11px] text-slate-500">Supports .csv, .xlsx, .json, and hospital invoice .txt files</p>
-        <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.json,.txt" onchange="handleFileSelected(this.files)">
+        <p class="text-[11px] text-slate-500">Supports .csv, .xlsx, .json, .pdf, .png/.jpg, and hospital invoice .txt files</p>
+        <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.json,.txt,.pdf,.png,.jpg,.jpeg" onchange="handleFileSelected(this.files)">
       </div>
 
       <!-- Selected File Confirmation Card -->
@@ -641,6 +641,14 @@
               <span class="truncate">Error Trap Sample</span>
             </span>
             <span class="text-[10px] font-bold text-rose-600">TEST</span>
+          </button>
+
+          <button onclick="ingestCanonicalSample('small')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-800 border border-slate-200 hover:border-brand-300 font-medium transition text-left flex items-center justify-between col-span-2">
+            <span class="flex items-center gap-1.5 truncate">
+              <span>🏥</span>
+              <span class="truncate">Canonical Health Dataset (validated backend import)</span>
+            </span>
+            <span class="text-[10px] font-bold text-brand-600">RUN ⚡</span>
           </button>
         </div>
       </div>
@@ -1210,6 +1218,33 @@
       } catch (err) {
         showIngestionProgress(false);
         alert("Failed to ingest sample file: " + err.message);
+      }
+    }
+
+    async function ingestCanonicalSample(datasetName) {
+      showIngestionProgress(true, `Running canonical ingestion backend (${datasetName} dataset)...`);
+      try {
+        const res = await fetch(`/api/v1/ingest/canonical-sample?dataset_name=${encodeURIComponent(datasetName)}`, {
+          method: 'POST'
+        });
+        const result = await res.json();
+        showIngestionProgress(false);
+        if (!res.ok || result.ingestion_status === 'FAILED') {
+          const errList = ((result.ingestion_result && result.ingestion_result.errors) || []).map(e => `• ${e.field_name}: ${e.error_message}`).join('\n');
+          alert(`Canonical ingestion failed:\n\n${errList || result.detail || 'No eligible claims committed'}`);
+          return;
+        }
+        const validCount = result.ingestion_result.valid_records_count;
+        const banner = document.getElementById('ingestionAlertBanner');
+        banner.classList.remove('hidden');
+        document.getElementById('ingestionAlertTitle').innerText = `Canonical Dataset Ingested (${datasetName})`;
+        document.getElementById('ingestionAlertText').innerText = `Committed ${validCount} claim(s) from the ingestion backend into the studio portfolio.`;
+        showToast(`Ingested ${validCount} canonical claims!`);
+        toggleUploadModal();
+        await fetchDashboardData();
+      } catch (err) {
+        showIngestionProgress(false);
+        alert("Canonical ingestion error: " + err.message);
       }
     }
 
