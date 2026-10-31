@@ -1,0 +1,22 @@
+[
+  {
+    "claim_id": "CLM-3001",
+    "policy_number": "POL-2024-001",
+    "claimant_id": "MEM-501",
+    "claimant_name": "Meera Krishnan",
+    "incident_date": "2024-04-18",
+    "claim_type": "CASHLESS",
+    "requested_amount": "38000.00",
+    "currency": "INR"
+  },
+  {
+    "claim_id": "CLM-3002",
+    "policy_number": "POL-2024-001",
+    "claimant_id": "MEM-502",
+    "claimant_name": "Rajesh Nambiar",
+    "incident_date": "2024-04-20",
+    "claim_type": "REIMBURSEMENT",
+    "requested_amount": "22000.00",
+    "currency": "INR"
+  }
+]

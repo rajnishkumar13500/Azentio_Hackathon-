@@ -177,7 +177,7 @@
         <div class="max-w-md mx-auto">
           <h3 class="text-lg font-bold text-slate-900">No Claims In Active Portfolio</h3>
           <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-            Your workspace starts clean. Ingest a batch of claims across CSV, Excel (.xlsx), JSON, or raw medical text invoices, or load the pre-configured hackathon demo batch.
+            Your workspace starts clean. Ingest a batch of claims across CSV, Excel (.xlsx), JSON, PDF/image bills, or raw medical text invoices, or load the pre-configured hackathon demo batch.
           </p>
         </div>
         <div class="flex flex-wrap justify-center gap-3 pt-2">
@@ -318,6 +318,10 @@
           <button onclick="downloadCustomerReport(true)" class="px-3 py-1.5 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <span>Download Report</span>
+          </button>
+          <button onclick="openEmailModalForCurrentClaim()" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition flex items-center gap-1.5 shadow-sm" title="Email EOB report to policyholder">
+            <span>📧</span>
+            <span>Email Report</span>
           </button>
           <span id="verdict-badge" class="text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
             ANALYZING
@@ -686,6 +690,10 @@
                 <span>👁️</span>
                 <span>Preview</span>
               </button>
+              <button onclick="openEmailModalForCurrentClaim()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-sm shadow-blue-600/30 transition flex items-center gap-1.5" title="Dispatch settlement report directly to customer inbox">
+                <span>📧</span>
+                <span>Email to Customer</span>
+              </button>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
@@ -711,6 +719,60 @@
   </main>
 
   <!-- ========================================================================= -->
+  <!-- MODAL: SEND SETTLEMENT REPORT & EOB VIA EMAIL                             -->
+  <!-- ========================================================================= -->
+  <div id="emailCustomerModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 transform transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center font-bold text-lg shadow-sm">
+            📧
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Email Settlement Report</h3>
+            <p class="text-xs text-slate-500">Dispatch official Explanation of Benefits (EOB) directly to policyholder</p>
+          </div>
+        </div>
+        <button onclick="toggleEmailCustomerModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Claimant / Policyholder</label>
+          <input type="text" id="modalCustomerName" readonly class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Customer Email Address <span class="text-rose-500">*</span></label>
+          <input type="email" id="modalCustomerEmail" placeholder="customer@example.com" class="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 font-mono focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Subject</label>
+          <input type="text" id="modalEmailSubject" class="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Auditor Remarks (Included in Statement)</label>
+          <textarea id="modalEmailNotes" rows="2" class="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"></textarea>
+        </div>
+        
+        <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2">
+          <span class="text-blue-600 font-bold">ℹ️</span>
+          <span>Transmits the official Explanation of Benefits audit certificate with Step 4 arithmetic proof and itemized decisions as an attached HTML document.</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button onclick="toggleEmailCustomerModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
+          Cancel
+        </button>
+        <button id="btnModalSendEmail" onclick="executeEmailDispatchFromDashboard()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition flex items-center gap-1.5 shadow-sm shadow-blue-600/30">
+          <span>📧</span>
+          <span>Send Settlement Email</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- MODAL: GRADE-READY CLAIMS FILE INGESTION (GREEN AZENTIO THEME)             -->
   <!-- ========================================================================= -->
   <div id="uploadModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
@@ -724,7 +786,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-slate-900">Ingest Claims Batch</h3>
-            <p class="text-xs text-slate-500">Multi-Format Automated Intake • CSV • Excel • JSON • Text Bill</p>
+            <p class="text-xs text-slate-500">Multi-Format Automated Intake • CSV • Excel • JSON • PDF/Image • Text Bill</p>
           </div>
         </div>
         <button onclick="toggleUploadModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
@@ -738,7 +800,7 @@
         <div class="text-xs text-slate-800 font-semibold" id="dropZoneLabel">
           Choose a file or select the entire <span class="font-mono text-brand-700 bg-brand-100/70 px-1.5 py-0.5 rounded">data/jury_examples/</span> folder
         </div>
-        <p class="text-[11px] text-slate-500">Supports .csv, .xlsx, .json, and hospital invoice .txt files</p>
+        <p class="text-[11px] text-slate-500">Supports .csv, .xlsx, .json, .pdf, .png/.jpg, and hospital invoice .txt files</p>
         
         <div class="flex items-center justify-center gap-2 pt-1">
           <button type="button" onclick="document.getElementById('fileInput').click()" class="px-3.5 py-1.5 rounded-xl bg-white border border-brand-300 hover:border-brand-500 text-brand-800 text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
@@ -751,7 +813,7 @@
           </button>
         </div>
 
-        <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.json,.txt" onchange="handleFileSelected(this.files)">
+        <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.json,.txt,.pdf,.png,.jpg,.jpeg" onchange="handleFileSelected(this.files)">
         <input type="file" id="folderInput" class="hidden" webkitdirectory directory onchange="handleFolderSelected(this.files)">
       </div>
 
@@ -819,6 +881,14 @@
               <span class="truncate">06 Error Trap Guardrail</span>
             </span>
             <span class="text-[10px] font-bold text-rose-600">TEST</span>
+          </button>
+
+          <button onclick="ingestCanonicalSample('small')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-800 border border-slate-200 hover:border-brand-300 font-medium transition text-left flex items-center justify-between col-span-2">
+            <span class="flex items-center gap-1.5 truncate">
+              <span>🏥</span>
+              <span class="truncate">Canonical Health Dataset (validated backend import)</span>
+            </span>
+            <span class="text-[10px] font-bold text-brand-600">RUN ⚡</span>
           </button>
         </div>
       </div>
@@ -1334,6 +1404,72 @@
     // =========================================================================
     // ADJUDICATION ACTION & CUSTOMER REPORT DOWNLOAD
     // =========================================================================
+
+    function toggleEmailCustomerModal() {
+      const modal = document.getElementById('emailCustomerModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function openEmailModalForCurrentClaim() {
+      if (!activeClaimReport) {
+        alert("Please select a claim to email.");
+        return;
+      }
+      const rawItem = allClaimsList.find(i => i.claim.claim_id === activeClaimReport.claim_id);
+      const claimant = rawItem ? rawItem.claim.claimant : null;
+      const name = claimant ? claimant.name : "Policyholder";
+      const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '.');
+      const email = (claimant && claimant.email) ? claimant.email : `${sanitizedName}@insurance-client.com`;
+
+      document.getElementById('modalCustomerName').value = name;
+      document.getElementById('modalCustomerEmail').value = email;
+      document.getElementById('modalEmailSubject').value = `[Azentio.ai] Official Settlement Statement & Explanation of Benefits — Claim ${activeClaimReport.claim_id}`;
+      document.getElementById('modalEmailNotes').value = document.getElementById('actionNotes').value.trim() || (activeClaimReport.recommendations[0] || "Standard policy adjudication.");
+
+      const submitBtn = document.getElementById('btnModalSendEmail');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>📧</span><span>Send Settlement Email</span>';
+
+      toggleEmailCustomerModal();
+    }
+
+    async function executeEmailDispatchFromDashboard() {
+      if (!activeClaimReport) return;
+      const claimId = activeClaimReport.claim_id;
+      const email = document.getElementById('modalCustomerEmail').value.trim();
+      if (!email || !email.includes('@')) {
+        alert("Please enter a valid recipient email address.");
+        return;
+      }
+
+      const submitBtn = document.getElementById('btnModalSendEmail');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>⏳ Dispatching...</span>';
+
+      try {
+        const res = await fetch(`/api/v1/claims/${claimId}/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipient_email: email,
+            recipient_name: document.getElementById('modalCustomerName').value.trim(),
+            subject: document.getElementById('modalEmailSubject').value.trim(),
+            notes: document.getElementById('modalEmailNotes').value.trim()
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Email dispatch failed.");
+
+        showToast(`Settlement report successfully emailed to ${email}!`);
+        toggleEmailCustomerModal();
+      } catch (err) {
+        alert("Failed to send email: " + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Retry Send</span>';
+      }
+    }
+
     function downloadCustomerReport(triggerDownload = true) {
       if (!activeClaimReport) {
         alert("Please select a claim to download report.");
@@ -1466,6 +1602,33 @@
       } catch (err) {
         showIngestionProgress(false);
         alert("Failed to ingest sample file: " + err.message);
+      }
+    }
+
+    async function ingestCanonicalSample(datasetName) {
+      showIngestionProgress(true, `Running canonical ingestion backend (${datasetName} dataset)...`);
+      try {
+        const res = await fetch(`/api/v1/ingest/canonical-sample?dataset_name=${encodeURIComponent(datasetName)}`, {
+          method: 'POST'
+        });
+        const result = await res.json();
+        showIngestionProgress(false);
+        if (!res.ok || result.ingestion_status === 'FAILED') {
+          const errList = ((result.ingestion_result && result.ingestion_result.errors) || []).map(e => `• ${e.field_name}: ${e.error_message}`).join('\n');
+          alert(`Canonical ingestion failed:\n\n${errList || result.detail || 'No eligible claims committed'}`);
+          return;
+        }
+        const validCount = result.ingestion_result.valid_records_count;
+        const banner = document.getElementById('ingestionAlertBanner');
+        banner.classList.remove('hidden');
+        document.getElementById('ingestionAlertTitle').innerText = `Canonical Dataset Ingested (${datasetName})`;
+        document.getElementById('ingestionAlertText').innerText = `Committed ${validCount} claim(s) from the ingestion backend into the studio portfolio.`;
+        showToast(`Ingested ${validCount} canonical claims!`);
+        toggleUploadModal();
+        await fetchDashboardData();
+      } catch (err) {
+        showIngestionProgress(false);
+        alert("Canonical ingestion error: " + err.message);
       }
     }
 

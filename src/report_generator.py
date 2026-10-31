@@ -1,6 +1,7 @@
 """
 Azentio.ai Customer Settlement Report & Explanation of Benefits (EOB) Generator.
-Generates an official, publication-quality printable and downloadable HTML audit document.
+Generates an official, publication-quality printable and downloadable HTML audit document
+with embedded direct customer email dispatch capabilities.
 """
 
 from datetime import datetime
@@ -31,6 +32,12 @@ def generate_customer_report_html(
     adj_notes = adj.get("notes") or (report.recommendations[0] if report.recommendations else "Standard policy adjudication.")
     generation_date = datetime.now().strftime("%d %B %Y, %I:%M %p")
 
+    # Determine default customer recipient email
+    claimant_email = getattr(claim.claimant, "email", None)
+    if not claimant_email or not claimant_email.strip():
+        sanitized_name = "".join(c for c in claim.claimant.name.lower() if c.isalnum() or c == " ").strip().replace(" ", ".")
+        claimant_email = f"{sanitized_name}@insurance-client.com"
+
     # Determine status badge colors
     if adj_status in ["CONFIRMED_DENIAL", "REJECTED"]:
         badge_bg = "#fef2f2"
@@ -53,7 +60,6 @@ def generate_customer_report_html(
     for idx, item in enumerate(report.line_items, 1):
         status_color = "#059669" if item.status == "PASSED" else ("#dc2626" if item.status == "EXCLUDED" else "#d97706")
         status_bg = "#ecfdf5" if item.status == "PASSED" else ("#fef2f2" if item.status == "EXCLUDED" else "#fffbeb")
-        primary_rule = item.rules_applied[0].rule_name if item.rules_applied else "Standard Admissible"
         reason = item.rules_applied[0].reason if item.rules_applied else "Complies with policy terms"
 
         line_rows += f"""
@@ -114,30 +120,132 @@ def generate_customer_report_html(
             font-size: 12px;
             line-height: 1.5;
         }}
-        .print-btn {{
+        .action-bar-top {{
             position: fixed;
             top: 15px;
             right: 15px;
-            background: #059669;
-            color: #fff;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }}
+        .btn-top {{
             border: none;
-            padding: 10px 18px;
+            padding: 10px 16px;
             border-radius: 8px;
             font-weight: bold;
             font-size: 12px;
             cursor: pointer;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }}
+        .print-btn {{
+            background: #059669;
+            color: #fff;
         }}
         .print-btn:hover {{ background: #047857; }}
+        .email-btn {{
+            background: #2563eb;
+            color: #fff;
+        }}
+        .email-btn:hover {{ background: #1d4ed8; }}
+        
+        /* Modal Styles */
+        .email-modal-overlay {{
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }}
+        .email-modal-card {{
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            animation: modalFadeIn 0.2s ease-out;
+        }}
+        @keyframes modalFadeIn {{
+            from {{ opacity: 0; transform: scale(0.96); }}
+            to {{ opacity: 1; transform: scale(1); }}
+        }}
+        .email-modal-header {{
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }}
+        
         @media print {{
-            .print-btn {{ display: none; }}
+            .action-bar-top, .email-modal-overlay {{ display: none !important; }}
             body {{ padding: 0; }}
         }}
     </style>
 </head>
 <body>
 
-    <button onclick="window.print()" class="print-btn">🖨️ Print / Save as PDF</button>
+    <!-- Top Action Ribbon -->
+    <div class="action-bar-top">
+        <button onclick="window.print()" class="btn-top print-btn">
+            <span>🖨️</span>
+            <span>Print / Save as PDF</span>
+        </button>
+        <button onclick="openEmailModal()" class="btn-top email-btn" id="btnEmailReportTrigger">
+            <span>📧</span>
+            <span>Send Email to Customer</span>
+        </button>
+    </div>
+
+    <!-- Email Dispatch Modal -->
+    <div id="emailModal" class="email-modal-overlay">
+        <div class="email-modal-card">
+            <div class="email-modal-header">
+                <div style="font-weight: 700; font-size: 14px; color: #064e3b; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">📧</span>
+                    <span>Send Settlement Report to Policyholder</span>
+                </div>
+                <button onclick="closeEmailModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #64748b; line-height: 1;">✕</button>
+            </div>
+            <div style="padding: 18px 20px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">Policyholder / Claimant Name</label>
+                    <input type="text" id="reportEmailRecipientName" value="{claim.claimant.name}" readonly style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; background: #f8fafc; color: #334155;">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">Destination Customer Email Address <span style="color: #dc2626;">*</span></label>
+                    <input type="email" id="reportEmailRecipient" value="{claimant_email}" placeholder="customer@example.com" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; font-family: monospace;">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">Email Subject</label>
+                    <input type="text" id="reportEmailSubject" value="[Azentio.ai] Official Settlement Statement & Explanation of Benefits — Claim {claim.claim_id}" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px;">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;">Auditor Remarks / Notes Included in Message</label>
+                    <textarea id="reportEmailNotes" rows="2" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; resize: vertical;">{adj_notes}</textarea>
+                </div>
+                <div id="reportEmailStatusAlert" style="display: none; padding: 10px 12px; border-radius: 6px; font-size: 11px; margin-bottom: 12px;"></div>
+                <p style="font-size: 11px; color: #64748b; margin: 0;">
+                    Attaches the complete official Explanation of Benefits (EOB) HTML audit certificate and financial waterfall.
+                </p>
+            </div>
+            <div style="background: #f8fafc; padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="closeEmailModal()" style="padding: 8px 14px; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">Cancel</button>
+                <button id="btnSendReportEmailSubmit" onclick="executeReportEmailDispatch()" style="padding: 8px 18px; background: #059669; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <span>Send Email Now</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Header & Letterhead -->
     <div style="border-bottom: 3px solid #10b981; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-start;">
@@ -183,50 +291,50 @@ def generate_customer_report_html(
         </tr>
     </table>
 
-    <!-- Financial Reconciliation Waterfall -->
-    <div style="margin-bottom: 18px;">
-        <div style="font-weight: 700; font-size: 12px; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">1. Financial Waterfall Reconciliation</div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+    <!-- Financial Waterfall Summary Table -->
+    <div style="margin-bottom: 20px;">
+        <div style="font-weight: 700; font-size: 12px; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">1. Policy Settlement Financial Waterfall</div>
+        <table style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left;">
-                    <th style="padding: 8px 10px;">Waterfall Component</th>
-                    <th style="padding: 8px 10px;">Rule Explanation</th>
-                    <th style="padding: 8px 10px; text-align: right;">Amount (INR)</th>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left; font-size: 11px;">
+                    <th style="padding: 6px 10px;">Waterfall Stage</th>
+                    <th style="padding: 6px 10px;">Calculation Basis</th>
+                    <th style="padding: 6px 10px; text-align: right;">Amount (₹)</th>
                 </tr>
             </thead>
             <tbody>
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 10px;"><strong>Gross Invoiced Amount</strong></td>
-                    <td style="padding: 6px 10px; color: #64748b;">Total billed charges submitted by provider</td>
-                    <td style="padding: 6px 10px; text-align: right; font-family: monospace; font-weight: bold;">{format_inr(s.total_claimed)}</td>
+                    <td style="padding: 6px 10px; font-weight: 600;">Total Invoiced / Claimed</td>
+                    <td style="padding: 6px 10px;">Sum of all itemized charges submitted</td>
+                    <td style="padding: 6px 10px; text-align: right; font-family: monospace;">{format_inr(s.total_claimed)}</td>
                 </tr>
                 {f'''<tr style="border-bottom: 1px solid #e2e8f0; color: #b91c1c;">
-                    <td style="padding: 6px 10px;">(-) Non-Payable Consumables</td>
-                    <td style="padding: 6px 10px;">IRDAI non-payable items (PPE, gloves, registration)</td>
+                    <td style="padding: 6px 10px;">(-) Non-Payable Consumables & Admin</td>
+                    <td style="padding: 6px 10px;">Disallowed under IRDAI Non-Payable Schedule (PPE, Gloves, etc.)</td>
                     <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-{format_inr(s.total_excluded)}</td>
                 </tr>''' if s.total_excluded > 0 else ''}
                 {f'''<tr style="border-bottom: 1px solid #e2e8f0; color: #b91c1c;">
-                    <td style="padding: 6px 10px;">(-) Daily Room Rent Breach</td>
-                    <td style="padding: 6px 10px;">Room rent capped to daily limit of ₹{policy.sub_limits.daily_room_rent:,.2f}</td>
+                    <td style="padding: 6px 10px;">(-) Daily Room Rent Sub-Limit Excess</td>
+                    <td style="padding: 6px 10px;">Excess daily room rent above policy cap of ₹{policy.sub_limits.daily_room_rent:,.2f}/day</td>
                     <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-{format_inr(s.total_sublimit_deduction)}</td>
                 </tr>''' if s.total_sublimit_deduction > 0 else ''}
                 {f'''<tr style="border-bottom: 1px solid #e2e8f0; color: #b91c1c;">
-                    <td style="padding: 6px 10px;">(-) Proportionate Deduction</td>
-                    <td style="padding: 6px 10px;">Associated surgeon and visit charges scaled by room limit ratio</td>
+                    <td style="padding: 6px 10px;">(-) Proportionate Associated Charges Cascade</td>
+                    <td style="padding: 6px 10px;">Mandatory proportionate scaling on surgeon, doctor and nursing fees</td>
                     <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-{format_inr(s.total_proportionate_deduction)}</td>
                 </tr>''' if s.total_proportionate_deduction > 0 else ''}
                 {f'''<tr style="border-bottom: 1px solid #e2e8f0; color: #b91c1c;">
-                    <td style="padding: 6px 10px;">(-) Procedure Specific Cap</td>
-                    <td style="padding: 6px 10px;">Ailment sub-limit enforced per policy schedule</td>
+                    <td style="padding: 6px 10px;">(-) Procedure-Specific Financial Sub-Limit</td>
+                    <td style="padding: 6px 10px;">Cap applied to procedure per policy terms</td>
                     <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-{format_inr(s.procedure_cap_deduction)}</td>
                 </tr>''' if s.procedure_cap_deduction > 0 else ''}
                 {f'''<tr style="border-bottom: 1px solid #e2e8f0; color: #b45309;">
                     <td style="padding: 6px 10px;">(-) Policy Deductible Applied</td>
-                    <td style="padding: 6px 10px;">Mandatory insured per-claim deductible applied</td>
+                    <td style="padding: 6px 10px;">Standard contractual deductible</td>
                     <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-{format_inr(s.deductible_applied)}</td>
                 </tr>''' if s.deductible_applied > 0 else ''}
                 {f'''<tr style="border-bottom: 1px solid #e2e8f0; color: #b45309;">
-                    <td style="padding: 6px 10px;">(-) Policy Co-Payment ({policy.co_payment_percentage}%)</td>
+                    <td style="padding: 6px 10px;">(-) Mandatory Co-Payment ({policy.co_payment_percentage}%)</td>
                     <td style="padding: 6px 10px;">Agreed cost-sharing co-payment deducted from admissible sum</td>
                     <td style="padding: 6px 10px; text-align: right; font-family: monospace;">-{format_inr(s.copay_applied)}</td>
                 </tr>''' if s.copay_applied > 0 else ''}
@@ -296,8 +404,91 @@ def generate_customer_report_html(
         In accordance with IRDAI claims adjudication guidelines. For grievances or clarifications regarding this Explanation of Benefits, please reach out to claims-support@azentio.ai referencing Claim ID <strong>{claim.claim_id}</strong>.
     </div>
 
+    <!-- Interactive Client Scripts for Direct Email Dispatch -->
+    <script>
+    function openEmailModal() {{
+        document.getElementById('emailModal').style.display = 'flex';
+        document.getElementById('reportEmailStatusAlert').style.display = 'none';
+        const submitBtn = document.getElementById('btnSendReportEmailSubmit');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Send Email Now</span>';
+    }}
+
+    function closeEmailModal() {{
+        document.getElementById('emailModal').style.display = 'none';
+    }}
+
+    async function executeReportEmailDispatch() {{
+        const recipientInput = document.getElementById('reportEmailRecipient');
+        const email = recipientInput.value.trim();
+        if (!email || !email.includes('@')) {{
+            alert('Please provide a valid recipient email address.');
+            recipientInput.focus();
+            return;
+        }}
+
+        const submitBtn = document.getElementById('btnSendReportEmailSubmit');
+        const alertBox = document.getElementById('reportEmailStatusAlert');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>⏳ Dispatching...</span>';
+        alertBox.style.display = 'none';
+
+        try {{
+            const res = await fetch('/api/v1/claims/{claim.claim_id}/send-email', {{
+                method: 'POST',
+                headers: {{ 'Content-Type': 'application/json' }},
+                body: JSON.stringify({{
+                    recipient_email: email,
+                    recipient_name: document.getElementById('reportEmailRecipientName').value.trim(),
+                    subject: document.getElementById('reportEmailSubject').value.trim(),
+                    notes: document.getElementById('reportEmailNotes').value.trim()
+                }})
+            }});
+
+            const data = await res.json();
+            if (!res.ok) {{
+                throw new Error(data.detail || 'Email transmission was rejected by server.');
+            }}
+
+            alertBox.style.display = 'block';
+            alertBox.style.background = '#ecfdf5';
+            alertBox.style.color = '#065f46';
+            alertBox.style.border = '1px solid #a7f3d0';
+            alertBox.innerHTML = '<strong>✔ Success:</strong> ' + (data.message || 'Settlement report emailed successfully.');
+            submitBtn.innerHTML = '<span>✔ Email Dispatched</span>';
+
+            // Also update the trigger button in top ribbon
+            const triggerBtn = document.getElementById('btnEmailReportTrigger');
+            if (triggerBtn) {{
+                triggerBtn.style.background = '#059669';
+                triggerBtn.innerHTML = '<span>✔</span><span>Email Sent to Customer</span>';
+            }}
+
+            setTimeout(() => {{
+                closeEmailModal();
+            }}, 2200);
+
+        }} catch (err) {{
+            alertBox.style.display = 'block';
+            alertBox.style.background = '#fef2f2';
+            alertBox.style.color = '#991b1b';
+            alertBox.style.border = '1px solid #fecaca';
+            alertBox.innerHTML = '<strong>Transmission Error:</strong> ' + err.message;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Retry Dispatch</span>';
+        }}
+    }}
+
+    // Close modal on escape key or backdrop click
+    window.addEventListener('keydown', function(e) {{
+        if (e.key === 'Escape') closeEmailModal();
+    }});
+    document.getElementById('emailModal').addEventListener('click', function(e) {{
+        if (e.target === this) closeEmailModal();
+    }});
+    </script>
+
 </body>
 </html>
 """
     return html
-

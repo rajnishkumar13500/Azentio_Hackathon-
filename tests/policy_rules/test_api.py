@@ -16,6 +16,19 @@ def test_health_endpoint():
     data = response.json()
     assert data["status"] == "healthy"
     assert data["groq_model"] == settings.GROQ_MODEL
+    assert data.get("canonical_ingestion_available") is True
+
+
+def test_studio_dashboard_routes_are_unchanged():
+    studio_claims = client.get("/api/v1/claims")
+    assert studio_claims.status_code == 200
+    assert "total_claims" in studio_claims.json()
+    assert "portfolio_metrics" in studio_claims.json()
+
+    ui = client.get("/")
+    assert ui.status_code == 200
+    assert "Claims Leakage Detection Studio" in ui.text
+    assert "streamlit" not in ui.text.lower()
 
 def test_portfolio_lifecycle_empty_and_seed():
     # 1. Clear portfolio
@@ -129,3 +142,15 @@ def test_document_analysis_endpoints():
     upload_data = upload_res.json()
     assert upload_data["total_variances_detected"] >= 1
     assert len(upload_data["line_item_reconciliations"]) >= 1
+
+def test_canonical_sample_lands_in_existing_studio_portfolio():
+    res = client.post("/api/v1/ingest/canonical-sample?dataset_name=small")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["ingestion_status"] in ("SUCCESS", "PARTIAL_SUCCESS")
+    assert data["ingestion_result"]["valid_records_count"] >= 1
+    assert len(data["validation_reports"]) >= 1
+
+    studio = client.get("/api/v1/claims/CLM-1001")
+    assert studio.status_code == 200
+    assert studio.json()["claim_id"] == "CLM-1001"

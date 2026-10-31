@@ -6,6 +6,7 @@ class Claimant(BaseModel):
     name: str
     relationship_to_insured: str = Field(default="SELF", description="SELF, SPOUSE, CHILD_1, PARENT")
     age: int = Field(ge=0, le=120)
+    email: Optional[str] = None
 
 class IncidentDetails(BaseModel):
     admission_date: str

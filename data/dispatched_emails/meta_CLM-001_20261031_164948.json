@@ -1,0 +1,13 @@
+{
+  "claim_id": "CLM-001",
+  "recipient_email": "rohan.gupta@example.com",
+  "recipient_name": "Rohan Gupta",
+  "subject": "Official Settlement for CLM-001",
+  "admissible_amount": 74552.76,
+  "prevented_leakage": 70447.24,
+  "dispatch_mode": "SIMULATED",
+  "dispatch_timestamp": "2026-10-31T11:19:48.691187",
+  "archive_file": "email_CLM-001_20261031_164948.html",
+  "auditor_notes": "Approved with proportionate room deductions.",
+  "error_warning": null
+}

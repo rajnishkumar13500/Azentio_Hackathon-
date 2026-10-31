@@ -1,7 +1,10 @@
 import json
 import logging
 from typing import Dict, Any, Optional
-from groq import Groq
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -16,7 +19,9 @@ class GroqMedicalAgent:
         self.api_key = settings.GROQ_API_KEY
         self.model = settings.GROQ_MODEL
         self.client: Optional[Groq] = None
-        if self.api_key and self.api_key.strip() and not self.api_key.startswith("your_"):
+        if Groq is None:
+            logger.warning("groq package not installed; AI extraction disabled.")
+        elif self.api_key and self.api_key.strip() and not self.api_key.startswith("your_"):
             try:
                 base_url = settings.GROQ_BASE_URL or "https://api.groq.com"
                 self.client = Groq(api_key=self.api_key, base_url=base_url)
@@ -25,7 +30,7 @@ class GroqMedicalAgent:
 
     @property
     def is_available(self) -> bool:
-        return self.client is not None
+        return Groq is not None and self.client is not None
 
     def normalize_clinical_line_item(
         self, description: str, category: str, primary_diagnosis: str

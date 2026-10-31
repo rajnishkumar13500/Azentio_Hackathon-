@@ -31,8 +31,15 @@ from src.config import settings
 from src.schemas import Claim, Policy, ValidationReport
 from src.engine import validation_engine
 from src.ingestion import ingestion_service, IngestionResult
+from src.ingestion.canonical_ingest import (
+    canonical_pipeline_available,
+    ingest_bytes_via_canonical,
+    ingest_sample_dataset_via_canonical,
+    looks_like_canonical_payload,
+)
 from src.repository import claims_repository
 from src.report_generator import generate_customer_report_html
+from src.email_service import email_service
 from src.ai.groq_client import groq_agent
 from src.investigation import (
     CrossClaimCorrelationEngine,
@@ -47,6 +54,12 @@ console = Console()
 
 # In-memory adjudication decision store
 _adjudications: Dict[str, Dict[str, Any]] = {}
+
+class SendEmailReportRequest(BaseModel):
+    recipient_email: Optional[str] = None
+    recipient_name: Optional[str] = None
+    subject: Optional[str] = None
+    notes: Optional[str] = None
 
 class AdjudicationActionRequest(BaseModel):
     claim_id: str
@@ -91,6 +104,7 @@ def health_check():
         "version": settings.VERSION,
         "groq_configured": bool(settings.GROQ_API_KEY and not settings.GROQ_API_KEY.startswith("your_")),
         "groq_model": settings.GROQ_MODEL,
+        "canonical_ingestion_available": canonical_pipeline_available(),
     }
 
 def get_available_models() -> List[Dict[str, Any]]:
@@ -449,6 +463,37 @@ def get_customer_report_endpoint(claim_id: str, download: bool = False):
 
     return Response(content=html_content, media_type="text/html", headers=headers)
 
+@app.post("/api/v1/claims/{claim_id}/send-email")
+@app.post("/api/claims/{claim_id}/send-email")
+def send_email_report_endpoint(claim_id: str, req: Optional[SendEmailReportRequest] = None):
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
+    policies_data, _ = load_data()
+    policy_dict = policies_data.get(claim.policy_id, policies_data.get("POL-COMPREHENSIVE-01"))
+    policy = Policy(**policy_dict)
+    report = validation_engine.validate_claim(claim, policy)
+    adjudication = _adjudications.get(claim_id, {})
+
+    payload = req or SendEmailReportRequest()
+    return email_service.send_settlement_report(
+        claim=claim,
+        policy=policy,
+        report=report,
+        adjudication=adjudication,
+        recipient_email=payload.recipient_email,
+        subject=payload.subject,
+        auditor_notes=payload.notes,
+    )
+
+@app.get("/api/v1/claims/{claim_id}/email-history")
+@app.get("/api/claims/{claim_id}/email-history")
+def get_email_history_endpoint(claim_id: str):
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
+    return email_service.get_email_history_for_claim(claim_id)
+
 @app.post("/api/v1/claims/seed-demo")
 def seed_demo_claims():
     """Populates the portfolio with the 5 pre-configured hackathon demo cases."""
@@ -474,9 +519,9 @@ def seed_correlation_dataset_endpoint():
 @app.get("/api/investigation/{claim_id}/correlations", response_model=CrossClaimCorrelationReport)
 def get_claim_correlations(claim_id: str):
     """
-    Level 2 Step 1: Discovers multi-entity cross-claim correlations across policies,
-    claimants, providers, invoices, and incidents. Returns matching attributes,
-    explanation, and network graph nodes/edges.
+    Ingests and validates claims data across CSV, Excel (.xlsx), JSON, or text documents.
+    Validates identifiers, amounts, dates, and mandatory fields without silently ignoring bad records.
+    Persists valid claims into the active portfolio.
     """
     claim = claims_repository.get_by_id(claim_id)
     if not claim:
@@ -685,15 +730,66 @@ def get_investigation_workspace(claim_id: str):
         ]
     }
 
+def _ingest_uploaded_bytes(filename: str, content: bytes) -> IngestionResult:
+    """
+    Route an upload to the existing studio parser, or to the canonical
+    claims-ingestion backend when the payload matches that schema / document types.
+
+    Standalone hospital bills (PDF/PNG/JPG) always try the studio document parser
+    first so they become portfolio claims instead of canonical invoice rows.
+    """
+    ext = Path(filename or "").suffix.lower().lstrip(".")
+    if ext in {"pdf", "png", "jpg", "jpeg"}:
+        studio_result = ingestion_service.ingest_file(filename, content)
+        if studio_result.claims:
+            return studio_result
+        if canonical_pipeline_available():
+            canonical_result = ingest_bytes_via_canonical(filename, content)
+            if canonical_result.claims:
+                return canonical_result
+        return studio_result
+
+    if looks_like_canonical_payload(filename, content) and canonical_pipeline_available():
+        return ingest_bytes_via_canonical(filename, content)
+    return ingestion_service.ingest_file(filename, content)
+
+
+def _validate_ingested_claims(result: IngestionResult) -> dict:
+    if not result.success and len(result.claims) == 0:
+        return {
+            "ingestion_status": "FAILED",
+            "ingestion_result": result,
+            "validation_reports": [],
+        }
+
+    if result.claims:
+        claims_repository.add_claims(result.claims)
+
+    policies_data, _ = load_data()
+    validation_reports: List[ValidationReport] = []
+    for claim in result.claims:
+        if claim.policy_id not in policies_data:
+            policy = Policy(**policies_data.get("POL-COMPREHENSIVE-01"))
+        else:
+            policy = Policy(**policies_data[claim.policy_id])
+        validation_reports.append(validation_engine.validate_claim(claim, policy))
+
+    return {
+        "ingestion_status": "SUCCESS" if result.success else "PARTIAL_SUCCESS",
+        "ingestion_result": result,
+        "validation_reports": validation_reports,
+    }
+
+
 @app.post("/api/v1/ingest/upload", response_model=IngestionResult)
 async def upload_claims_file(file: UploadFile = File(...)):
     """
-    Ingests and validates claims data across CSV, Excel (.xlsx), JSON, or text documents.
-    Validates identifiers, amounts, dates, and mandatory fields without silently ignoring bad records.
+    Ingests and validates claims data across CSV, Excel (.xlsx), JSON, documents,
+    and canonical pipeline formats (PDF/images and operational CSV/JSON bundles).
     Persists valid claims into the active portfolio.
     """
     content = await file.read()
-    result = ingestion_service.ingest_file(file.filename, content)
+    result = _ingest_uploaded_bytes(file.filename, content)
     if result.claims:
         claims_repository.add_claims(result.claims)
     return result
@@ -704,35 +800,25 @@ async def upload_and_validate(file: UploadFile = File(...)):
     Full pipeline: Ingests file -> Validates data integrity -> Persists claims -> Runs policy rule engine.
     """
     content = await file.read()
-    result = ingestion_service.ingest_file(file.filename, content)
-    
-    if not result.success and len(result.claims) == 0:
-        return {
-            "ingestion_status": "FAILED",
-            "ingestion_result": result,
-            "validation_reports": [],
-        }
+    result = _ingest_uploaded_bytes(file.filename, content)
+    return _validate_ingested_claims(result)
 
-    # Persist valid claims into repository
-    claims_repository.add_claims(result.claims)
 
-    policies_data, _ = load_data()
-    validation_reports: List[ValidationReport] = []
-
-    for claim in result.claims:
-        if claim.policy_id not in policies_data:
-            # Fallback to default comprehensive policy if unknown policy cited
-            policy = Policy(**policies_data.get("POL-COMPREHENSIVE-01"))
-        else:
-            policy = Policy(**policies_data[claim.policy_id])
-        report = validation_engine.validate_claim(claim, policy)
-        validation_reports.append(report)
-
-    return {
-        "ingestion_status": "SUCCESS" if result.success else "PARTIAL_SUCCESS",
-        "ingestion_result": result,
-        "validation_reports": validation_reports,
-    }
+@app.post("/api/v1/ingest/canonical-sample")
+def ingest_canonical_sample(dataset_name: str = "small"):
+    """
+    Runs the claims-ingestion backend sample dataset (no Streamlit UI) and
+    loads committed claims into the existing studio portfolio + policy engine.
+    """
+    if not canonical_pipeline_available():
+        raise HTTPException(status_code=503, detail="Canonical ingestion backend is not available.")
+    try:
+        result = ingest_sample_dataset_via_canonical(dataset_name)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return _validate_ingested_claims(result)
 
 @app.get("/api/v1/ingest/samples/{file_format}")
 def download_sample_file(file_format: str):

@@ -1,0 +1,13 @@
+{
+  "claim_id": "CLM-002",
+  "recipient_email": "devi.prasad@insurance-client.com",
+  "recipient_name": "Devi Prasad",
+  "subject": "[Azentio.ai] Official Settlement Statement & Explanation of Benefits \u2014 Claim CLM-002",
+  "admissible_amount": 80000.0,
+  "prevented_leakage": 55000.0,
+  "dispatch_mode": "SIMULATED",
+  "dispatch_timestamp": "2026-10-31T11:27:07.121529+00:00",
+  "archive_file": "email_CLM-002_20261031_165707.html",
+  "auditor_notes": "CORRECT SETTLEMENT: Proposed settlement (\u20b9135,000.00) exceeds policy calculated entitlement (\u20b980,000.00) by \u20b955,000.00.",
+  "error_warning": null
+}
