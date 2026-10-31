@@ -114,6 +114,7 @@ flowchart TD
 | Component | File Path | Core Functionality |
 | :--- | :--- | :--- |
 | **Config & Environment** | [`src/config.py`](file:///d:/Azentio_Hackathon/src/config.py) | Manages `.env` loading, Groq Qwen model selection, and paths to synthetic datasets. |
+| **Multi-Format Ingestion** | [`src/ingestion/`](file:///d:/Azentio_Hackathon/src/ingestion/) | Ingests CSV, Excel (.xlsx), JSON, and unstructured hospital bill documents (AI OCR via Groq). Validates identifiers, dates, amounts, and mandatory fields without silently ignoring bad records. |
 | **Data Contracts** | [`src/schemas/`](file:///d:/Azentio_Hackathon/src/schemas/) | Pydantic v2 schemas: `Policy`, `Claim`, `LineItem`, `RuleResult`, `ValidationReport`. |
 | **Clinical Catalog** | [`src/catalog/medical_catalog.py`](file:///d:/Azentio_Hackathon/src/catalog/medical_catalog.py) | In-memory lookup with **word-boundary regex matching** to eliminate false positives (e.g. prevents matching `ppe` inside `appendectomy`). |
 | **AI Clinical Agent** | [`src/ai/groq_client.py`](file:///d:/Azentio_Hackathon/src/ai/groq_client.py) | Connects to **Groq (`qwen-2.5-32b`)** for contextual clinical reasoning on complex or ambiguous medical descriptions. Fails over gracefully to catalog offline. |
