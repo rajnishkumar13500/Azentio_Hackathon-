@@ -1,0 +1,100 @@
+[
+  {
+    "case_id": "GT-CASE-01",
+    "claim_id": "CLM-INCOMING-101",
+    "scenario_type": "EXACT_DUPLICATE_CLAIM",
+    "target_level": "CLAIM",
+    "flagged_line_ids": [
+      "LIN-C1-01",
+      "LIN-C1-02",
+      "LIN-C1-03"
+    ],
+    "matched_claim_id": "CLM-HIST-001",
+    "matched_line_id": null,
+    "leakage_amount": 32000.0,
+    "leakage_classification": "CALCULATED_EXACT",
+    "rationale": "Exact duplicate submission of settled invoice INV-MAX-88901 from provider PRV-MAX-01 for claimant CUST-5001."
+  },
+  {
+    "case_id": "GT-CASE-02",
+    "claim_id": "CLM-INCOMING-102",
+    "scenario_type": "INTRA_CLAIM_DUPLICATE_LINE",
+    "target_level": "LINE_ITEM",
+    "flagged_line_ids": [
+      "LIN-C2-02"
+    ],
+    "matched_claim_id": "CLM-INCOMING-102",
+    "matched_line_id": "LIN-C2-01",
+    "leakage_amount": 1800.0,
+    "leakage_classification": "CALCULATED_EXACT",
+    "rationale": "Duplicate charge on same invoice: Thyroid Profile Total billed twice on 2024-10-12."
+  },
+  {
+    "case_id": "GT-CASE-03",
+    "claim_id": "CLM-INCOMING-103",
+    "scenario_type": "CROSS_CLAIM_DUPLICATE_LINE",
+    "target_level": "LINE_ITEM",
+    "flagged_line_ids": [
+      "LIN-C3-01"
+    ],
+    "matched_claim_id": "CLM-HIST-001",
+    "matched_line_id": "LIN-H1-02",
+    "leakage_amount": 8500.0,
+    "leakage_classification": "CALCULATED_EXACT",
+    "rationale": "Cross-claim duplicate charge: MRI Left Knee Joint was already claimed and settled under CLM-HIST-001."
+  },
+  {
+    "case_id": "GT-CASE-04",
+    "claim_id": "CLM-INCOMING-104",
+    "scenario_type": "NEAR_DUPLICATE_CLAIM",
+    "target_level": "CLAIM",
+    "flagged_line_ids": [
+      "LIN-C4-01",
+      "LIN-C4-02",
+      "LIN-C4-03"
+    ],
+    "matched_claim_id": "CLM-HIST-002",
+    "matched_line_id": null,
+    "leakage_amount": 42500.0,
+    "leakage_classification": "SUSPECTED_ESTIMATED",
+    "rationale": "High-confidence near duplicate of settled claim CLM-HIST-002. Invoice # has 1-char typo ('INV-AP0-55421' vs 'INV-APO-55421'), dates shift by 1 day, same provider and procedure."
+  },
+  {
+    "case_id": "GT-CASE-05",
+    "claim_id": "CLM-INCOMING-105",
+    "scenario_type": "LEGITIMATE_REPEAT_SERVICE",
+    "target_level": "NONE",
+    "flagged_line_ids": [],
+    "matched_claim_id": null,
+    "matched_line_id": null,
+    "leakage_amount": 0.0,
+    "leakage_classification": "NONE",
+    "rationale": "Valid recurring post-op physiotherapy sessions on distinct dates (Oct 5, 7, 9, 11) with explicit session numbers. No duplicate leakage."
+  },
+  {
+    "case_id": "GT-CASE-06",
+    "claim_id": "CLM-INCOMING-106",
+    "scenario_type": "CLEAN_VALID_CLAIM",
+    "target_level": "NONE",
+    "flagged_line_ids": [],
+    "matched_claim_id": null,
+    "matched_line_id": null,
+    "leakage_amount": 0.0,
+    "leakage_classification": "NONE",
+    "rationale": "Clean valid independent claim with no duplicate charges."
+  },
+  {
+    "case_id": "GT-CASE-07",
+    "claim_id": "CLM-INCOMING-107",
+    "scenario_type": "POLICY_LIMIT_BREACH",
+    "target_level": "LINE_ITEM",
+    "flagged_line_ids": [
+      "LIN-C7-01"
+    ],
+    "matched_claim_id": null,
+    "matched_line_id": null,
+    "leakage_amount": 6000.0,
+    "leakage_classification": "CALCULATED_EXACT",
+    "rationale": "Daily room rent \u20b97,000 exceeds policy limit of \u20b95,000 by \u20b92,000 for 3 days = \u20b96,000 calculated excess."
+  }
+]

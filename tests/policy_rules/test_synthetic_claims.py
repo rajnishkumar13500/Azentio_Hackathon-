@@ -13,7 +13,7 @@ def load_data():
 
 def test_all_synthetic_claims_execution():
     policies_data, claims_data = load_data()
-    assert len(claims_data) == 5
+    assert len(claims_data) >= 5
 
     for raw_claim in claims_data:
         claim = Claim(**raw_claim)

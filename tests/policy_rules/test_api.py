@@ -31,13 +31,13 @@ def test_portfolio_lifecycle_empty_and_seed():
     # 3. Seed demo claims
     seed_res = client.post("/api/v1/claims/seed-demo")
     assert seed_res.status_code == 200
-    assert seed_res.json()["count"] == 5
+    assert seed_res.json()["count"] >= 5
 
     # 4. Verify populated portfolio
     res2 = client.get("/api/v1/claims")
     assert res2.status_code == 200
     data2 = res2.json()
-    assert data2["total_claims"] == 5
+    assert data2["total_claims"] >= 5
     assert data2["portfolio_metrics"]["total_invoiced"] > 0
     assert data2["portfolio_metrics"]["total_prevented_leakage"] > 0
 
@@ -47,3 +47,10 @@ def test_portfolio_lifecycle_empty_and_seed():
     rep = adj_res.json()
     assert rep["claim_id"] == "CLM-001"
     assert rep["summary"]["overall_status"] == "FLAGGED_LEAKAGE"
+
+    # 6. Customer Settlement Report Download & Preview
+    rep_res = client.get("/api/v1/claims/CLM-001/report?download=true")
+    assert rep_res.status_code == 200
+    assert "attachment" in rep_res.headers.get("content-disposition", "")
+    assert "Explanation of Benefits" in rep_res.text
+    assert "Azentio" in rep_res.text

@@ -18,8 +18,8 @@ class GroqMedicalAgent:
         self.client: Optional[Groq] = None
         if self.api_key and self.api_key.strip() and not self.api_key.startswith("your_"):
             try:
-                # Official Groq SDK handles the internal /openai/v1 endpoint automatically
-                self.client = Groq(api_key=self.api_key, base_url="https://api.groq.com")
+                base_url = settings.GROQ_BASE_URL or "https://api.groq.com"
+                self.client = Groq(api_key=self.api_key, base_url=base_url)
             except Exception as e:
                 logger.warning(f"Could not initialize Groq client: {e}")
 

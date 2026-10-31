@@ -17,6 +17,8 @@ class IncidentDetails(BaseModel):
     policy_tenure_months: int = Field(default=12, ge=0, description="Months since policy initiation")
     is_pre_existing: bool = Field(default=False, description="Whether condition is flagged as pre-existing")
     proposed_settlement_amount: float = Field(default=0.0, ge=0.0, description="Amount proposed by claim handler")
+    invoice_number: Optional[str] = None
+    invoice_date: Optional[str] = None
 
 class LineItem(BaseModel):
     line_id: str
@@ -37,6 +39,8 @@ class PriorClaimRecord(BaseModel):
     hospital_name: Optional[str] = None
     paid_amount: float = Field(ge=0.0)
     settlement_status: str = Field(default="SETTLED")
+    invoice_number: Optional[str] = None
+    invoice_date: Optional[str] = None
 
 class Claim(BaseModel):
     claim_id: str

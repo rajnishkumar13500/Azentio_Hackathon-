@@ -338,5 +338,295 @@
       }
     ],
     "claim_history": []
+  },
+  {
+    "claim_id": "CLM-006",
+    "case_title": "Exact Duplicate Claim Resubmission (100% Match Against Settled Prior Claim)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CLMNT-006",
+      "name": "Aarav Sharma",
+      "relationship_to_insured": "SELF",
+      "age": 29
+    },
+    "incident_details": {
+      "admission_date": "2026-08-10T10:00:00Z",
+      "discharge_date": "2026-08-14T11:00:00Z",
+      "hospital_id": "HOSP-MAX-DEL",
+      "hospital_name": "Max Healthcare Saket",
+      "icd10_code": "J18.9",
+      "diagnosis_description": "Bacterial Pneumonia Acute Treatment",
+      "policy_tenure_months": 15,
+      "is_pre_existing": false,
+      "proposed_settlement_amount": 32000.0,
+      "invoice_number": "INV-MAX-88901",
+      "invoice_date": "2026-08-14"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-GEN",
+        "description": "General Ward Bed (4 days)",
+        "quantity": 4,
+        "unit_price": 3000.0,
+        "total_amount": 12000.0,
+        "service_date": "2026-08-10"
+      },
+      {
+        "line_id": "L2",
+        "category": "PHARMACY",
+        "item_code": "MED-ANTIBIOTIC",
+        "description": "IV Antibiotics & Respiratory Medication",
+        "quantity": 1,
+        "unit_price": 14000.0,
+        "total_amount": 14000.0,
+        "service_date": "2026-08-11"
+      },
+      {
+        "line_id": "L3",
+        "category": "INVESTIGATION",
+        "item_code": "CHEST-XRAY",
+        "description": "Chest Radiograph PA View",
+        "quantity": 2,
+        "unit_price": 3000.0,
+        "total_amount": 6000.0,
+        "service_date": "2026-08-11"
+      }
+    ],
+    "claim_history": [
+      {
+        "previous_claim_id": "CLM-HIST-001",
+        "admission_date": "2026-08-10",
+        "diagnosis": "Bacterial Pneumonia Acute Treatment",
+        "hospital_name": "Max Healthcare Saket",
+        "paid_amount": 32000.0,
+        "settlement_status": "SETTLED",
+        "invoice_number": "INV-MAX-88901",
+        "invoice_date": "2026-08-14"
+      }
+    ]
+  },
+  {
+    "claim_id": "CLM-007",
+    "case_title": "Intra-Claim Duplicate Billing (Diagnostic Tests Double Billed on Same Service Day)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CLMNT-007",
+      "name": "Pooja Hegde",
+      "relationship_to_insured": "SELF",
+      "age": 31
+    },
+    "incident_details": {
+      "admission_date": "2026-09-12T08:00:00Z",
+      "discharge_date": "2026-09-14T18:00:00Z",
+      "hospital_id": "HOSP-MAX-DEL",
+      "hospital_name": "Max Healthcare Saket",
+      "icd10_code": "R07.9",
+      "diagnosis_description": "Chest Discomfort & Cardiac Evaluation",
+      "policy_tenure_months": 18,
+      "is_pre_existing": false,
+      "proposed_settlement_amount": 25000.0,
+      "invoice_number": "INV-MAX-90112",
+      "invoice_date": "2026-09-14"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-STD",
+        "description": "Standard Private Room (2 days)",
+        "quantity": 2,
+        "unit_price": 5000.0,
+        "total_amount": 10000.0,
+        "service_date": "2026-09-12"
+      },
+      {
+        "line_id": "L2",
+        "category": "INVESTIGATION",
+        "item_code": "RAD-XRAY-CHEST",
+        "description": "Chest X-Ray PA View (Primary)",
+        "quantity": 1,
+        "unit_price": 1500.0,
+        "total_amount": 1500.0,
+        "service_date": "2026-09-12"
+      },
+      {
+        "line_id": "L3",
+        "category": "INVESTIGATION",
+        "item_code": "RAD-XRAY-CHEST",
+        "description": "Chest Radiograph View (Duplicate Intra-Claim)",
+        "quantity": 1,
+        "unit_price": 1500.0,
+        "total_amount": 1500.0,
+        "service_date": "2026-09-12"
+      },
+      {
+        "line_id": "L4",
+        "category": "INVESTIGATION",
+        "item_code": "CARD-ECG-12",
+        "description": "12-Lead Electrocardiogram ECG",
+        "quantity": 1,
+        "unit_price": 1200.0,
+        "total_amount": 1200.0,
+        "service_date": "2026-09-12"
+      },
+      {
+        "line_id": "L5",
+        "category": "INVESTIGATION",
+        "item_code": "CARD-ECG-12",
+        "description": "Routine ECG Recording (Duplicate Intra-Claim)",
+        "quantity": 1,
+        "unit_price": 1200.0,
+        "total_amount": 1200.0,
+        "service_date": "2026-09-12"
+      },
+      {
+        "line_id": "L6",
+        "category": "CONSULTATION",
+        "item_code": "DOC-CARDIO",
+        "description": "Cardiologist Consultation Fee",
+        "quantity": 1,
+        "unit_price": 4000.0,
+        "total_amount": 4000.0,
+        "service_date": "2026-09-12"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-008",
+    "case_title": "Near-Duplicate Resubmission (Altered Invoice Number & Temporal Shift)",
+    "policy_id": "POL-SENIOR-CARE-02",
+    "claimant": {
+      "claimant_id": "CLMNT-008",
+      "name": "Ramesh Verma",
+      "relationship_to_insured": "SELF",
+      "age": 62
+    },
+    "incident_details": {
+      "admission_date": "2026-09-02T09:00:00Z",
+      "discharge_date": "2026-09-05T15:00:00Z",
+      "hospital_id": "HOSP-APOLLO-CHE",
+      "hospital_name": "Apollo Hospitals Delhi",
+      "icd10_code": "I10",
+      "diagnosis_description": "Hypertensive Emergency & Cardiovascular Stabilization",
+      "policy_tenure_months": 30,
+      "is_pre_existing": true,
+      "proposed_settlement_amount": 42000.0,
+      "invoice_number": "INV-APO-55421-B",
+      "invoice_date": "2026-09-05"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ICU_RENT",
+        "item_code": "ICU-CARD",
+        "description": "Cardiac ICU Observation (2 days)",
+        "quantity": 2,
+        "unit_price": 8000.0,
+        "total_amount": 16000.0,
+        "service_date": "2026-09-02"
+      },
+      {
+        "line_id": "L2",
+        "category": "PHARMACY",
+        "item_code": "MEDS-IV-ANTIHYP",
+        "description": "IV Antihypertensives and Nitroglycerin Infusion",
+        "quantity": 1,
+        "unit_price": 18000.0,
+        "total_amount": 18000.0,
+        "service_date": "2026-09-03"
+      },
+      {
+        "line_id": "L3",
+        "category": "INVESTIGATION",
+        "item_code": "ECHO-2D",
+        "description": "Transthoracic 2D Echocardiography with Doppler",
+        "quantity": 1,
+        "unit_price": 8000.0,
+        "total_amount": 8000.0,
+        "service_date": "2026-09-03"
+      }
+    ],
+    "claim_history": [
+      {
+        "previous_claim_id": "CLM-HIST-002",
+        "admission_date": "2026-09-01",
+        "diagnosis": "Hypertensive Emergency & Cardiovascular Stabilization",
+        "hospital_name": "Apollo Hospitals Delhi",
+        "paid_amount": 42000.0,
+        "settlement_status": "SETTLED",
+        "invoice_number": "INV-APO-55421",
+        "invoice_date": "2026-09-04"
+      }
+    ]
+  },
+  {
+    "claim_id": "CLM-009",
+    "case_title": "Repeat Service Frequency Protocol Breach (High-Resolution CT Thorax Repeated within 24h)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CLMNT-009",
+      "name": "Sunita Nair",
+      "relationship_to_insured": "SELF",
+      "age": 42
+    },
+    "incident_details": {
+      "admission_date": "2026-10-18T10:00:00Z",
+      "discharge_date": "2026-10-20T12:00:00Z",
+      "hospital_id": "HOSP-MAX-DEL",
+      "hospital_name": "Max Healthcare Saket",
+      "icd10_code": "J18.9",
+      "diagnosis_description": "Severe Viral Pneumonitis",
+      "policy_tenure_months": 20,
+      "is_pre_existing": false,
+      "proposed_settlement_amount": 35000.0,
+      "invoice_number": "INV-MAX-99201",
+      "invoice_date": "2026-10-20"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-STD",
+        "description": "Standard Ward Bed (2 days)",
+        "quantity": 2,
+        "unit_price": 5000.0,
+        "total_amount": 10000.0,
+        "service_date": "2026-10-18"
+      },
+      {
+        "line_id": "L2",
+        "category": "INVESTIGATION",
+        "item_code": "CT-CHEST-HR",
+        "description": "High Resolution Computed Tomography HRCT Chest",
+        "quantity": 1,
+        "unit_price": 8500.0,
+        "total_amount": 8500.0,
+        "service_date": "2026-10-18"
+      },
+      {
+        "line_id": "L3",
+        "category": "INVESTIGATION",
+        "item_code": "CT-CHEST-HR",
+        "description": "High Resolution Computed Tomography HRCT Chest (Unjustified Repeat <24h)",
+        "quantity": 1,
+        "unit_price": 8500.0,
+        "total_amount": 8500.0,
+        "service_date": "2026-10-18"
+      },
+      {
+        "line_id": "L4",
+        "category": "PHARMACY",
+        "item_code": "MEDS-ANTIVIRAL",
+        "description": "Antiviral Therapy and Nebulization",
+        "quantity": 1,
+        "unit_price": 8000.0,
+        "total_amount": 8000.0,
+        "service_date": "2026-10-19"
+      }
+    ],
+    "claim_history": []
   }
 ]

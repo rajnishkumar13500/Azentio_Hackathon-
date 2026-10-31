@@ -15,6 +15,8 @@ if sys.platform == "win32":
         pass
 
 from typing import Dict, Any, Optional, List
+from pydantic import BaseModel, Field
+from datetime import datetime
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,8 +30,19 @@ from src.schemas import Claim, Policy, ValidationReport
 from src.engine import validation_engine
 from src.ingestion import ingestion_service, IngestionResult
 from src.repository import claims_repository
+from src.report_generator import generate_customer_report_html
 
 console = Console()
+
+# In-memory adjudication decision store
+_adjudications: Dict[str, Dict[str, Any]] = {}
+
+class AdjudicationActionRequest(BaseModel):
+    claim_id: str
+    action: str  # CONFIRM_DENIAL, ADJUST_AMOUNT, DISMISS_FALSE_POSITIVE
+    adjudicated_by: Optional[str] = "Adjudicator"
+    adjusted_amount: Optional[float] = None
+    notes: Optional[str] = None
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -101,10 +114,11 @@ def validate_demo_claim(claim_id: str):
     return validation_engine.validate_claim(claim, policy)
 
 @app.get("/api/v1/claims")
+@app.get("/api/claims")
 def get_portfolio_dashboard():
     """
-    Returns active claims in the portfolio dashboard with their computed validation status.
-    Starts EMPTY until files are uploaded or the demo batch is loaded.
+    Returns active claims in the portfolio dashboard with their computed validation status,
+    duplicate detection findings, and adjudication state.
     """
     claims = claims_repository.get_all()
     policies_data, _ = load_data()
@@ -134,9 +148,20 @@ def get_portfolio_dashboard():
         else:
             approved_count += 1
 
+        adj = _adjudications.get(c.claim_id, {
+            "status": "PENDING_REVIEW" if s.overall_status in ["REJECTED", "FLAGGED_LEAKAGE"] else "AUTO_APPROVED",
+            "adjudicated_by": None,
+            "adjusted_amount": None,
+            "notes": None,
+            "timestamp": None
+        })
+
         claims_with_summary.append({
             "claim": c,
             "summary": s,
+            "validation_report": report,
+            "duplicate_findings": report.duplicate_findings,
+            "adjudication": adj,
             "top_recommendation": report.recommendations[0] if report.recommendations else None,
         })
 
@@ -151,6 +176,99 @@ def get_portfolio_dashboard():
             "approved_count": approved_count,
         },
         "claims": claims_with_summary,
+    }
+
+@app.get("/api/v1/kpis")
+@app.get("/api/kpis")
+def get_executive_kpis():
+    """Returns aggregated executive metrics, category breakdowns, and provider distributions."""
+    data = get_portfolio_dashboard()
+    total_claims = data["total_claims"]
+    metrics = data["portfolio_metrics"]
+    claims_list = data["claims"]
+
+    flagged_count = metrics["flagged_count"] + metrics["rejected_count"]
+    total_amount = metrics["total_invoiced"]
+    calc_leakage = metrics["total_prevented_leakage"]
+    susp_leakage = metrics["total_suspected_leakage"]
+    overall_leakage = round(calc_leakage + susp_leakage, 2)
+
+    categories: Dict[str, float] = {}
+    severities: Dict[str, int] = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "CLEAN": 0}
+    providers: Dict[str, Dict[str, Any]] = {}
+
+    for item in claims_list:
+        c = item["claim"]
+        s = item["summary"]
+        report = item["validation_report"]
+        findings = item.get("duplicate_findings", [])
+
+        # Leakage by category
+        if findings:
+            for f in findings:
+                scen = f.get("scenario_type", "DUPLICATE")
+                amt = f.get("leakage_amount", 0.0)
+                categories[scen] = round(categories.get(scen, 0.0) + amt, 2)
+        if s.total_sublimit_deduction > 0:
+            categories["ROOM_RENT_LIMIT_BREACH"] = round(categories.get("ROOM_RENT_LIMIT_BREACH", 0.0) + s.total_sublimit_deduction, 2)
+        if s.total_excluded > 0:
+            categories["NON_PAYABLE_CONSUMABLES"] = round(categories.get("NON_PAYABLE_CONSUMABLES", 0.0) + s.total_excluded, 2)
+        if s.total_proportionate_deduction > 0:
+            categories["PROPORTIONATE_DEDUCTION"] = round(categories.get("PROPORTIONATE_DEDUCTION", 0.0) + s.total_proportionate_deduction, 2)
+        if s.deductible_applied > 0 or s.copay_applied > 0:
+            categories["DEDUCTIBLE_COPAY"] = round(categories.get("DEDUCTIBLE_COPAY", 0.0) + s.deductible_applied + s.copay_applied, 2)
+
+        # Severity
+        if s.overall_status == "REJECTED":
+            severities["CRITICAL"] += 1
+        elif s.calculated_leakage_prevented > 20000:
+            severities["HIGH"] += 1
+        elif s.calculated_leakage_prevented > 0 or s.suspected_leakage_total > 0:
+            severities["MEDIUM"] += 1
+        else:
+            severities["CLEAN"] += 1
+
+        # Provider breakdown
+        p_name = c.incident_details.hospital_name or c.incident_details.hospital_id
+        providers.setdefault(p_name, {"claims": 0, "leakage": 0.0, "total_billed": 0.0})
+        providers[p_name]["claims"] += 1
+        providers[p_name]["leakage"] = round(providers[p_name]["leakage"] + s.calculated_leakage_prevented + s.suspected_leakage_total, 2)
+        providers[p_name]["total_billed"] = round(providers[p_name]["total_billed"] + s.total_claimed, 2)
+
+    return {
+        "total_claims_processed": total_claims,
+        "total_claimed_amount": total_amount,
+        "flagged_claims_count": flagged_count,
+        "flag_rate_percentage": round((flagged_count / total_claims * 100), 1) if total_claims else 0.0,
+        "total_calculated_leakage": calc_leakage,
+        "total_suspected_leakage": susp_leakage,
+        "overall_leakage_exposure": overall_leakage,
+        "potential_savings_rate": round((overall_leakage / total_amount * 100), 1) if total_amount else 0.0,
+        "leakage_by_category": categories,
+        "severity_distribution": severities,
+        "provider_breakdown": providers,
+    }
+
+@app.post("/api/v1/action")
+@app.post("/api/action")
+def record_adjudicator_action(req: AdjudicationActionRequest):
+    """Records an adjudicator's decision (CONFIRM_DENIAL, ADJUST_AMOUNT, DISMISS_FALSE_POSITIVE)."""
+    claim = claims_repository.get_by_id(req.claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{req.claim_id}' not found.")
+
+    _adjudications[req.claim_id] = {
+        "status": req.action,
+        "adjudicated_by": req.adjudicated_by or "Adjudicator",
+        "adjusted_amount": req.adjusted_amount,
+        "notes": req.notes,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    return {
+        "status": "SUCCESS",
+        "claim_id": req.claim_id,
+        "action": req.action,
+        "message": f"Claim {req.claim_id} updated to {req.action}"
     }
 
 @app.get("/api/v1/claims/{claim_id}")
@@ -169,6 +287,29 @@ def adjudicate_claim(claim_id: str):
     policy_dict = policies_data.get(claim.policy_id, policies_data.get("POL-COMPREHENSIVE-01"))
     policy = Policy(**policy_dict)
     return validation_engine.validate_claim(claim, policy)
+
+@app.get("/api/v1/claims/{claim_id}/report")
+@app.get("/api/claims/{claim_id}/report")
+def get_customer_report_endpoint(claim_id: str, download: bool = False):
+    """
+    Generates and returns an official customer settlement report / Explanation of Benefits (EOB).
+    If download=true, sends Content-Disposition attachment header to save directly to disk.
+    """
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
+    policies_data, _ = load_data()
+    policy_dict = policies_data.get(claim.policy_id, policies_data.get("POL-COMPREHENSIVE-01"))
+    policy = Policy(**policy_dict)
+    report = validation_engine.validate_claim(claim, policy)
+    adjudication = _adjudications.get(claim_id, {})
+
+    html_content = generate_customer_report_html(claim, policy, report, adjudication)
+    headers = {"Content-Type": "text/html; charset=utf-8"}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="Azentio_Settlement_Report_{claim_id}.html"'
+
+    return Response(content=html_content, media_type="text/html", headers=headers)
 
 @app.post("/api/v1/claims/seed-demo")
 def seed_demo_claims():
