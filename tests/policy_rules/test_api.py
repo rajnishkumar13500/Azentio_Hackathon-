@@ -54,3 +54,33 @@ def test_portfolio_lifecycle_empty_and_seed():
     assert "attachment" in rep_res.headers.get("content-disposition", "")
     assert "Explanation of Benefits" in rep_res.text
     assert "Azentio" in rep_res.text
+
+def test_v1_models_discovery():
+    res = client.get("/v1/models")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["object"] == "list"
+    assert len(data["data"]) > 0
+    model_ids = [m["id"] for m in data["data"]]
+    assert settings.GROQ_MODEL in model_ids
+
+    # Test single model retrieval
+    single_res = client.get(f"/v1/models/{settings.GROQ_MODEL}")
+    assert single_res.status_code == 200
+    single_data = single_res.json()
+    assert single_data["id"] == settings.GROQ_MODEL
+
+def test_v1_chat_completions():
+    res = client.post(
+        "/v1/chat/completions",
+        json={
+            "model": settings.GROQ_MODEL,
+            "messages": [{"role": "user", "content": "Analyze claim discrepancy for disposable syringes"}],
+        },
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert "choices" in data
+    assert len(data["choices"]) > 0
+    assert "message" in data["choices"][0]
+    assert data["choices"][0]["message"]["role"] == "assistant"

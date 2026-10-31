@@ -1,5 +1,7 @@
 import sys
 import json
+import time
+import logging
 import argparse
 from pathlib import Path
 
@@ -17,7 +19,7 @@ if sys.platform == "win32":
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.responses import FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from rich.console import Console
@@ -31,7 +33,9 @@ from src.engine import validation_engine
 from src.ingestion import ingestion_service, IngestionResult
 from src.repository import claims_repository
 from src.report_generator import generate_customer_report_html
+from src.ai.groq_client import groq_agent
 
+logger = logging.getLogger(__name__)
 console = Console()
 
 # In-memory adjudication decision store
@@ -80,6 +84,113 @@ def health_check():
         "version": settings.VERSION,
         "groq_configured": bool(settings.GROQ_API_KEY and not settings.GROQ_API_KEY.startswith("your_")),
         "groq_model": settings.GROQ_MODEL,
+    }
+
+def get_available_models() -> List[Dict[str, Any]]:
+    default_models = [
+        {"id": settings.GROQ_MODEL, "object": "model", "created": 1700000000, "owned_by": "groq"},
+        {"id": "llama-3.3-70b-versatile", "object": "model", "created": 1700000000, "owned_by": "groq"},
+        {"id": "llama-3.1-8b-instant", "object": "model", "created": 1700000000, "owned_by": "groq"},
+        {"id": "mixtral-8x7b-32768", "object": "model", "created": 1700000000, "owned_by": "groq"},
+        {"id": "emilyalsentzer/Bio_ClinicalBERT", "object": "model", "created": 1700000000, "owned_by": "azentio-ai"},
+        {"id": "all-MiniLM-L6-v2", "object": "model", "created": 1700000000, "owned_by": "azentio-ai"},
+    ]
+    if groq_agent.is_available:
+        try:
+            live_models = groq_agent.client.models.list()
+            if hasattr(live_models, "data") and live_models.data:
+                return [
+                    {
+                        "id": m.id,
+                        "object": "model",
+                        "created": getattr(m, "created", 1700000000),
+                        "owned_by": getattr(m, "owned_by", "groq"),
+                    }
+                    for m in live_models.data
+                ]
+        except Exception:
+            pass
+    return default_models
+
+@app.get("/v1/models")
+@app.get("/models")
+def list_models():
+    """OpenAI-compatible models list endpoint for agent and client discovery."""
+    return {
+        "object": "list",
+        "data": get_available_models(),
+    }
+
+@app.get("/v1/models/{model_id:path}")
+@app.get("/models/{model_id:path}")
+def get_model(model_id: str):
+    """OpenAI-compatible model detail endpoint."""
+    return {
+        "id": model_id,
+        "object": "model",
+        "created": 1700000000,
+        "owned_by": "azentio-ai",
+        "permission": [],
+        "root": model_id,
+        "parent": None,
+    }
+
+@app.post("/v1/chat/completions")
+@app.post("/chat/completions")
+async def chat_completions(req: Request):
+    """
+    OpenAI-compatible chat completions endpoint.
+    Seamlessly routes agent requests to Groq or deterministic auditor fallback.
+    """
+    try:
+        body = await req.json()
+    except Exception:
+        body = {}
+
+    messages = body.get("messages", [])
+    model = body.get("model", settings.GROQ_MODEL)
+    temperature = body.get("temperature", 0.2)
+    max_tokens = body.get("max_tokens", 1024)
+
+    if groq_agent.is_available:
+        try:
+            response = groq_agent.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            return json.loads(response.model_dump_json())
+        except Exception as e:
+            logger.warning(f"Groq chat completion fallback: {e}")
+
+    # Fallback response for offline mode or test harnesses
+    last_user_msg = "Hello"
+    for m in reversed(messages):
+        if m.get("role") == "user":
+            last_user_msg = m.get("content", "")
+            break
+
+    return {
+        "id": f"chatcmpl-azentio-{int(time.time())}",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": model,
+        "choices": [
+            {
+                "index": 0,
+                "message": {
+                    "role": "assistant",
+                    "content": f"Azentio.ai Claims Agent: Received message: '{last_user_msg[:80]}'. The claims validation microservice and duplicate detector are active.",
+                },
+                "finish_reason": "stop",
+            }
+        ],
+        "usage": {
+            "prompt_tokens": len(str(messages)),
+            "completion_tokens": 30,
+            "total_tokens": len(str(messages)) + 30,
+        },
     }
 
 @app.get("/api/v1/sample-policies")

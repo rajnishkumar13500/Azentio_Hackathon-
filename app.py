@@ -16,6 +16,7 @@ if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from src.config import settings
+from src.main import app  # Expose FastAPI application instance for uvicorn runner
 
 
 def open_browser(port):
