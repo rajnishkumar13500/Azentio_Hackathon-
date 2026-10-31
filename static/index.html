@@ -427,6 +427,72 @@
         </div>
       </section>
 
+      <!-- Level 2 Step 2: Supporting Document & Invoice Evidence Reconciliation -->
+      <section class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4" id="documentAnalysisSection">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold">
+              📑
+            </div>
+            <div>
+              <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <span>Supporting Document vs. Submitted Claim Reconciliation</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Level 2 Step 2</span>
+              </h3>
+              <p class="text-[11px] text-slate-500">Cross-verifies hospital tax invoices, discharge summaries, and bills against claim line items with source line quotes</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="docVarianceBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-mono">
+              Reconciling Evidence...
+            </span>
+            <label class="cursor-pointer px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition flex items-center gap-1 shadow-sm">
+              <span>📎</span>
+              <span>Upload Supporting Doc</span>
+              <input type="file" id="supportingDocInput" class="hidden" accept=".txt,.pdf" onchange="uploadSupportingDocument(this.files)">
+            </label>
+          </div>
+        </div>
+
+        <!-- Document Metadata Header -->
+        <div id="docMetadataBanner" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs flex flex-wrap items-center justify-between gap-3 font-mono">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400">Source Doc:</span>
+            <span class="font-bold text-slate-800" id="docEvidenceFilename">hospital_tax_invoice_saket.txt</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200" id="docEvidenceType">HOSPITAL_TAX_INVOICE</span>
+          </div>
+          <div class="flex items-center gap-4 text-[11px]">
+            <div><span class="text-slate-400">Doc Invoiced:</span> <span class="font-bold text-slate-900" id="docInvoicedTotal">₹0.00</span></div>
+            <div><span class="text-slate-400">Total Variance:</span> <span class="font-bold text-rose-600" id="docTotalDiscrepancy">₹0.00</span></div>
+          </div>
+        </div>
+
+        <!-- Field Level Variance Cards (Amount, Dates, Patient) -->
+        <div id="fieldVariancesContainer" class="space-y-2">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Itemized Line Level Reconciliation Table -->
+        <div class="overflow-x-auto pt-1">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 border-b border-slate-200 font-semibold text-slate-500 text-[11px]">
+              <tr>
+                <th class="py-2 px-3">Line #</th>
+                <th class="py-2 px-3">Service Description</th>
+                <th class="py-2 px-3 text-right">Claim Rate (₹)</th>
+                <th class="py-2 px-3 text-right">Doc Rate (₹)</th>
+                <th class="py-2 px-3 text-right">Discrepancy (₹)</th>
+                <th class="py-2 px-3 text-center">Status</th>
+                <th class="py-2 px-3">Source Citation (Line & Quote)</th>
+              </tr>
+            </thead>
+            <tbody id="docLineReconciliationBody" class="divide-y divide-slate-100">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- Financial Waterfall Summary & Leakage Comparison -->
       <section class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <!-- Settlement Waterfall Table -->
@@ -1041,6 +1107,7 @@
 
         renderDetailedAdjudication(report);
         loadClaimCorrelations(claimId);
+        loadDocumentEvidence(claimId);
       } catch (err) {
         alert("Error auditing claim: " + err.message);
       }
@@ -1453,6 +1520,121 @@
 
       } catch (e) {
         container.innerHTML = `<div class="py-3 text-xs text-rose-600">Failed to load correlation report: ${e.message}</div>`;
+      }
+    }
+
+    async function loadDocumentEvidence(claimId) {
+      const badge = document.getElementById('docVarianceBadge');
+      const fieldContainer = document.getElementById('fieldVariancesContainer');
+      const lineTbody = document.getElementById('docLineReconciliationBody');
+      if (!badge || !fieldContainer || !lineTbody) return;
+
+      badge.innerText = "Reconciling Evidence...";
+      badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-mono";
+
+      try {
+        const res = await fetch(`/api/v1/investigation/${claimId}/document-evidence`);
+        if (!res.ok) throw new Error("Could not fetch document evidence");
+        const rep = await res.json();
+
+        document.getElementById('docEvidenceFilename').innerText = rep.document_name;
+        document.getElementById('docEvidenceType').innerText = rep.document_type;
+        document.getElementById('docInvoicedTotal').innerText = formatINR(rep.extracted_metadata.total_invoiced_amount || 0);
+        document.getElementById('docTotalDiscrepancy').innerText = formatINR(rep.total_financial_leakage || 0);
+
+        const hasVariances = rep.total_variances_detected > 0;
+        badge.innerText = hasVariances ? `${rep.total_variances_detected} Discrepanc${rep.total_variances_detected === 1 ? 'y' : 'ies'} Detected` : "✔ Document Fully Verified";
+        badge.className = hasVariances ? "text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-mono" : "text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono";
+
+        // Field comparisons
+        if (!rep.field_comparisons || rep.field_comparisons.length === 0) {
+          fieldContainer.innerHTML = '';
+        } else {
+          fieldContainer.innerHTML = rep.field_comparisons.map(fc => `
+            <div class="p-3 rounded-xl border border-rose-200 bg-rose-50/50 text-xs flex items-start justify-between gap-3">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-rose-800 font-mono text-[11px] px-2 py-0.5 rounded bg-rose-100 border border-rose-200">${fc.variance_type.replace(/_/g, ' ')}</span>
+                  <span class="font-semibold text-slate-800">${fc.field_name}</span>
+                </div>
+                <p class="text-slate-700 text-[11px] leading-relaxed">${fc.description}</p>
+                <div class="text-[10px] text-slate-500 font-mono bg-white p-1.5 rounded border border-rose-200/60 mt-1">
+                  <span class="font-bold text-slate-600">Source Quote (Line ${fc.source_citation.line_number || 'N/A'}):</span> "${fc.source_citation.raw_quote}"
+                </div>
+              </div>
+              ${fc.variance_amount > 0 ? `
+                <div class="text-right shrink-0">
+                  <span class="text-[10px] text-slate-400 font-bold block">Amount Discrepancy</span>
+                  <span class="text-xs font-bold text-rose-600 font-mono">${formatINR(fc.variance_amount)}</span>
+                </div>` : ''}
+            </div>
+          `).join('');
+        }
+
+        // Line item reconciliation
+        if (!rep.line_item_reconciliations || rep.line_item_reconciliations.length === 0) {
+          lineTbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400 italic">No line items to reconcile.</td></tr>`;
+        } else {
+          lineTbody.innerHTML = rep.line_item_reconciliations.map(li => {
+            let statusBadge = '';
+            if (li.status === 'MATCHED') {
+              statusBadge = '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono text-[10px] font-bold">MATCHED</span>';
+            } else if (li.status === 'RATE_INFLATED') {
+              statusBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-mono text-[10px] font-bold">RATE INFLATED</span>';
+            } else if (li.status === 'UNSUBSTANTIATED_IN_CLAIM') {
+              statusBadge = '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-mono text-[10px] font-bold">UNSUBSTANTIATED</span>';
+            } else {
+              statusBadge = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono text-[10px]">${li.status}</span>`;
+            }
+
+            return `
+              <tr class="hover:bg-slate-50/60 transition">
+                <td class="py-2.5 px-3 font-mono font-bold text-slate-700">${li.claim_line_id || '-'}</td>
+                <td class="py-2.5 px-3">
+                  <div class="font-semibold text-slate-800">${li.description}</div>
+                  <div class="text-[10px] text-slate-400 uppercase">${li.category}</div>
+                </td>
+                <td class="py-2.5 px-3 text-right font-mono">${li.claim_unit_rate ? formatINR(li.claim_unit_rate) : '-'}</td>
+                <td class="py-2.5 px-3 text-right font-mono">${li.document_unit_rate ? formatINR(li.document_unit_rate) : '<span class="text-rose-500 italic">Not on Bill</span>'}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-bold ${li.discrepancy_amount > 0 ? 'text-rose-600' : 'text-slate-400'}">
+                  ${li.discrepancy_amount > 0 ? formatINR(li.discrepancy_amount) : '-'}
+                </td>
+                <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+                <td class="py-2.5 px-3">
+                  <div class="text-[11px] text-slate-600 font-mono bg-slate-50 p-1.5 rounded border border-slate-200 truncate max-w-xs" title="${li.source_citation.raw_quote}">
+                    ${li.source_citation.line_number ? `Line ${li.source_citation.line_number}: ` : ''}"${li.source_citation.raw_quote}"
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+      } catch (err) {
+        badge.innerText = "Supporting Doc Absent";
+        lineTbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400 italic">Attach a hospital invoice or discharge summary to run document reconciliation.</td></tr>`;
+      }
+    }
+
+    async function uploadSupportingDocument(files) {
+      if (!files || files.length === 0 || !activeClaimReport) return;
+      const file = files[0];
+      const claimId = activeClaimReport.claim_id;
+
+      const formData = new FormData();
+      formData.append('file', file, file.name);
+
+      try {
+        showToast(`Uploading and reconciling ${file.name}...`);
+        const res = await fetch(`/api/v1/investigation/${claimId}/compare-document`, {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) throw new Error("Document comparison failed.");
+        showToast("Document reconciliation updated!");
+        await loadDocumentEvidence(claimId);
+      } catch (err) {
+        alert("Document upload error: " + err.message);
       }
     }
 

@@ -39,3 +39,4 @@ Select any file or ingest them directly via the "Ingest Claims File" UI modal:
   • Contains negative amounts, missing claimant IDs, and reversed dates.
   • Proves the ingestion pipeline rejects invalid records rather than silently ignoring errors.
 ================================================================================
+

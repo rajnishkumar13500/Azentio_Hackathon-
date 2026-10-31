@@ -1,0 +1,31 @@
+================================================================================
+                    MAX SUPER SPECIALITY HOSPITAL SAKET
+                         CLINICAL DISCHARGE SUMMARY
+================================================================================
+Hospital IPD No: IPD-2026-9042
+MRN / Patient ID: MRN-DEL-89211
+Patient Name: Mr. Vivek Singhania
+Age / Gender: 44 Yrs / Male
+Admission Date: 2026-08-10 (10:30 AM)
+Discharge Date: 2026-08-13 (04:30 PM)
+Length of Stay: 3 Days Inpatient Care
+
+CLINICAL COURSE:
+Chief Complaint: Acute severe right iliac fossa pain, nausea, fever for 24 hours.
+Primary Diagnosis: Acute Appendicitis with localized peritonitis (ICD-10: K35.8)
+Secondary Diagnosis: None
+Procedure Performed: Emergency Laparoscopic Appendectomy
+Date of Procedure: 2026-08-11
+Operating Surgeon: Dr. K. N. Rao, MS, FRCS (Laparoscopic GI Surgeon)
+Anesthetist: Dr. Anita Desai, MD
+Condition at Discharge: Hemodynamically stable, afebrile, surgical wounds clean and healthy.
+Dietary Advice: Soft diet, avoid strenuous physical activities for 2 weeks.
+
+MEDICATIONS PRESCRIBED:
+1. Tab Cefuroxime Axetil 500mg BD x 5 days
+2. Tab Paracetamol 650mg TDS PRN x 3 days
+3. Tab Pantoprazole 40mg OD AC x 7 days
+
+Follow-up Appointment: 2026-08-20 in Surgical OPD for suture removal.
+Consultant Signature: Dr. K. N. Rao (Registration No: DMC-44821)
+================================================================================

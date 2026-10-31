@@ -71,3 +71,62 @@ class CrossClaimCorrelationReport(BaseModel):
     network_nodes: List[NetworkNode] = Field(default_factory=list)
     network_edges: List[NetworkEdge] = Field(default_factory=list)
 
+
+# =============================================================================
+# Level 2 Step 2: Document & Invoice Analysis Models
+# =============================================================================
+
+class VarianceType(str, Enum):
+    TOTAL_AMOUNT_MISMATCH = "TOTAL_AMOUNT_MISMATCH"
+    DATE_MISMATCH = "DATE_MISMATCH"
+    UNSUBSTANTIATED_CLAIM_ITEM = "UNSUBSTANTIATED_CLAIM_ITEM"
+    OMITTED_INVOICE_ITEM = "OMITTED_INVOICE_ITEM"
+    UNIT_RATE_INFLATION = "UNIT_RATE_INFLATION"
+    QUANTITY_MISMATCH = "QUANTITY_MISMATCH"
+    DIAGNOSIS_MISMATCH = "DIAGNOSIS_MISMATCH"
+
+
+class DocumentSourceCitation(BaseModel):
+    document_name: str
+    section: str = "GENERAL"
+    line_number: Optional[int] = None
+    raw_quote: str = ""
+
+
+class DocumentFieldComparison(BaseModel):
+    field_name: str
+    claim_value: Any
+    document_value: Any
+    variance_type: VarianceType
+    variance_amount: float = 0.0
+    severity: str = "MEDIUM"  # CRITICAL, HIGH, MEDIUM, LOW
+    description: str
+    source_citation: DocumentSourceCitation
+
+
+class DocumentLineItemComparison(BaseModel):
+    claim_line_id: Optional[str] = None
+    document_item_num: Optional[int] = None
+    category: str
+    description: str
+    claim_unit_rate: Optional[float] = None
+    document_unit_rate: Optional[float] = None
+    claim_total: Optional[float] = None
+    document_total: Optional[float] = None
+    discrepancy_amount: float = 0.0
+    status: str  # MATCHED, RATE_INFLATED, UNSUBSTANTIATED_IN_CLAIM, OMITTED_FROM_CLAIM
+    explanation: str
+    source_citation: DocumentSourceCitation
+
+
+class DocumentReconciliationReport(BaseModel):
+    claim_id: str
+    document_name: str
+    document_type: str = "HOSPITAL_TAX_INVOICE"
+    total_variances_detected: int = 0
+    total_financial_leakage: float = 0.0
+    field_comparisons: List[DocumentFieldComparison] = Field(default_factory=list)
+    line_item_reconciliations: List[DocumentLineItemComparison] = Field(default_factory=list)
+    extracted_metadata: Dict[str, Any] = Field(default_factory=dict)
+    summary_verdict: str = "VERIFIED_MATCH"
+

@@ -1,0 +1,27 @@
+================================================================================
+               AUTHORIZED AUTO CARE & REPAIR ESTIMATE WORKORDER
+================================================================================
+Estimate Reference: EST-REP-2026-4401
+Insurer: Azentio General Insurance Ltd.
+Claim Reference ID: CLM-MTR-009
+Policy Number: POL-MOTOR-COMP-01
+Vehicle Registration: DL-3C-AZ-4420
+Make / Model: Hyundai Creta SX 1.5 Petrol
+Owner / Claimant: Mr. Aman Kapoor
+Incident Date: 2026-09-02
+Date of Inspection: 2026-09-04
+Surveyor / Assessor: Vikramaditya Sharma (License No: SLA-88219)
+
+ESTIMATED ITEMIZED REPAIR & REPLACEMENT CHARGES:
+--------------------------------------------------------------------------------
+Item # | Type   | Part / Labor Description                    | Qty | Rate   | Total (INR)
+--------------------------------------------------------------------------------
+1      | PART   | Front Bumper Assembly OEM Replacement       | 1   | 14,500 | 14,500.00
+2      | PART   | Left LED Headlamp Unit (Complete)           | 1   | 22,000 | 22,000.00
+3      | PART   | Front Radiator Grille Chrome Trim           | 1   | 4,200  | 4,200.00
+4      | LABOR  | Front Bumper Removal, Denting & Refitting   | 1   | 3,500  | 3,500.00
+5      | LABOR  | Premium Polyurethane Panel Painting (Front) | 1   | 5,500  | 5,500.00
+--------------------------------------------------------------------------------
+TOTAL REPAIR ESTIMATE AUTHORIZED: INR 49,700.00
+Depreciation Applicable on Plastic Parts: 50% (Per Policy Schedule)
+================================================================================

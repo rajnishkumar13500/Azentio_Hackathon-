@@ -38,6 +38,8 @@ from src.investigation import (
     CrossClaimCorrelationEngine,
     CrossClaimCorrelationReport,
     CorrelationRelationshipType,
+    document_analyzer,
+    DocumentReconciliationReport,
 )
 
 logger = logging.getLogger(__name__)
@@ -509,6 +511,60 @@ def get_all_portfolio_correlations():
         "total_flagged_with_correlations": len(results),
         "correlations": results,
     }
+
+@app.post("/api/v1/investigation/{claim_id}/compare-document", response_model=DocumentReconciliationReport)
+@app.post("/api/investigation/{claim_id}/compare-document", response_model=DocumentReconciliationReport)
+async def compare_claim_with_document_endpoint(claim_id: str, file: UploadFile = File(...)):
+    """
+    Level 2 Step 2: Uploads a supporting document (invoice, discharge summary, repair estimate)
+    and executes line-level reconciliation against the claim data.
+    """
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        _, claims_data = load_data()
+        raw = next((c for c in claims_data if c["claim_id"] == claim_id), None)
+        if not raw:
+            raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found.")
+        claim = Claim(**raw)
+
+    content = await file.read()
+    report = document_analyzer.compare(claim, file.filename, content)
+    return report
+
+@app.get("/api/v1/investigation/{claim_id}/document-evidence", response_model=DocumentReconciliationReport)
+@app.get("/api/investigation/{claim_id}/document-evidence", response_model=DocumentReconciliationReport)
+def get_claim_document_evidence(claim_id: str, doc_name: Optional[str] = None):
+    """
+    Level 2 Step 2: Retrieves pre-linked supporting document evidence and automated reconciliation diff.
+    """
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        _, claims_data = load_data()
+        raw = next((c for c in claims_data if c["claim_id"] == claim_id), None)
+        if not raw:
+            step2_claim_file = settings.DATA_DIR / "jury_examples" / "Step_2_Document_Analysis" / "claim_for_document_audit.json"
+            if step2_claim_file.exists():
+                with open(step2_claim_file, "r", encoding="utf-8") as f:
+                    s2_claims = json.load(f)
+                raw = next((c for c in s2_claims if c["claim_id"] == claim_id), None)
+        if not raw:
+            raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found.")
+        claim = Claim(**raw)
+
+    step2_dir = settings.DATA_DIR / "jury_examples" / "Step_2_Document_Analysis"
+    doc_filename = doc_name or "hospital_tax_invoice_saket.txt"
+    doc_path = step2_dir / doc_filename
+    if not doc_path.exists():
+        doc_path = settings.DATA_DIR / "samples" / "sample_hospital_invoice.txt"
+        doc_filename = "sample_hospital_invoice.txt"
+
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail="Supporting document not found.")
+
+    with open(doc_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    return document_analyzer.compare(claim, doc_filename, content)
 
 @app.post("/api/v1/ingest/upload", response_model=IngestionResult)
 async def upload_claims_file(file: UploadFile = File(...)):

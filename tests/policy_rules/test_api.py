@@ -1,3 +1,4 @@
+from pathlib import Path
 from fastapi.testclient import TestClient
 from src.main import app
 from src.config import settings
@@ -106,3 +107,25 @@ def test_investigation_correlation_endpoints():
     assert all_corr_res.status_code == 200
     all_data = all_corr_res.json()
     assert all_data["total_flagged_with_correlations"] >= 1
+
+def test_document_analysis_endpoints():
+    # 1. Test pre-linked supporting document evidence endpoint
+    doc_res = client.get("/api/v1/investigation/CLM-001/document-evidence")
+    assert doc_res.status_code == 200
+    data = doc_res.json()
+    assert data["claim_id"] == "CLM-001"
+    assert "total_variances_detected" in data
+    assert "field_comparisons" in data
+    assert "line_item_reconciliations" in data
+
+    # 2. Test document upload comparison endpoint
+    sample_invoice = Path("data/jury_examples/Step_2_Document_Analysis/hospital_tax_invoice_saket.txt")
+    with open(sample_invoice, "rb") as f:
+        upload_res = client.post(
+            "/api/v1/investigation/CLM-001/compare-document",
+            files={"file": ("hospital_tax_invoice_saket.txt", f, "text/plain")},
+        )
+    assert upload_res.status_code == 200
+    upload_data = upload_res.json()
+    assert upload_data["total_variances_detected"] >= 1
+    assert len(upload_data["line_item_reconciliations"]) >= 1

@@ -1,0 +1,5 @@
+claim_id,policy_id,case_title,claimant_name,relationship,age,admission_date,discharge_date,hospital_name,icd10_code,diagnosis,tenure_months,is_pre_existing,proposed_settlement,line_id,category,item_code,description,quantity,unit_price,total_amount
+,POL-COMPREHENSIVE-01,Missing Claim ID Case,Pooja Verma,SELF,29,2026-08-10,2026-08-12,City Hospital,K35.8,Acute Appendicitis,12,false,45000,L1,SURGERY,SURG-01,Appendectomy,1,45000,45000
+CLM-INV-002,POL-COMPREHENSIVE-01,Reverse Dates Case,Ramesh Kumar,SELF,45,2026-09-20,2026-09-15,Max Hospital,K35.8,Appendicitis,12,false,30000,L1,ROOM_RENT,ROOM-01,Single Room,2,5000,10000
+CLM-INV-003,POL-COMPREHENSIVE-01,Negative Price Case,Sanjay Gupta,SELF,50,2026-07-10,2026-07-12,Fortis Hospital,K35.8,Appendicitis,12,false,20000,L1,SURGERY,SURG-01,Surgical Dressing,1,-5000,-5000
+
