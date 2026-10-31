@@ -483,7 +483,21 @@ def _ingest_uploaded_bytes(filename: str, content: bytes) -> IngestionResult:
     """
     Route an upload to the existing studio parser, or to the canonical
     claims-ingestion backend when the payload matches that schema / document types.
+
+    Standalone hospital bills (PDF/PNG/JPG) always try the studio document parser
+    first so they become portfolio claims instead of canonical invoice rows.
     """
+    ext = Path(filename or "").suffix.lower().lstrip(".")
+    if ext in {"pdf", "png", "jpg", "jpeg"}:
+        studio_result = ingestion_service.ingest_file(filename, content)
+        if studio_result.claims:
+            return studio_result
+        if canonical_pipeline_available():
+            canonical_result = ingest_bytes_via_canonical(filename, content)
+            if canonical_result.claims:
+                return canonical_result
+        return studio_result
+
     if looks_like_canonical_payload(filename, content) and canonical_pipeline_available():
         return ingest_bytes_via_canonical(filename, content)
     return ingestion_service.ingest_file(filename, content)

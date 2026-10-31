@@ -23,21 +23,31 @@ class DocumentFieldExtractor:
             return candidates
 
         # 1. Invoice Reference / Bill No
-        # Prioritize explicit pattern like INV-xxx or BILL-xxx
-        inv_token_match = re.search(r"\b(INV[-:_][A-Za-z0-9\-]+|BILL[-:_][A-Za-z0-9\-]+)\b", raw_text, re.IGNORECASE)
+        # OCR often reads "Invoice No" as "Invoice Nar" and splits "INV-DOC- 8088".
+        inv_token_match = re.search(
+            r"\b((?:INV|BILL)[-:_]\s*[A-Za-z0-9\-]+)\b",
+            raw_text,
+            re.IGNORECASE,
+        )
         if inv_token_match:
-            candidates["invoice_reference"] = inv_token_match.group(1).replace(":", "-")
+            candidates["invoice_reference"] = re.sub(r"\s+", "", inv_token_match.group(1).replace(":", "-"))
         else:
-            inv_match = re.search(r"(?:invoice\s*(?:no|num|number|#|ref)|bill\s*(?:no|num|#))[:\s]*([A-Za-z0-9\-_/]+)", raw_text, re.IGNORECASE)
+            inv_match = re.search(
+                r"(?:invoice|bill)\s*(?:no|num|number|#|ref|nar)[:\s]*([A-Za-z0-9\-_/ ]+)",
+                raw_text,
+                re.IGNORECASE,
+            )
             if inv_match:
-                candidates["invoice_reference"] = inv_match.group(1).strip()
+                candidates["invoice_reference"] = re.sub(r"\s+", "", inv_match.group(1).strip())
+        if candidates["invoice_reference"]:
+            candidates["invoice_id"] = candidates["invoice_reference"]
 
         # 2. Claim ID
         claim_token_match = re.search(r"\b(CLM[-:_][A-Za-z0-9\-]+)\b", raw_text, re.IGNORECASE)
         if claim_token_match:
             candidates["claim_id"] = claim_token_match.group(1).replace(":", "-")
         else:
-            claim_match = re.search(r"(?:claim\s*(?:no|id|number|ref))[:\s]*([A-Za-z0-9\-_]+)", raw_text, re.IGNORECASE)
+            claim_match = re.search(r"(?:claim\s*(?:no|nor|id|number|ref))[:\s]*([A-Za-z0-9\-_]+)", raw_text, re.IGNORECASE)
             if claim_match:
                 candidates["claim_id"] = claim_match.group(1).strip()
 
