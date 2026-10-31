@@ -4,6 +4,11 @@ from src.config import settings
 
 client = TestClient(app)
 
+def test_ui_index_endpoint():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "Claims Leakage Detection Studio" in response.text
+
 def test_health_endpoint():
     response = client.get("/health")
     assert response.status_code == 200

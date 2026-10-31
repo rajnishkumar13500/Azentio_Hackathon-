@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azentio Claims Leakage Detection Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-lg">
+        🛡️
+      </div>
+      <div>
+        <h1 class="font-bold text-base tracking-tight text-white flex items-center gap-2">
+          Claims Leakage Detection Studio
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-medium">v1.0 Live</span>
+        </h1>
+        <p class="text-xs text-slate-400">Policy Validation & Overpayment Prevention Engine • Azentio Hackathon</p>
+      </div>
+    </div>
+
+    <!-- Live System Badges -->
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-slate-300">FastAPI Core: <span class="text-emerald-400 font-medium">Active</span></span>
+      </div>
+      <div class="flex items-center space-x-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
+        <span class="text-slate-400">Groq AI:</span>
+        <span id="groq-model-badge" class="text-cyan-400 font-mono font-medium">Loading...</span>
+      </div>
+      <a href="/docs" target="_blank" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1 shadow-sm">
+        <span>Swagger API</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- Scenario Switcher Banner -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Select Test Scenario / Claim</h2>
+          <p class="text-xs text-slate-500">Pick any synthetic claim to run live policy validation & financial leakage analysis</p>
+        </div>
+        <div class="flex flex-wrap gap-2" id="scenario-buttons">
+          <!-- Dynamically populated scenario tabs -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Claim Header Card -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Claimant & Patient</span>
+        <div class="mt-1 flex items-baseline justify-between">
+          <span id="patient-name" class="text-lg font-bold text-white">Loading...</span>
+          <span id="patient-age-rel" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300">SELF</span>
+        </div>
+        <div id="claim-id-label" class="text-xs font-mono text-cyan-400 mt-1">CLM-000</div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Diagnosis & ICD-10</span>
+        <div id="diagnosis-text" class="text-sm font-semibold text-white mt-1 truncate" title="Diagnosis">Loading...</div>
+        <div class="mt-1 flex items-center gap-2">
+          <span id="icd-code-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">ICD: -</span>
+          <span id="pre-existing-badge" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400">Tenure: -</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Hospital & Policy</span>
+        <div id="hospital-name" class="text-sm font-semibold text-white mt-1 truncate">Loading...</div>
+        <div id="policy-id-badge" class="text-xs font-mono text-emerald-400 mt-1">POL-000</div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Adjudication Verdict</span>
+        <div id="verdict-container" class="mt-1">
+          <span id="verdict-badge" class="text-sm font-bold px-3 py-1 rounded-md inline-block uppercase tracking-wider">
+            ANALYZING...
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations / Audit Warning Banner -->
+    <div id="recommendation-banner" class="rounded-xl p-4 border transition-all duration-300 hidden">
+      <div class="flex items-start space-x-3">
+        <div id="recommendation-icon" class="text-xl">⚠️</div>
+        <div class="flex-1">
+          <h3 id="recommendation-title" class="text-sm font-bold">Action Recommended</h3>
+          <p id="recommendation-detail" class="text-xs text-slate-300 mt-0.5"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Split Workspace: Line Items Adjudication (Left) & Settlement Waterfall (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left Column: Line Items Table (2 cols wide) -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+          <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <span>📋</span> Line-Item Level Adjudication
+              <span id="line-items-count" class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">0 lines</span>
+            </h3>
+            <span class="text-xs text-slate-400">Click any row to view applied formula</span>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/60 text-slate-400 uppercase font-medium border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Line</th>
+                  <th class="py-3 px-4">Category</th>
+                  <th class="py-3 px-4">Description</th>
+                  <th class="py-3 px-4 text-right">Claimed</th>
+                  <th class="py-3 px-4 text-right">Admissible</th>
+                  <th class="py-3 px-4 text-right">Discrepancy</th>
+                  <th class="py-3 px-4 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="line-items-tbody" class="divide-y divide-slate-800/60 font-mono">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Rules & Mathematical Proofs Section -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-3">
+          <h3 class="font-bold text-sm text-white flex items-center gap-2">
+            <span>⚖️</span> Rule Execution Audit Trail
+          </h3>
+          <p class="text-xs text-slate-400">Detailed breakdown of every policy clause and mathematical formula evaluated for this claim:</p>
+          <div id="rules-audit-list" class="space-y-2 mt-2">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Financial Waterfall & Leakage Cards (1 col wide) -->
+      <div class="space-y-4">
+
+        <!-- Prevented Financial Leakage Highlight Card -->
+        <div class="bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-xl p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              Financial Leakage Prevented
+            </span>
+            <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">Calculated Math</span>
+          </div>
+          <div class="flex items-baseline space-x-2">
+            <span class="text-3xl font-extrabold text-emerald-400 font-mono" id="leakage-prevented-amount">₹0.00</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Direct financial overpayment prevented by identifying room-rent caps, proportionate deductions, non-payable consumables, and overlooked co-pays/deductibles.
+          </p>
+
+          <!-- Suspected Anomaly Callout -->
+          <div id="suspected-leakage-card" class="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hidden">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-amber-400 flex items-center gap-1">
+                <span>⚠</span> Suspected Provider Leakage
+              </span>
+              <span class="text-xs text-amber-300 font-mono font-bold" id="suspected-leakage-amount">₹0.00</span>
+            </div>
+            <p class="text-[11px] text-amber-200/80 mt-1">
+              Statistical pricing outlier flagged against regional procedure benchmarks. Requires Medical Officer audit.
+            </p>
+          </div>
+        </div>
+
+        <!-- Settlement Waterfall Breakdown -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+          <h3 class="font-bold text-sm text-white flex items-center gap-2">
+            <span>💧</span> Settlement Financial Waterfall
+          </h3>
+          <p class="text-xs text-slate-400">Sequential insurance calculation pipeline:</p>
+
+          <div class="space-y-2.5 text-xs font-mono">
+            <div class="flex justify-between py-1 border-b border-slate-800 text-slate-300">
+              <span>Gross Claim Invoiced</span>
+              <span id="wf-gross" class="font-bold text-white">₹0.00</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+              <span>(-) Excluded Consumables</span>
+              <span id="wf-excluded">-₹0.00</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+              <span>(-) Room / ICU Rent Excess</span>
+              <span id="wf-sublimit">-₹0.00</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+              <span>(-) Proportionate Deduction</span>
+              <span id="wf-proportionate">-₹0.00</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+              <span>(-) Procedure Sub-Limit Cap</span>
+              <span id="wf-proc-cap">-₹0.00</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-800 text-amber-400">
+              <span>(-) Policy Deductible</span>
+              <span id="wf-deductible">-₹0.00</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-800 text-amber-400">
+              <span>(-) Policy Co-Payment</span>
+              <span id="wf-copay">-₹0.00</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+              <span>(-) Balance Sum Insured Cap</span>
+              <span id="wf-sum-insured-cap">-₹0.00</span>
+            </div>
+            <div class="flex justify-between py-2 text-sm border-t-2 border-slate-700 font-bold bg-slate-950/40 px-2 rounded">
+              <span class="text-emerald-400">Calculated Settlement</span>
+              <span id="wf-calculated-admissible" class="text-emerald-400">₹0.00</span>
+            </div>
+            <div class="flex justify-between py-1 text-slate-400 px-2">
+              <span>Proposed Settlement (Handler)</span>
+              <span id="wf-proposed" class="text-slate-300">₹0.00</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    let sampleClaims = [];
+    let activeClaimId = "CLM-001";
+
+    // Format currency to INR
+    function formatINR(val) {
+      if (val === undefined || val === null) return "₹0.00";
+      return "₹" + Number(val).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    // Initialize application
+    async function initApp() {
+      try {
+        // Fetch health & model status
+        const healthRes = await fetch("/health");
+        const health = await healthRes.json();
+        document.getElementById("groq-model-badge").innerText = health.groq_model || "Offline";
+
+        // Fetch sample claims
+        const claimsRes = await fetch("/api/v1/sample-claims");
+        sampleClaims = await claimsRes.json();
+
+        // Render scenario buttons
+        renderScenarioButtons();
+
+        // Load default claim
+        if (sampleClaims.length > 0) {
+          selectScenario(sampleClaims[0].claim_id);
+        }
+      } catch (err) {
+        console.error("Initialization error:", err);
+      }
+    }
+
+    function renderScenarioButtons() {
+      const container = document.getElementById("scenario-buttons");
+      container.innerHTML = "";
+      sampleClaims.forEach((claim, idx) => {
+        const btn = document.createElement("button");
+        btn.id = `btn-${claim.claim_id}`;
+        btn.className = `px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
+          claim.claim_id === activeClaimId
+            ? "bg-indigo-600 text-white border-indigo-500 shadow-sm"
+            : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+        }`;
+        btn.innerText = `${claim.claim_id}: Case ${idx + 1}`;
+        btn.title = claim.case_title || "";
+        btn.onclick = () => selectScenario(claim.claim_id);
+        container.appendChild(btn);
+      });
+    }
+
+    async function selectScenario(claimId) {
+      activeClaimId = claimId;
+      renderScenarioButtons();
+
+      const rawClaim = sampleClaims.find(c => c.claim_id === claimId);
+      if (!rawClaim) return;
+
+      // Update patient & incident cards
+      document.getElementById("patient-name").innerText = rawClaim.claimant.name;
+      document.getElementById("patient-age-rel").innerText = `${rawClaim.claimant.relationship_to_insured} (${rawClaim.claimant.age}y)`;
+      document.getElementById("claim-id-label").innerText = rawClaim.claim_id;
+      document.getElementById("diagnosis-text").innerText = rawClaim.incident_details.diagnosis_description;
+      document.getElementById("diagnosis-text").title = rawClaim.incident_details.diagnosis_description;
+      document.getElementById("icd-code-badge").innerText = `ICD: ${rawClaim.incident_details.icd10_code || 'N/A'}`;
+      document.getElementById("pre-existing-badge").innerText = `Tenure: ${rawClaim.incident_details.policy_tenure_months}mo ${rawClaim.incident_details.is_pre_existing ? '(PED)' : ''}`;
+      document.getElementById("hospital-name").innerText = rawClaim.incident_details.hospital_name || rawClaim.incident_details.hospital_id;
+      document.getElementById("policy-id-badge").innerText = rawClaim.policy_id;
+
+      // Call API to run live validation
+      try {
+        const res = await fetch(`/api/v1/validate-demo/${claimId}`, { method: "POST" });
+        const report = await res.json();
+        renderValidationReport(report);
+      } catch (err) {
+        console.error("Validation error:", err);
+      }
+    }
+
+    function renderValidationReport(report) {
+      const s = report.summary;
+
+      // Verdict badge
+      const verdictBadge = document.getElementById("verdict-badge");
+      if (s.overall_status === "REJECTED") {
+        verdictBadge.className = "text-sm font-bold px-3 py-1 rounded-md inline-block uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/40";
+        verdictBadge.innerText = "❌ REJECTED (100% LEAKAGE)";
+      } else if (s.overall_status === "FLAGGED_LEAKAGE") {
+        verdictBadge.className = "text-sm font-bold px-3 py-1 rounded-md inline-block uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/40";
+        verdictBadge.innerText = "⚠️ FLAGGED FINANCIAL LEAKAGE";
+      } else {
+        verdictBadge.className = "text-sm font-bold px-3 py-1 rounded-md inline-block uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+        verdictBadge.innerText = "✔ APPROVED SETTLEMENT";
+      }
+
+      // Recommendations Banner
+      const recBanner = document.getElementById("recommendation-banner");
+      if (report.recommendations && report.recommendations.length > 0) {
+        recBanner.classList.remove("hidden");
+        const recText = report.recommendations[0];
+        document.getElementById("recommendation-detail").innerText = recText;
+        if (s.overall_status === "REJECTED") {
+          recBanner.className = "rounded-xl p-4 border bg-rose-950/30 border-rose-500/30 text-rose-200";
+          document.getElementById("recommendation-icon").innerText = "🛑";
+          document.getElementById("recommendation-title").innerText = "Critical Policy Violation";
+        } else if (s.overall_status === "FLAGGED_LEAKAGE") {
+          recBanner.className = "rounded-xl p-4 border bg-amber-950/30 border-amber-500/30 text-amber-200";
+          document.getElementById("recommendation-icon").innerText = "⚠️";
+          document.getElementById("recommendation-title").innerText = "Settlement Correction Required";
+        } else {
+          recBanner.className = "rounded-xl p-4 border bg-emerald-950/30 border-emerald-500/30 text-emerald-200";
+          document.getElementById("recommendation-icon").innerText = "✔";
+          document.getElementById("recommendation-title").innerText = "Claim Verified & Approved";
+        }
+      } else {
+        recBanner.classList.add("hidden");
+      }
+
+      // Financial Waterfall
+      document.getElementById("wf-gross").innerText = formatINR(s.total_claimed);
+      document.getElementById("wf-excluded").innerText = s.total_excluded > 0 ? `-${formatINR(s.total_excluded)}` : "₹0.00";
+      document.getElementById("wf-sublimit").innerText = s.total_sublimit_deduction > 0 ? `-${formatINR(s.total_sublimit_deduction)}` : "₹0.00";
+      document.getElementById("wf-proportionate").innerText = s.total_proportionate_deduction > 0 ? `-${formatINR(s.total_proportionate_deduction)}` : "₹0.00";
+      document.getElementById("wf-proc-cap").innerText = s.procedure_cap_deduction > 0 ? `-${formatINR(s.procedure_cap_deduction)}` : "₹0.00";
+      document.getElementById("wf-deductible").innerText = s.deductible_applied > 0 ? `-${formatINR(s.deductible_applied)}` : "₹0.00";
+      document.getElementById("wf-copay").innerText = s.copay_applied > 0 ? `-${formatINR(s.copay_applied)}` : "₹0.00";
+      document.getElementById("wf-sum-insured-cap").innerText = s.balance_sum_insured_cap_deduction > 0 ? `-${formatINR(s.balance_sum_insured_cap_deduction)}` : "₹0.00";
+      document.getElementById("wf-calculated-admissible").innerText = formatINR(s.calculated_settlement);
+      document.getElementById("wf-proposed").innerText = formatINR(s.proposed_settlement);
+
+      // Leakage Highlights
+      document.getElementById("leakage-prevented-amount").innerText = formatINR(s.calculated_leakage_prevented);
+      const suspCard = document.getElementById("suspected-leakage-card");
+      if (s.suspected_leakage_total > 0) {
+        suspCard.classList.remove("hidden");
+        document.getElementById("suspected-leakage-amount").innerText = formatINR(s.suspected_leakage_total);
+      } else {
+        suspCard.classList.add("hidden");
+      }
+
+      // Line Items Table
+      const tbody = document.getElementById("line-items-tbody");
+      tbody.innerHTML = "";
+      document.getElementById("line-items-count").innerText = `${report.line_items.length} lines`;
+
+      if (report.line_items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-500 font-sans">No line items evaluated (Claim rejected at coverage level).</td></tr>`;
+      } else {
+        report.line_items.forEach(item => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-800/40 transition";
+
+          let statusBadgeClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
+          if (item.status === "EXCLUDED") statusBadgeClass = "bg-rose-500/20 text-rose-300 border-rose-500/30";
+          if (item.status === "BREACHED") statusBadgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/30";
+
+          tr.innerHTML = `
+            <td class="py-3 px-4 font-mono text-slate-400">${item.line_id}</td>
+            <td class="py-3 px-4 text-slate-300 font-sans text-xs">${item.category}</td>
+            <td class="py-3 px-4 text-white font-sans text-xs">
+              <div class="font-medium">${item.description}</div>
+              ${item.rules_applied.map(r => `<div class="text-[11px] text-slate-400 mt-0.5">• ${r.reason}</div>`).join('')}
+            </td>
+            <td class="py-3 px-4 text-right text-slate-200">${formatINR(item.claimed_amount)}</td>
+            <td class="py-3 px-4 text-right text-emerald-400 font-semibold">${formatINR(item.admissible_amount)}</td>
+            <td class="py-3 px-4 text-right ${item.discrepancy_amount > 0 ? 'text-rose-400 font-bold' : 'text-slate-600'}">
+              ${item.discrepancy_amount > 0 ? formatINR(item.discrepancy_amount) : '-'}
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="text-[10px] font-sans px-2 py-0.5 rounded-full border ${statusBadgeClass} uppercase font-semibold">
+                ${item.status}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Rules Audit Trail
+      const rulesList = document.getElementById("rules-audit-list");
+      rulesList.innerHTML = "";
+      const allRules = [...report.claim_level_rules, ...report.line_items.flatMap(i => i.rules_applied)];
+      
+      allRules.forEach(r => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "p-3 rounded-lg bg-slate-950/50 border border-slate-800 text-xs space-y-1";
+        
+        let badgeColor = "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
+        if (r.status === "FAILED" || r.status === "EXCLUDED") badgeColor = "text-rose-400 border-rose-500/30 bg-rose-500/10";
+        if (r.status === "BREACHED" || r.status === "APPLIED" || r.status === "ANOMALY_SUSPECTED") badgeColor = "text-amber-400 border-amber-500/30 bg-amber-500/10";
+
+        itemDiv.innerHTML = `
+          <div class="flex items-center justify-between font-mono">
+            <span class="text-cyan-400 font-bold">${r.rule_id}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded border ${badgeColor} font-sans uppercase font-medium">${r.status}</span>
+          </div>
+          <div class="text-white font-medium font-sans">${r.rule_name}</div>
+          <div class="text-slate-300 font-sans">${r.reason}</div>
+          ${r.formula_applied ? `<div class="text-[11px] font-mono text-slate-400 bg-slate-900 p-1.5 rounded mt-1 border border-slate-800">Formula: ${r.formula_applied}</div>` : ''}
+        `;
+        rulesList.appendChild(itemDiv);
+      });
+    }
+
+    // Launch on load
+    window.onload = initApp;
+  </script>
+</body>
+</html>

@@ -17,9 +17,12 @@ class Settings:
     GROQ_BASE_URL: str = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
     
     # File Paths
+    BASE_DIR: Path = BASE_DIR
+    STATIC_DIR: Path = BASE_DIR / "static"
     DATA_DIR: Path = BASE_DIR / "data"
     POLICIES_FILE: Path = DATA_DIR / "sample_policies.json"
     CATALOG_FILE: Path = DATA_DIR / "medical_catalog.json"
     SYNTHETIC_CLAIMS_FILE: Path = DATA_DIR / "synthetic_claims.json"
 
 settings = Settings()
+

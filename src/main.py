@@ -16,6 +16,7 @@ if sys.platform == "win32":
 
 from typing import Dict, Any, Optional
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from rich.console import Console
 from rich.table import Table
@@ -48,6 +49,13 @@ def load_data():
     with open(settings.SYNTHETIC_CLAIMS_FILE, "r", encoding="utf-8") as f:
         claims_data = json.load(f)
     return policies_data, claims_data
+
+@app.get("/", include_in_schema=False)
+def serve_ui():
+    index_path = settings.STATIC_DIR / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return {"message": "Claims Policy Validation Microservice is Running"}
 
 @app.get("/health")
 def health_check():
