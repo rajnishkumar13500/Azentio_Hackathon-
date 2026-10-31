@@ -101,3 +101,4 @@ def test_reconciliation_discharge_date_variance(sample_claim_record, discharge_s
     assert date_diff.document_value == "2026-08-13"
     assert date_diff.severity == "HIGH"
     assert "Discharge Date: 2026-08-13" in date_diff.source_citation.raw_quote
+

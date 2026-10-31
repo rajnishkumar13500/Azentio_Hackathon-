@@ -62,4 +62,6 @@ class ValidationReport(BaseModel):
     claim_level_rules: List[RuleResult] = Field(default_factory=list)
     recommendations: List[str] = Field(default_factory=list)
     duplicate_findings: List[Dict[str, Any]] = Field(default_factory=list)
+    policy_terms: Optional[Dict[str, Any]] = None
+    adjudication: Optional[Dict[str, Any]] = None
 

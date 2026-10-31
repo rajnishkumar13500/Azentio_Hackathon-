@@ -400,11 +400,31 @@ def get_claim_by_id(claim_id: str):
 def adjudicate_claim(claim_id: str):
     claim = claims_repository.get_by_id(claim_id)
     if not claim:
-        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
-    policies_data, _ = load_data()
+        policies_data, claims_data = load_data()
+        raw = next((c for c in claims_data if c["claim_id"] == claim_id), None)
+        if not raw:
+            step2_claim_file = settings.DATA_DIR / "jury_examples" / "Step_2_Document_Analysis" / "claim_for_document_audit.json"
+            if step2_claim_file.exists():
+                with open(step2_claim_file, "r", encoding="utf-8") as f:
+                    s2_claims = json.load(f)
+                raw = next((c for c in s2_claims if c["claim_id"] == claim_id), None)
+        if not raw:
+            raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
+        claim = Claim(**raw)
+    else:
+        policies_data, _ = load_data()
+
     policy_dict = policies_data.get(claim.policy_id, policies_data.get("POL-COMPREHENSIVE-01"))
     policy = Policy(**policy_dict)
-    return validation_engine.validate_claim(claim, policy)
+    report = validation_engine.validate_claim(claim, policy)
+    report.policy_terms = policy_dict
+    report.adjudication = _adjudications.get(claim_id, {
+        "status": "PENDING_REVIEW" if report.summary.overall_status in ["REJECTED", "FLAGGED_LEAKAGE"] else "AUTO_APPROVED",
+        "adjudicated_by": None,
+        "notes": "",
+        "timestamp": None
+    })
+    return report
 
 @app.get("/api/v1/claims/{claim_id}/report")
 @app.get("/api/claims/{claim_id}/report")
@@ -565,6 +585,105 @@ def get_claim_document_evidence(claim_id: str, doc_name: Optional[str] = None):
         content = f.read()
 
     return document_analyzer.compare(claim, doc_filename, content)
+
+class InvestigationNoteRequest(BaseModel):
+    notes: str
+    adjudicated_by: Optional[str] = "Claims Analyst"
+
+@app.post("/api/v1/investigation/{claim_id}/notes")
+@app.post("/api/investigation/{claim_id}/notes")
+def save_investigation_note(claim_id: str, req: InvestigationNoteRequest):
+    """
+    Level 2 Step 3: Allows the claims analyst to add and update persistent investigation notes
+    and evidence commentary without closing or modifying the claim settlement status.
+    """
+    current = _adjudications.get(claim_id, {
+        "status": "PENDING_REVIEW",
+        "adjudicated_by": req.adjudicated_by or "Claims Analyst",
+        "adjusted_amount": None,
+        "notes": "",
+        "timestamp": None
+    })
+    current["notes"] = req.notes
+    current["adjudicated_by"] = req.adjudicated_by or current.get("adjudicated_by") or "Claims Analyst"
+    current["timestamp"] = datetime.utcnow().isoformat()
+    _adjudications[claim_id] = current
+    return {
+        "status": "SUCCESS",
+        "claim_id": claim_id,
+        "message": "Investigation note saved successfully.",
+        "adjudication": current
+    }
+
+@app.get("/api/v1/investigation/documents/{document_name}")
+@app.get("/api/investigation/documents/{document_name}")
+def get_raw_supporting_document(document_name: str):
+    """
+    Level 2 Step 3: Returns the raw text of the supporting document so the analyst
+    can inspect each piece of supporting evidence directly.
+    """
+    search_dirs = [
+        settings.DATA_DIR / "jury_examples" / "Step_3_Claims_Investigation_Workspace",
+        settings.DATA_DIR / "jury_examples" / "Step_2_Document_Analysis",
+        settings.DATA_DIR / "samples",
+    ]
+    for d in search_dirs:
+        p = d / document_name
+        if p.exists() and p.is_file():
+            with open(p, "r", encoding="utf-8", errors="replace") as f:
+                content = f.read()
+            return {
+                "document_name": document_name,
+                "file_path": str(p),
+                "content": content,
+                "line_count": len(content.splitlines()),
+                "size_bytes": len(content.encode("utf-8")),
+            }
+    raise HTTPException(status_code=404, detail=f"Supporting document '{document_name}' not found.")
+
+@app.get("/api/v1/investigation/{claim_id}/workspace")
+@app.get("/api/investigation/{claim_id}/workspace")
+def get_investigation_workspace(claim_id: str):
+    """
+    Level 2 Step 3: Consolidated Claims Investigation Workspace payload containing:
+    1. Original Claim & Line Items
+    2. Relevant Policy Terms & Sub-Limits
+    3. Related Claims (Cross-Claim Correlations)
+    4. Extracted Document Evidence & Discrepancies
+    5. Calculated Leakage Amount & Arithmetic Proof
+    6. Analyst Notes & Evidence Audit History
+    """
+    report = adjudicate_claim(claim_id)
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        policies_data, claims_data = load_data()
+        raw = next((c for c in claims_data if c["claim_id"] == claim_id), None)
+        claim = Claim(**raw) if raw else None
+
+    # Get correlation report
+    engine = CrossClaimCorrelationEngine(claims_repository.get_all() or ([claim] if claim else []))
+    correlations = engine.correlate(claim) if claim else None
+
+    # Get document evidence report
+    try:
+        doc_evidence = get_claim_document_evidence(claim_id)
+    except Exception:
+        doc_evidence = None
+
+    return {
+        "claim_id": claim_id,
+        "original_claim": claim,
+        "policy_terms": report.policy_terms,
+        "validation_report": report,
+        "correlations": correlations,
+        "document_evidence": doc_evidence,
+        "adjudication": report.adjudication,
+        "available_documents": [
+            "hospital_tax_invoice_saket.txt",
+            "clinical_discharge_summary.txt",
+            "repair_estimate_motor.txt"
+        ]
+    }
 
 @app.post("/api/v1/ingest/upload", response_model=IngestionResult)
 async def upload_claims_file(file: UploadFile = File(...)):

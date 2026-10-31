@@ -25,3 +25,4 @@ Item # | Type   | Part / Labor Description                    | Qty | Rate   | T
 TOTAL REPAIR ESTIMATE AUTHORIZED: INR 49,700.00
 Depreciation Applicable on Plastic Parts: 50% (Per Policy Schedule)
 ================================================================================
+

@@ -1,0 +1,97 @@
+[
+  {
+    "claim_id": "CLM-DOC-AUDIT-001",
+    "case_title": "Claim with Discrepancies vs Hospital Supporting Documents",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-89211",
+      "name": "Vivek Singhania",
+      "relationship_to_insured": "SELF",
+      "age": 44
+    },
+    "incident_details": {
+      "admission_date": "2026-08-10T10:30:00Z",
+      "discharge_date": "2026-08-14T14:00:00Z",
+      "hospital_id": "HOSP-MAX-DEL",
+      "hospital_name": "Max Super Speciality Hospital Saket",
+      "icd10_code": "K35.8",
+      "diagnosis_description": "Acute Appendicitis with Localized Peritonitis",
+      "proposed_settlement_amount": 145000.0,
+      "invoice_number": "INV-MAX-2026-881",
+      "invoice_date": "2026-08-16"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-DELUXE",
+        "description": "Single Deluxe Room Charges (4 days)",
+        "quantity": 4,
+        "unit_price": 7500.0,
+        "total_amount": 30000.0,
+        "service_date": "2026-08-10"
+      },
+      {
+        "line_id": "L2",
+        "category": "SURGERY",
+        "item_code": "SURG-APP",
+        "description": "Laparoscopic Appendectomy Surgeon Fee",
+        "quantity": 1,
+        "unit_price": 80000.0,
+        "total_amount": 80000.0,
+        "service_date": "2026-08-11"
+      },
+      {
+        "line_id": "L3",
+        "category": "CONSULTATION",
+        "item_code": "DOC-VISIT",
+        "description": "Daily Doctor Visit / Consultation",
+        "quantity": 4,
+        "unit_price": 3000.0,
+        "total_amount": 12000.0,
+        "service_date": "2026-08-11"
+      },
+      {
+        "line_id": "L4",
+        "category": "CONSUMABLE",
+        "item_code": "PPE-PACK",
+        "description": "Disposable PPE Kits & Face Shields",
+        "quantity": 4,
+        "unit_price": 1200.0,
+        "total_amount": 4800.0,
+        "service_date": "2026-08-10"
+      },
+      {
+        "line_id": "L5",
+        "category": "CONSUMABLE",
+        "item_code": "GLOVES-STERILE",
+        "description": "Sterile Examination Gloves & Swabs",
+        "quantity": 2,
+        "unit_price": 850.0,
+        "total_amount": 1700.0,
+        "service_date": "2026-08-10"
+      },
+      {
+        "line_id": "L6",
+        "category": "INVESTIGATION",
+        "item_code": "DIAG-USG",
+        "description": "Pre-Operative Ultrasound & Blood Panel",
+        "quantity": 1,
+        "unit_price": 6500.0,
+        "total_amount": 6500.0,
+        "service_date": "2026-08-10"
+      },
+      {
+        "line_id": "L7",
+        "category": "INVESTIGATION",
+        "item_code": "REHAB-SESSION",
+        "description": "Post-Op Physical Rehabilitation & Mobility Therapy",
+        "quantity": 1,
+        "unit_price": 10000.0,
+        "total_amount": 10000.0,
+        "service_date": "2026-08-13"
+      }
+    ],
+    "claim_history": []
+  }
+]

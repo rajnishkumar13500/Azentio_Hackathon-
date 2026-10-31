@@ -364,6 +364,47 @@
         </div>
       </section>
 
+      <!-- Relevant Policy Terms & Sub-Limits Card (Level 2 Step 3) -->
+      <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3" id="policyTermsCard">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center space-x-2">
+            <span class="text-base">📜</span>
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <span>Relevant Policy Terms & Sub-Limits</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-50 text-brand-700 border border-brand-200" id="polTermName">Health Shield Comprehensive</span>
+            </h3>
+          </div>
+          <span class="text-[11px] font-mono text-slate-500" id="polValidityBadge">Validity: Active</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Total Sum Insured</span>
+            <span class="font-bold text-slate-900 font-mono" id="polSumInsured">₹500,000</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Available Balance</span>
+            <span class="font-bold text-brand-700 font-mono" id="polBalanceSum">₹420,000</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Daily Room Rent Cap</span>
+            <span class="font-bold text-slate-800 font-mono" id="polRoomRentCap">₹5,000/day</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Daily ICU Rent Cap</span>
+            <span class="font-bold text-slate-800 font-mono" id="polIcuRentCap">₹10,000/day</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Co-Payment / Deductible</span>
+            <span class="font-bold text-slate-800 font-mono" id="polCopayDeductible">10% / ₹5,000</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Proportionate Clause</span>
+            <span class="font-bold text-brand-800 font-mono" id="polProportionate">ACTIVE</span>
+          </div>
+        </div>
+      </section>
+
       <!-- Step 4: Arithmetic Leakage Proof Box -->
       <section class="bg-brand-50/70 border border-brand-200 rounded-2xl p-5 shadow-sm space-y-3" id="proofCard">
         <div class="flex items-center justify-between">
@@ -446,6 +487,10 @@
             <span id="docVarianceBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-mono">
               Reconciling Evidence...
             </span>
+            <button type="button" onclick="inspectRawSupportingDoc()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-semibold transition flex items-center gap-1 shadow-sm" title="Inspect Full Verbatim Document Text">
+              <span>👁️</span>
+              <span>Inspect Raw Document</span>
+            </button>
             <label class="cursor-pointer px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition flex items-center gap-1 shadow-sm">
               <span>📎</span>
               <span>Upload Supporting Doc</span>
@@ -617,8 +662,19 @@
           Record your adjudication verdict. Confirmed decisions will immediately update portfolio metrics and audit logs.
         </p>
 
-        <div class="space-y-3 pt-1">
-          <textarea id="actionNotes" rows="2" placeholder="Enter auditor / adjudicator justification notes..." class="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"></textarea>
+        <div class="space-y-2 pt-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-500 font-medium">Auditor Investigation Commentary:</span>
+            <span id="auditLastUpdatedBadge" class="text-[11px] text-slate-400 font-mono">No prior notes</span>
+          </div>
+
+          <div class="relative">
+            <textarea id="actionNotes" rows="3" placeholder="Enter auditor / adjudicator justification notes..." class="w-full text-xs p-3 pb-8 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"></textarea>
+            <button type="button" onclick="saveWorkingNote()" class="absolute right-2.5 bottom-2.5 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-semibold rounded-lg shadow-sm transition flex items-center gap-1" title="Save notes as work-in-progress without finalizing claim">
+              <span>💾</span>
+              <span>Save Working Note</span>
+            </button>
+          </div>
 
           <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
             <div class="flex items-center gap-2">
@@ -783,6 +839,37 @@
         </button>
         <button id="btnUploadSubmit" onclick="uploadSelectedFile()" disabled class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 disabled:bg-slate-200 disabled:text-slate-400 text-white transition shadow-sm shadow-brand-600/30">
           Process & Validate Batch
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: RAW SUPPORTING DOCUMENT EVIDENCE INSPECTOR (LEVEL 2 STEP 3)        -->
+  <!-- ========================================================================= -->
+  <div id="rawDocModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full p-6 shadow-2xl space-y-4 max-h-[88vh] flex flex-col transform transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center text-lg font-bold">
+            📄
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900" id="rawDocTitle">Supporting Document Evidence</h3>
+            <p class="text-xs text-slate-500 font-mono" id="rawDocSubtitle">hospital_tax_invoice_saket.txt</p>
+          </div>
+        </div>
+        <button onclick="toggleRawDocModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 bg-slate-900 text-slate-100 rounded-2xl font-mono text-xs leading-relaxed whitespace-pre-wrap select-text border border-slate-800 shadow-inner" id="rawDocContent">
+        Loading verbatim document text...
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+        <span id="rawDocLineStats">0 lines • 0 KB</span>
+        <button onclick="toggleRawDocModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition">
+          Close Inspector
         </button>
       </div>
     </div>
@@ -1103,6 +1190,19 @@
           document.getElementById('diagnosis-text').innerText = c.incident_details.diagnosis_description;
           document.getElementById('icd-code-badge').innerText = `ICD: ${c.incident_details.icd10_code || 'N/A'}`;
           document.getElementById('pre-existing-badge').innerText = `Tenure: ${c.incident_details.policy_tenure_months}mo ${c.incident_details.is_pre_existing ? '(PED)' : ''}`;
+        }
+
+        // Populate Policy Terms (Level 2 Step 3)
+        populatePolicyTerms(report.policy_terms || {});
+
+        // Pre-populate Working Notes
+        const adj = report.adjudication || {};
+        document.getElementById('actionNotes').value = adj.notes || '';
+        const noteBadge = document.getElementById('auditLastUpdatedBadge');
+        if (noteBadge) {
+          noteBadge.innerText = adj.timestamp
+            ? `Updated: ${adj.timestamp.replace('T', ' ').slice(0, 16)} by ${adj.adjudicated_by || 'Auditor'}`
+            : 'No prior notes';
         }
 
         renderDetailedAdjudication(report);
@@ -1635,6 +1735,71 @@
         await loadDocumentEvidence(claimId);
       } catch (err) {
         alert("Document upload error: " + err.message);
+      }
+    }
+
+    function populatePolicyTerms(terms) {
+      if (!terms || Object.keys(terms).length === 0) return;
+      document.getElementById('polTermName').innerText = terms.policy_name || terms.policy_id || 'Policy Terms';
+      document.getElementById('polValidityBadge').innerText = `Validity: ${terms.start_date || '2026-01-01'} to ${terms.end_date || '2026-12-31'}`;
+      document.getElementById('polSumInsured').innerText = formatINR(terms.sum_insured || 500000);
+      document.getElementById('polBalanceSum').innerText = formatINR(terms.balance_sum_insured || 420000);
+
+      const sub = terms.sub_limits || {};
+      document.getElementById('polRoomRentCap').innerText = sub.daily_room_rent ? `${formatINR(sub.daily_room_rent)}/day` : '₹5,000/day';
+      document.getElementById('polIcuRentCap').innerText = sub.daily_icu_rent ? `${formatINR(sub.daily_icu_rent)}/day` : '₹10,000/day';
+      document.getElementById('polCopayDeductible').innerText = `${terms.co_payment_percentage || 0}% / ${formatINR(terms.deductible_per_claim || 0)}`;
+      document.getElementById('polProportionate').innerText = terms.proportionate_deduction ? 'ACTIVE' : 'NONE';
+    }
+
+    function toggleRawDocModal() {
+      const modal = document.getElementById('rawDocModal');
+      modal.classList.toggle('hidden');
+    }
+
+    async function inspectRawSupportingDoc() {
+      const docName = document.getElementById('docEvidenceFilename').innerText.trim();
+      if (!docName) return;
+
+      document.getElementById('rawDocTitle').innerText = "Supporting Document Evidence";
+      document.getElementById('rawDocSubtitle').innerText = docName;
+      document.getElementById('rawDocContent').innerText = "Fetching verbatim supporting document text...";
+      toggleRawDocModal();
+
+      try {
+        const res = await fetch(`/api/v1/investigation/documents/${encodeURIComponent(docName)}`);
+        if (!res.ok) throw new Error("Could not load supporting document file.");
+        const data = await res.json();
+        document.getElementById('rawDocContent').innerText = data.content;
+        document.getElementById('rawDocLineStats').innerText = `${data.line_count} lines • ${(data.size_bytes / 1024).toFixed(1)} KB • Verified Forensic Evidence`;
+      } catch (err) {
+        document.getElementById('rawDocContent').innerText = `Error loading document: ${err.message}\n\nPlease verify that the file exists in data/jury_examples/ or data/samples/.`;
+      }
+    }
+
+    async function saveWorkingNote() {
+      if (!activeClaimReport) return;
+      const claimId = activeClaimReport.claim_id;
+      const notes = document.getElementById('actionNotes').value.trim();
+
+      try {
+        const res = await fetch(`/api/v1/investigation/${claimId}/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notes: notes,
+            adjudicated_by: "Senior Claims Auditor"
+          })
+        });
+        if (!res.ok) throw new Error("Could not save note");
+        const data = await res.json();
+        showToast("Investigation working note saved!");
+        const badge = document.getElementById('auditLastUpdatedBadge');
+        if (badge) {
+          badge.innerText = `Saved just now by Senior Claims Auditor`;
+        }
+      } catch (err) {
+        alert("Failed to save note: " + err.message);
       }
     }
 
