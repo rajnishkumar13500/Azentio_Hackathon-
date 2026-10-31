@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from src.main import app
+from src.config import settings
 
 client = TestClient(app)
 
@@ -8,7 +9,7 @@ def test_health_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
-    assert data["groq_model"] == "qwen-2.5-32b"
+    assert data["groq_model"] == settings.GROQ_MODEL
 
 def test_sample_claims_endpoint():
     response = client.get("/api/v1/sample-claims")
@@ -23,3 +24,4 @@ def test_validate_demo_endpoint():
     assert report["claim_id"] == "CLM-001"
     assert report["summary"]["overall_status"] == "FLAGGED_LEAKAGE"
     assert report["summary"]["calculated_leakage_prevented"] > 40000.0
+
