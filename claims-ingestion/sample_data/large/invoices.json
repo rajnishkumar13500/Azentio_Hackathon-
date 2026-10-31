@@ -1,0 +1,906 @@
+{
+  "invoices": [
+    {
+      "invoice_id": "INV-L-001",
+      "claim_id": "CLM-2001",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0001",
+      "invoice_date": "2024-05-11",
+      "total_amount": "15500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-002",
+      "claim_id": "CLM-2002",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0002",
+      "invoice_date": "2024-05-11",
+      "total_amount": "19000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-003",
+      "claim_id": "CLM-2003",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0003",
+      "invoice_date": "2024-05-11",
+      "total_amount": "22500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-004",
+      "claim_id": "CLM-2004",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0004",
+      "invoice_date": "2024-05-11",
+      "total_amount": "26000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-005",
+      "claim_id": "CLM-2005",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0005",
+      "invoice_date": "2024-05-11",
+      "total_amount": "29500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-006",
+      "claim_id": "CLM-2006",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0006",
+      "invoice_date": "2024-05-11",
+      "total_amount": "33000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-007",
+      "claim_id": "CLM-2007",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0007",
+      "invoice_date": "2024-05-11",
+      "total_amount": "36500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-008",
+      "claim_id": "CLM-2008",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0008",
+      "invoice_date": "2024-05-11",
+      "total_amount": "40000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-009",
+      "claim_id": "CLM-2009",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0009",
+      "invoice_date": "2024-05-11",
+      "total_amount": "43500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-010",
+      "claim_id": "CLM-2010",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0010",
+      "invoice_date": "2024-05-11",
+      "total_amount": "47000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-011",
+      "claim_id": "CLM-2011",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0011",
+      "invoice_date": "2024-05-11",
+      "total_amount": "50500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-012",
+      "claim_id": "CLM-2012",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0012",
+      "invoice_date": "2024-05-11",
+      "total_amount": "54000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-013",
+      "claim_id": "CLM-2013",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0013",
+      "invoice_date": "2024-05-11",
+      "total_amount": "57500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-014",
+      "claim_id": "CLM-2014",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0014",
+      "invoice_date": "2024-05-11",
+      "total_amount": "61000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-015",
+      "claim_id": "CLM-2015",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0015",
+      "invoice_date": "2024-05-11",
+      "total_amount": "64500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-016",
+      "claim_id": "CLM-2016",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0016",
+      "invoice_date": "2024-05-11",
+      "total_amount": "68000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-017",
+      "claim_id": "CLM-2017",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0017",
+      "invoice_date": "2024-05-11",
+      "total_amount": "71500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-018",
+      "claim_id": "CLM-2018",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0018",
+      "invoice_date": "2024-05-11",
+      "total_amount": "75000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-019",
+      "claim_id": "CLM-2019",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0019",
+      "invoice_date": "2024-05-11",
+      "total_amount": "78500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-020",
+      "claim_id": "CLM-2020",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0020",
+      "invoice_date": "2024-05-11",
+      "total_amount": "82000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-021",
+      "claim_id": "CLM-2021",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0021",
+      "invoice_date": "2024-05-11",
+      "total_amount": "85500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-022",
+      "claim_id": "CLM-2022",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0022",
+      "invoice_date": "2024-05-11",
+      "total_amount": "89000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-023",
+      "claim_id": "CLM-2023",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0023",
+      "invoice_date": "2024-05-11",
+      "total_amount": "92500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-024",
+      "claim_id": "CLM-2024",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0024",
+      "invoice_date": "2024-05-11",
+      "total_amount": "96000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-025",
+      "claim_id": "CLM-2025",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0025",
+      "invoice_date": "2024-05-11",
+      "total_amount": "99500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-026",
+      "claim_id": "CLM-2026",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0026",
+      "invoice_date": "2024-05-11",
+      "total_amount": "103000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-027",
+      "claim_id": "CLM-2027",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0027",
+      "invoice_date": "2024-05-11",
+      "total_amount": "106500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-028",
+      "claim_id": "CLM-2028",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0028",
+      "invoice_date": "2024-05-11",
+      "total_amount": "110000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-029",
+      "claim_id": "CLM-2029",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0029",
+      "invoice_date": "2024-05-11",
+      "total_amount": "113500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-030",
+      "claim_id": "CLM-2030",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0030",
+      "invoice_date": "2024-05-11",
+      "total_amount": "117000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-031",
+      "claim_id": "CLM-2031",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0031",
+      "invoice_date": "2024-05-11",
+      "total_amount": "120500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-032",
+      "claim_id": "CLM-2032",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0032",
+      "invoice_date": "2024-05-11",
+      "total_amount": "124000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-033",
+      "claim_id": "CLM-2033",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0033",
+      "invoice_date": "2024-05-11",
+      "total_amount": "127500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-034",
+      "claim_id": "CLM-2034",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0034",
+      "invoice_date": "2024-05-11",
+      "total_amount": "131000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-035",
+      "claim_id": "CLM-2035",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0035",
+      "invoice_date": "2024-05-11",
+      "total_amount": "134500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-036",
+      "claim_id": "CLM-2036",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0036",
+      "invoice_date": "2024-05-11",
+      "total_amount": "138000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-037",
+      "claim_id": "CLM-2037",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0037",
+      "invoice_date": "2024-05-11",
+      "total_amount": "141500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-038",
+      "claim_id": "CLM-2038",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0038",
+      "invoice_date": "2024-05-11",
+      "total_amount": "145000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-039",
+      "claim_id": "CLM-2039",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0039",
+      "invoice_date": "2024-05-11",
+      "total_amount": "148500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-040",
+      "claim_id": "CLM-2040",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0040",
+      "invoice_date": "2024-05-11",
+      "total_amount": "152000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-041",
+      "claim_id": "CLM-2041",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0041",
+      "invoice_date": "2024-05-11",
+      "total_amount": "155500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-042",
+      "claim_id": "CLM-2042",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0042",
+      "invoice_date": "2024-05-11",
+      "total_amount": "159000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-043",
+      "claim_id": "CLM-2043",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0043",
+      "invoice_date": "2024-05-11",
+      "total_amount": "162500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-044",
+      "claim_id": "CLM-2044",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0044",
+      "invoice_date": "2024-05-11",
+      "total_amount": "166000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-045",
+      "claim_id": "CLM-2045",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0045",
+      "invoice_date": "2024-05-11",
+      "total_amount": "169500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-046",
+      "claim_id": "CLM-2046",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0046",
+      "invoice_date": "2024-05-11",
+      "total_amount": "173000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-047",
+      "claim_id": "CLM-2047",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0047",
+      "invoice_date": "2024-05-11",
+      "total_amount": "176500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-048",
+      "claim_id": "CLM-2048",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0048",
+      "invoice_date": "2024-05-11",
+      "total_amount": "180000.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-049",
+      "claim_id": "CLM-2049",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0049",
+      "invoice_date": "2024-05-11",
+      "total_amount": "183500.00",
+      "currency": "INR"
+    },
+    {
+      "invoice_id": "INV-L-050",
+      "claim_id": "CLM-2050",
+      "provider_id": "PROV-HOSP-01",
+      "invoice_reference": "BILL-L-0050",
+      "invoice_date": "2024-05-11",
+      "total_amount": "187000.00",
+      "currency": "INR"
+    }
+  ],
+  "line_items": [
+    {
+      "line_item_id": "LIT-L-001",
+      "invoice_id": "INV-L-001",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 1",
+      "quantity": "1",
+      "unit_price": "15500.00",
+      "line_amount": "15500.00"
+    },
+    {
+      "line_item_id": "LIT-L-002",
+      "invoice_id": "INV-L-002",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 2",
+      "quantity": "1",
+      "unit_price": "19000.00",
+      "line_amount": "19000.00"
+    },
+    {
+      "line_item_id": "LIT-L-003",
+      "invoice_id": "INV-L-003",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 3",
+      "quantity": "1",
+      "unit_price": "22500.00",
+      "line_amount": "22500.00"
+    },
+    {
+      "line_item_id": "LIT-L-004",
+      "invoice_id": "INV-L-004",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 4",
+      "quantity": "1",
+      "unit_price": "26000.00",
+      "line_amount": "26000.00"
+    },
+    {
+      "line_item_id": "LIT-L-005",
+      "invoice_id": "INV-L-005",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 5",
+      "quantity": "1",
+      "unit_price": "29500.00",
+      "line_amount": "29500.00"
+    },
+    {
+      "line_item_id": "LIT-L-006",
+      "invoice_id": "INV-L-006",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 6",
+      "quantity": "1",
+      "unit_price": "33000.00",
+      "line_amount": "33000.00"
+    },
+    {
+      "line_item_id": "LIT-L-007",
+      "invoice_id": "INV-L-007",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 7",
+      "quantity": "1",
+      "unit_price": "36500.00",
+      "line_amount": "36500.00"
+    },
+    {
+      "line_item_id": "LIT-L-008",
+      "invoice_id": "INV-L-008",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 8",
+      "quantity": "1",
+      "unit_price": "40000.00",
+      "line_amount": "40000.00"
+    },
+    {
+      "line_item_id": "LIT-L-009",
+      "invoice_id": "INV-L-009",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 9",
+      "quantity": "1",
+      "unit_price": "43500.00",
+      "line_amount": "43500.00"
+    },
+    {
+      "line_item_id": "LIT-L-010",
+      "invoice_id": "INV-L-010",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 10",
+      "quantity": "1",
+      "unit_price": "47000.00",
+      "line_amount": "47000.00"
+    },
+    {
+      "line_item_id": "LIT-L-011",
+      "invoice_id": "INV-L-011",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 11",
+      "quantity": "1",
+      "unit_price": "50500.00",
+      "line_amount": "50500.00"
+    },
+    {
+      "line_item_id": "LIT-L-012",
+      "invoice_id": "INV-L-012",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 12",
+      "quantity": "1",
+      "unit_price": "54000.00",
+      "line_amount": "54000.00"
+    },
+    {
+      "line_item_id": "LIT-L-013",
+      "invoice_id": "INV-L-013",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 13",
+      "quantity": "1",
+      "unit_price": "57500.00",
+      "line_amount": "57500.00"
+    },
+    {
+      "line_item_id": "LIT-L-014",
+      "invoice_id": "INV-L-014",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 14",
+      "quantity": "1",
+      "unit_price": "61000.00",
+      "line_amount": "61000.00"
+    },
+    {
+      "line_item_id": "LIT-L-015",
+      "invoice_id": "INV-L-015",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 15",
+      "quantity": "1",
+      "unit_price": "64500.00",
+      "line_amount": "64500.00"
+    },
+    {
+      "line_item_id": "LIT-L-016",
+      "invoice_id": "INV-L-016",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 16",
+      "quantity": "1",
+      "unit_price": "68000.00",
+      "line_amount": "68000.00"
+    },
+    {
+      "line_item_id": "LIT-L-017",
+      "invoice_id": "INV-L-017",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 17",
+      "quantity": "1",
+      "unit_price": "71500.00",
+      "line_amount": "71500.00"
+    },
+    {
+      "line_item_id": "LIT-L-018",
+      "invoice_id": "INV-L-018",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 18",
+      "quantity": "1",
+      "unit_price": "75000.00",
+      "line_amount": "75000.00"
+    },
+    {
+      "line_item_id": "LIT-L-019",
+      "invoice_id": "INV-L-019",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 19",
+      "quantity": "1",
+      "unit_price": "78500.00",
+      "line_amount": "78500.00"
+    },
+    {
+      "line_item_id": "LIT-L-020",
+      "invoice_id": "INV-L-020",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 20",
+      "quantity": "1",
+      "unit_price": "82000.00",
+      "line_amount": "82000.00"
+    },
+    {
+      "line_item_id": "LIT-L-021",
+      "invoice_id": "INV-L-021",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 21",
+      "quantity": "1",
+      "unit_price": "85500.00",
+      "line_amount": "85500.00"
+    },
+    {
+      "line_item_id": "LIT-L-022",
+      "invoice_id": "INV-L-022",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 22",
+      "quantity": "1",
+      "unit_price": "89000.00",
+      "line_amount": "89000.00"
+    },
+    {
+      "line_item_id": "LIT-L-023",
+      "invoice_id": "INV-L-023",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 23",
+      "quantity": "1",
+      "unit_price": "92500.00",
+      "line_amount": "92500.00"
+    },
+    {
+      "line_item_id": "LIT-L-024",
+      "invoice_id": "INV-L-024",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 24",
+      "quantity": "1",
+      "unit_price": "96000.00",
+      "line_amount": "96000.00"
+    },
+    {
+      "line_item_id": "LIT-L-025",
+      "invoice_id": "INV-L-025",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 25",
+      "quantity": "1",
+      "unit_price": "99500.00",
+      "line_amount": "99500.00"
+    },
+    {
+      "line_item_id": "LIT-L-026",
+      "invoice_id": "INV-L-026",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 26",
+      "quantity": "1",
+      "unit_price": "103000.00",
+      "line_amount": "103000.00"
+    },
+    {
+      "line_item_id": "LIT-L-027",
+      "invoice_id": "INV-L-027",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 27",
+      "quantity": "1",
+      "unit_price": "106500.00",
+      "line_amount": "106500.00"
+    },
+    {
+      "line_item_id": "LIT-L-028",
+      "invoice_id": "INV-L-028",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 28",
+      "quantity": "1",
+      "unit_price": "110000.00",
+      "line_amount": "110000.00"
+    },
+    {
+      "line_item_id": "LIT-L-029",
+      "invoice_id": "INV-L-029",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 29",
+      "quantity": "1",
+      "unit_price": "113500.00",
+      "line_amount": "113500.00"
+    },
+    {
+      "line_item_id": "LIT-L-030",
+      "invoice_id": "INV-L-030",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 30",
+      "quantity": "1",
+      "unit_price": "117000.00",
+      "line_amount": "117000.00"
+    },
+    {
+      "line_item_id": "LIT-L-031",
+      "invoice_id": "INV-L-031",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 31",
+      "quantity": "1",
+      "unit_price": "120500.00",
+      "line_amount": "120500.00"
+    },
+    {
+      "line_item_id": "LIT-L-032",
+      "invoice_id": "INV-L-032",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 32",
+      "quantity": "1",
+      "unit_price": "124000.00",
+      "line_amount": "124000.00"
+    },
+    {
+      "line_item_id": "LIT-L-033",
+      "invoice_id": "INV-L-033",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 33",
+      "quantity": "1",
+      "unit_price": "127500.00",
+      "line_amount": "127500.00"
+    },
+    {
+      "line_item_id": "LIT-L-034",
+      "invoice_id": "INV-L-034",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 34",
+      "quantity": "1",
+      "unit_price": "131000.00",
+      "line_amount": "131000.00"
+    },
+    {
+      "line_item_id": "LIT-L-035",
+      "invoice_id": "INV-L-035",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 35",
+      "quantity": "1",
+      "unit_price": "134500.00",
+      "line_amount": "134500.00"
+    },
+    {
+      "line_item_id": "LIT-L-036",
+      "invoice_id": "INV-L-036",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 36",
+      "quantity": "1",
+      "unit_price": "138000.00",
+      "line_amount": "138000.00"
+    },
+    {
+      "line_item_id": "LIT-L-037",
+      "invoice_id": "INV-L-037",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 37",
+      "quantity": "1",
+      "unit_price": "141500.00",
+      "line_amount": "141500.00"
+    },
+    {
+      "line_item_id": "LIT-L-038",
+      "invoice_id": "INV-L-038",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 38",
+      "quantity": "1",
+      "unit_price": "145000.00",
+      "line_amount": "145000.00"
+    },
+    {
+      "line_item_id": "LIT-L-039",
+      "invoice_id": "INV-L-039",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 39",
+      "quantity": "1",
+      "unit_price": "148500.00",
+      "line_amount": "148500.00"
+    },
+    {
+      "line_item_id": "LIT-L-040",
+      "invoice_id": "INV-L-040",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 40",
+      "quantity": "1",
+      "unit_price": "152000.00",
+      "line_amount": "152000.00"
+    },
+    {
+      "line_item_id": "LIT-L-041",
+      "invoice_id": "INV-L-041",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 41",
+      "quantity": "1",
+      "unit_price": "155500.00",
+      "line_amount": "155500.00"
+    },
+    {
+      "line_item_id": "LIT-L-042",
+      "invoice_id": "INV-L-042",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 42",
+      "quantity": "1",
+      "unit_price": "159000.00",
+      "line_amount": "159000.00"
+    },
+    {
+      "line_item_id": "LIT-L-043",
+      "invoice_id": "INV-L-043",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 43",
+      "quantity": "1",
+      "unit_price": "162500.00",
+      "line_amount": "162500.00"
+    },
+    {
+      "line_item_id": "LIT-L-044",
+      "invoice_id": "INV-L-044",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 44",
+      "quantity": "1",
+      "unit_price": "166000.00",
+      "line_amount": "166000.00"
+    },
+    {
+      "line_item_id": "LIT-L-045",
+      "invoice_id": "INV-L-045",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 45",
+      "quantity": "1",
+      "unit_price": "169500.00",
+      "line_amount": "169500.00"
+    },
+    {
+      "line_item_id": "LIT-L-046",
+      "invoice_id": "INV-L-046",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 46",
+      "quantity": "1",
+      "unit_price": "173000.00",
+      "line_amount": "173000.00"
+    },
+    {
+      "line_item_id": "LIT-L-047",
+      "invoice_id": "INV-L-047",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 47",
+      "quantity": "1",
+      "unit_price": "176500.00",
+      "line_amount": "176500.00"
+    },
+    {
+      "line_item_id": "LIT-L-048",
+      "invoice_id": "INV-L-048",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 48",
+      "quantity": "1",
+      "unit_price": "180000.00",
+      "line_amount": "180000.00"
+    },
+    {
+      "line_item_id": "LIT-L-049",
+      "invoice_id": "INV-L-049",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 49",
+      "quantity": "1",
+      "unit_price": "183500.00",
+      "line_amount": "183500.00"
+    },
+    {
+      "line_item_id": "LIT-L-050",
+      "invoice_id": "INV-L-050",
+      "service_code": "GEN-01",
+      "description": "Hospitalization & Clinical Care 50",
+      "quantity": "1",
+      "unit_price": "187000.00",
+      "line_amount": "187000.00"
+    }
+  ]
+}

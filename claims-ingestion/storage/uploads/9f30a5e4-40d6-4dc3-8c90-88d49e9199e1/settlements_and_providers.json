@@ -1,0 +1,53 @@
+{
+  "providers": [
+    {
+      "provider_id": "PROV-HOSP-01",
+      "provider_name": "Apollo City Hospital",
+      "provider_code": "APOLLO-01",
+      "provider_type": "TERTIARY_CARE",
+      "address": "42 Bannerghatta Road, Bangalore"
+    },
+    {
+      "provider_id": "PROV-HOSP-02",
+      "provider_name": "Fortis Multispeciality",
+      "provider_code": "FORTIS-02",
+      "provider_type": "SECONDARY_CARE",
+      "address": "15 Cunningham Road, Bangalore"
+    }
+  ],
+  "settlements": [
+    {
+      "settlement_id": "SET-001",
+      "claim_id": "CLM-1001",
+      "approved_amount": "55000.00",
+      "paid_amount": "55000.00",
+      "settlement_date": "2024-03-20",
+      "settlement_status": "PAID",
+      "currency": "INR"
+    },
+    {
+      "settlement_id": "SET-002",
+      "claim_id": "CLM-UNKNOWN-888",
+      "approved_amount": "10000.00",
+      "paid_amount": "10000.00",
+      "settlement_date": "2024-04-15",
+      "settlement_status": "PAID",
+      "currency": "INR"
+    }
+  ],
+  "history": [
+    {
+      "claim_id": "CLM-1001",
+      "event_type": "ADMISSION",
+      "event_date": "2024-03-15",
+      "event_description": "Patient admitted for elective procedure."
+    },
+    {
+      "claim_id": "CLM-1001",
+      "event_type": "SETTLEMENT",
+      "event_date": "2024-03-20",
+      "event_description": "Initial settlement processed after policy deductible deduction.",
+      "amount": "55000.00"
+    }
+  ]
+}
