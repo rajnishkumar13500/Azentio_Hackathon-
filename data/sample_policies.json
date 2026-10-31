@@ -1,0 +1,84 @@
+{
+  "POL-COMPREHENSIVE-01": {
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "policy_name": "Health Shield Comprehensive",
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "status": "ACTIVE",
+    "sum_insured": 500000.0,
+    "balance_sum_insured": 420000.0,
+    "co_payment_percentage": 10.0,
+    "deductible_per_claim": 5000.0,
+    "deductible_annual_remaining": 0.0,
+    "proportionate_deduction": true,
+    "sub_limits": {
+      "daily_room_rent": 5000.0,
+      "daily_icu_rent": 10000.0,
+      "ambulance_limit": 2500.0,
+      "procedure_caps": {
+        "appendicitis": 100000.0,
+        "cataract": 35000.0,
+        "knee_replacement": 150000.0
+      }
+    },
+    "waiting_periods": {
+      "initial_waiting_days": 30,
+      "specific_diseases_months": 24,
+      "pre_existing_disease_months": 36
+    },
+    "covered_dependents": ["SELF", "SPOUSE", "CHILD_1", "CHILD_2"]
+  },
+  "POL-SENIOR-CARE-02": {
+    "policy_id": "POL-SENIOR-CARE-02",
+    "policy_name": "Silver Years Senior Care",
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "status": "ACTIVE",
+    "sum_insured": 300000.0,
+    "balance_sum_insured": 80000.0,
+    "co_payment_percentage": 20.0,
+    "deductible_per_claim": 3000.0,
+    "deductible_annual_remaining": 0.0,
+    "proportionate_deduction": true,
+    "sub_limits": {
+      "daily_room_rent": 4000.0,
+      "daily_icu_rent": 8000.0,
+      "ambulance_limit": 2000.0,
+      "procedure_caps": {
+        "cataract": 30000.0,
+        "knee_replacement": 120000.0
+      }
+    },
+    "waiting_periods": {
+      "initial_waiting_days": 30,
+      "specific_diseases_months": 12,
+      "pre_existing_disease_months": 24
+    },
+    "covered_dependents": ["SELF", "SPOUSE"]
+  },
+  "POL-EXPIRED-03": {
+    "policy_id": "POL-EXPIRED-03",
+    "policy_name": "Basic Care Terminated",
+    "start_date": "2025-01-01",
+    "end_date": "2025-12-31",
+    "status": "EXPIRED",
+    "sum_insured": 200000.0,
+    "balance_sum_insured": 200000.0,
+    "co_payment_percentage": 0.0,
+    "deductible_per_claim": 0.0,
+    "deductible_annual_remaining": 0.0,
+    "proportionate_deduction": false,
+    "sub_limits": {
+      "daily_room_rent": 3000.0,
+      "daily_icu_rent": 6000.0,
+      "ambulance_limit": 1500.0,
+      "procedure_caps": {}
+    },
+    "waiting_periods": {
+      "initial_waiting_days": 30,
+      "specific_diseases_months": 24,
+      "pre_existing_disease_months": 48
+    },
+    "covered_dependents": ["SELF"]
+  }
+}
