@@ -1,0 +1,179 @@
+# ==============================================================================
+# HACKATHON PROJECT .gitignore
+# Covers Node/Frontend, Python/Backend/AI, Environment Secrets, IDEs, and OS
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment & Sensitive Credentials (CRITICAL for Hackathons)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.template
+*.local
+*.pem
+*.key
+*.cert
+*.crt
+credentials.json
+serviceAccountKey.json
+client_secret*.json
+
+# ------------------------------------------------------------------------------
+# 2. Node.js / TypeScript / Frontend (React, Next.js, Vite, Vue, Angular)
+# ------------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.turbo/
+.parcel-cache/
+.cache/
+storybook-static/
+
+# ------------------------------------------------------------------------------
+# 3. Python / Backend / AI / Machine Learning
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# AI / ML Models & Datasets (Prevent accidentally pushing large weights)
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.onnx
+*.pkl
+*.h5
+*.hdf5
+*.joblib
+*.parquet
+dataset/
+datasets/
+models/*.bin
+models/*.pt
+models/*.pth
+models/*.safetensors
+
+# ------------------------------------------------------------------------------
+# 4. Java / JVM / Spring / Gradle / Maven (If applicable)
+# ------------------------------------------------------------------------------
+target/
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ------------------------------------------------------------------------------
+# 5. Databases & Local Storage
+# ------------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# ------------------------------------------------------------------------------
+# 6. Logs & Runtime Data
+# ------------------------------------------------------------------------------
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# ------------------------------------------------------------------------------
+# 7. Operating System Artifacts
+# ------------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ------------------------------------------------------------------------------
+# 8. IDE & Editor Artifacts
+# ------------------------------------------------------------------------------
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# VS Code (ignore user state, keep shared settings/extensions if desired)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
