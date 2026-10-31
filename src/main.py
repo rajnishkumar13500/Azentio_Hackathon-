@@ -31,6 +31,7 @@ from src.config import settings
 from src.schemas import Claim, Policy, ValidationReport
 from src.engine import validation_engine
 from src.ingestion import ingestion_service, IngestionResult
+from src.ingestion.pipeline_bridge import map_pipeline_claim_to_studio
 from src.repository import claims_repository
 from src.report_generator import generate_customer_report_html
 from src.ai.groq_client import groq_agent
@@ -62,6 +63,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount the standalone claims-ingestion FastAPI app under /pipeline so its
+# /api/v1/imports and /api/v1/claims routes cannot collide with studio APIs.
+CLAIMS_INGESTION_ROOT = Path(__file__).resolve().parent.parent / "claims-ingestion"
+if CLAIMS_INGESTION_ROOT.exists() and str(CLAIMS_INGESTION_ROOT) not in sys.path:
+    sys.path.insert(0, str(CLAIMS_INGESTION_ROOT))
+
+claims_ingestion_app = None
+try:
+    from app.main import app as claims_ingestion_app  # type: ignore
+
+    app.mount("/pipeline", claims_ingestion_app)
+    logger.info("Claims data ingestion pipeline mounted at /pipeline")
+except Exception as e:
+    logger.warning("Claims ingestion pipeline not mounted: %s", e)
+
 def load_data():
     with open(settings.POLICIES_FILE, "r", encoding="utf-8") as f:
         policies_data = json.load(f)
@@ -84,6 +100,7 @@ def health_check():
         "version": settings.VERSION,
         "groq_configured": bool(settings.GROQ_API_KEY and not settings.GROQ_API_KEY.startswith("your_")),
         "groq_model": settings.GROQ_MODEL,
+        "pipeline_mounted": claims_ingestion_app is not None,
     }
 
 def get_available_models() -> List[Dict[str, Any]]:
@@ -433,6 +450,40 @@ def clear_portfolio_claims():
     """Resets the dashboard to empty state."""
     claims_repository.clear()
     return {"message": "Portfolio cleared. Ready for fresh file upload."}
+
+@app.post("/api/v1/ingest/from-pipeline/{claim_id}")
+def ingest_committed_pipeline_claim(claim_id: str):
+    """
+    Promote a claim already committed in the canonical ingestion database
+    into the leakage-prevention studio portfolio without changing pipeline APIs.
+    """
+    if claims_ingestion_app is None:
+        raise HTTPException(status_code=503, detail="Claims ingestion pipeline is not available.")
+    try:
+        from app.persistence.database import SessionLocal  # type: ignore
+        from app.persistence.models.claim_models import Claim as PipelineClaim  # type: ignore
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Pipeline database is not available: {e}")
+
+    db = SessionLocal()
+    try:
+        row = db.query(PipelineClaim).filter(PipelineClaim.claim_id == claim_id).first()
+        if not row:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Claim '{claim_id}' not found in canonical ingestion database. Commit the import job first.",
+            )
+        studio_claim = map_pipeline_claim_to_studio(row)
+        claims_repository.add_claims([studio_claim])
+        return {
+            "status": "SUCCESS",
+            "claim_id": studio_claim.claim_id,
+            "policy_id": studio_claim.policy_id,
+            "message": f"Claim {studio_claim.claim_id} promoted into the studio portfolio.",
+        }
+    finally:
+        db.close()
+
 
 @app.post("/api/v1/ingest/upload", response_model=IngestionResult)
 async def upload_claims_file(file: UploadFile = File(...)):
