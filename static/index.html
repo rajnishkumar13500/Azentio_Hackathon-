@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azentio Claims Leakage Detection Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col">
+
+  <!-- Top Global Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateToDashboard()">
+      <div class="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-lg">
+        🛡️
+      </div>
+      <div>
+        <h1 class="font-bold text-base tracking-tight text-white flex items-center gap-2">
+          Claims Leakage Detection Studio
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-medium">Enterprise Edition</span>
+        </h1>
+        <p class="text-xs text-slate-400">Claims Ingestion • Policy Rule Validation • Overpayment Prevention</p>
+      </div>
+    </div>
+
+    <!-- Right Header Actions -->
+    <div class="flex items-center space-x-3">
+      <button onclick="toggleUploadModal()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3.5 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+        <span>+</span>
+        <span>Ingest Claims File</span>
+      </button>
+
+      <button id="btn-seed-demo" onclick="seedDemoBatch()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
+        <span>⚡</span>
+        <span>Load Demo Batch</span>
+      </button>
+
+      <button id="btn-clear-portfolio" onclick="clearPortfolio()" class="text-xs bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1" title="Reset to Empty State">
+        <span>🗑️</span>
+        <span class="hidden md:inline">Reset</span>
+      </button>
+
+      <div class="hidden lg:flex items-center space-x-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+        <span class="text-slate-400">Groq:</span>
+        <span id="groq-model-badge" class="text-cyan-400 font-mono font-medium">Loading...</span>
+      </div>
+
+      <a href="/docs" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1">
+        <span>Swagger API</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6">
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: CLAIMS PORTFOLIO DASHBOARD                                        -->
+    <!-- ========================================================================= -->
+    <div id="dashboard-view" class="space-y-6">
+
+      <!-- Executive Metric Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Claims in Portfolio</span>
+          <div class="text-2xl font-extrabold text-white font-mono mt-1" id="metric-total-claims">0</div>
+          <p class="text-xs text-slate-500 mt-1">Active claims under review</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Billed Portfolio</span>
+          <div class="text-2xl font-extrabold text-slate-200 font-mono mt-1" id="metric-total-invoiced">₹0.00</div>
+          <p class="text-xs text-slate-500 mt-1">Gross claimed amount</p>
+        </div>
+
+        <div class="bg-slate-900 border border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-slate-900 to-slate-900 rounded-xl p-4 shadow-sm">
+          <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            Prevented Financial Leakage
+          </span>
+          <div class="text-2xl font-extrabold text-emerald-400 font-mono mt-1" id="metric-prevented-leakage">₹0.00</div>
+          <p class="text-xs text-emerald-300/70 mt-1">Direct overpayment stopped</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Policy Breaches Flagged</span>
+          <div class="text-2xl font-extrabold text-amber-400 font-mono mt-1" id="metric-flagged-count">0</div>
+          <p class="text-xs text-slate-500 mt-1">Requiring handler review</p>
+        </div>
+      </div>
+
+      <!-- Empty State Card (When portfolio has 0 claims) -->
+      <div id="empty-portfolio-state" class="hidden bg-slate-900 border border-dashed border-slate-800 rounded-2xl p-12 text-center space-y-5">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-3xl">
+          📋
+        </div>
+        <div class="max-w-md mx-auto">
+          <h3 class="text-base font-bold text-white">No Claims In Active Portfolio</h3>
+          <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+            Your workspace starts empty. Ingest a batch of claims across CSV, Excel (.xlsx), JSON, or raw medical bill documents, or load the pre-configured hackathon demo batch.
+          </p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-3 pt-2">
+          <button onclick="toggleUploadModal()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-2 shadow-sm">
+            <span>📂</span>
+            <span>Upload Claims Batch (CSV / Excel / Doc)</span>
+          </button>
+          <button onclick="seedDemoBatch()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-2">
+            <span>⚡</span>
+            <span>Load Sample Demo Batch (5 Cases)</span>
+          </button>
+        </div>
+
+        <!-- Download sample files for judges -->
+        <div class="pt-6 border-t border-slate-800/80 max-w-lg mx-auto">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Download Sample Files:</span>
+          <div class="flex flex-wrap justify-center gap-2 mt-2 text-xs">
+            <a href="/api/v1/ingest/samples/csv" download class="px-2.5 py-1 rounded bg-slate-800/70 hover:bg-slate-700 text-slate-300 border border-slate-700">📥 Sample CSV</a>
+            <a href="/api/v1/ingest/samples/xlsx" download class="px-2.5 py-1 rounded bg-slate-800/70 hover:bg-slate-700 text-slate-300 border border-slate-700">📊 Sample Excel</a>
+            <a href="/api/v1/ingest/samples/txt" download class="px-2.5 py-1 rounded bg-slate-800/70 hover:bg-slate-700 text-slate-300 border border-slate-700">📄 Doctor Bill (TXT)</a>
+            <a href="/api/v1/ingest/samples/invalid" download class="px-2.5 py-1 rounded bg-rose-950/30 hover:bg-rose-900/40 text-rose-300 border border-rose-800/40">⚠️ Invalid Data Demo</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Portfolio Claims Table Container -->
+      <div id="portfolio-table-container" class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm space-y-4">
+        <!-- Table Toolbar -->
+        <div class="p-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold text-white">Claims Adjudication Queue</span>
+            <span id="queue-badge-count" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0</span>
+          </div>
+
+          <!-- Status Filters & Search -->
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex bg-slate-950/60 p-0.5 rounded-lg border border-slate-800 text-xs">
+              <button onclick="filterClaims('ALL')" id="filter-all" class="px-3 py-1 rounded-md font-medium bg-indigo-600 text-white transition">All</button>
+              <button onclick="filterClaims('FLAGGED_LEAKAGE')" id="filter-flagged" class="px-3 py-1 rounded-md text-slate-400 hover:text-white transition">Flagged</button>
+              <button onclick="filterClaims('REJECTED')" id="filter-rejected" class="px-3 py-1 rounded-md text-slate-400 hover:text-white transition">Rejected</button>
+              <button onclick="filterClaims('APPROVED')" id="filter-approved" class="px-3 py-1 rounded-md text-slate-400 hover:text-white transition">Approved</button>
+            </div>
+            <input type="text" id="claims-search-input" placeholder="Search patient, diagnosis, ID..." oninput="handleSearchClaims(this.value)" class="bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-48">
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/80 text-slate-400 uppercase font-medium border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4">Claim ID</th>
+                <th class="py-3 px-4">Claimant / Patient</th>
+                <th class="py-3 px-4">Diagnosis & ICD-10</th>
+                <th class="py-3 px-4">Hospital & Policy</th>
+                <th class="py-3 px-4 text-right">Invoiced (₹)</th>
+                <th class="py-3 px-4 text-right">Admissible (₹)</th>
+                <th class="py-3 px-4 text-right">Prevented Leakage</th>
+                <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="portfolio-tbody" class="divide-y divide-slate-800/60 font-mono">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: CLAIM POLICY BREACH & ADJUDICATION INVESTIGATION STUDIO           -->
+    <!-- ========================================================================= -->
+    <div id="adjudication-view" class="space-y-6 hidden">
+
+      <!-- Breadcrumb Bar -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <button onclick="navigateToDashboard()" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition">
+          <span>← Back to Claims Dashboard</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400">Claim File:</span>
+          <span id="adj-breadcrumb-claim-id" class="text-xs font-mono font-bold text-cyan-400">CLM-000</span>
+        </div>
+      </div>
+
+      <!-- Active Claim Header Card -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Claimant & Patient</span>
+          <div class="mt-1 flex items-baseline justify-between">
+            <span id="patient-name" class="text-lg font-bold text-white">Loading...</span>
+            <span id="patient-age-rel" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300">SELF</span>
+          </div>
+          <div id="claim-id-label" class="text-xs font-mono text-cyan-400 mt-1">CLM-000</div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Diagnosis & ICD-10</span>
+          <div id="diagnosis-text" class="text-sm font-semibold text-white mt-1 truncate" title="Diagnosis">Loading...</div>
+          <div class="mt-1 flex items-center gap-2">
+            <span id="icd-code-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">ICD: -</span>
+            <span id="pre-existing-badge" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400">Tenure: -</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Hospital & Policy</span>
+          <div id="hospital-name" class="text-sm font-semibold text-white mt-1 truncate">Loading...</div>
+          <div id="policy-id-badge" class="text-xs font-mono text-emerald-400 mt-1">POL-000</div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+          <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Adjudication Verdict</span>
+          <div id="verdict-container" class="mt-1">
+            <span id="verdict-badge" class="text-sm font-bold px-3 py-1 rounded-md inline-block uppercase tracking-wider">
+              ANALYZING...
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommendations / Audit Warning Banner -->
+      <div id="recommendation-banner" class="rounded-xl p-4 border transition-all duration-300 hidden">
+        <div class="flex items-start space-x-3">
+          <div id="recommendation-icon" class="text-xl">⚠️</div>
+          <div class="flex-1">
+            <h3 id="recommendation-title" class="text-sm font-bold">Action Recommended</h3>
+            <p id="recommendation-detail" class="text-xs text-slate-300 mt-0.5"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adjudication Split Workspace: Tabs (Left 2 cols) & Financial Waterfall (Right 1 col) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Left 2 Cols: Tabbed Content -->
+        <div class="lg:col-span-2 space-y-4">
+
+          <!-- Studio Tabs Header -->
+          <div class="flex border-b border-slate-800 gap-4 text-xs font-semibold">
+            <button onclick="switchStudioTab('items')" id="tab-btn-items" class="pb-2.5 border-b-2 border-indigo-500 text-white flex items-center gap-1.5 transition">
+              <span>📋</span> Line-Item Policy Breaches
+              <span id="line-items-count-badge" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0</span>
+            </button>
+            <button onclick="switchStudioTab('history')" id="tab-btn-history" class="pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+              <span>🕒</span> Prior Claim History & Sum Insured
+              <span id="history-count-badge" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0</span>
+            </button>
+            <button onclick="switchStudioTab('rules')" id="tab-btn-rules" class="pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+              <span>⚖️</span> Rule Execution Audit Trail
+            </button>
+          </div>
+
+          <!-- TAB 1: Line-Item Policy Breaches Table -->
+          <div id="studio-tab-items" class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-950/60 text-slate-400 uppercase font-medium border-b border-slate-800">
+                  <tr>
+                    <th class="py-3 px-4">Line</th>
+                    <th class="py-3 px-4">Category</th>
+                    <th class="py-3 px-4">Description</th>
+                    <th class="py-3 px-4 text-right">Claimed</th>
+                    <th class="py-3 px-4 text-right">Admissible</th>
+                    <th class="py-3 px-4 text-right">Discrepancy</th>
+                    <th class="py-3 px-4 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="line-items-tbody" class="divide-y divide-slate-800/60 font-mono">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 2: Prior Claim History & Sum Insured Depletion -->
+          <div id="studio-tab-history" class="space-y-4 hidden">
+            <!-- Balance Sum Insured Depletion Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Policy Sum Insured Depletion Tracking</h4>
+                <span class="text-xs text-cyan-400 font-mono font-semibold" id="sum-insured-depletion-ratio">-</span>
+              </div>
+              <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                <div id="sum-insured-progress-bar" class="bg-gradient-to-r from-emerald-500 to-amber-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-xs pt-1 font-mono">
+                <div class="p-2.5 bg-slate-950/60 rounded-lg border border-slate-800">
+                  <span class="text-slate-400 block text-[11px]">Original Sum Insured:</span>
+                  <span class="text-white font-bold" id="hist-original-si">₹0.00</span>
+                </div>
+                <div class="p-2.5 bg-slate-950/60 rounded-lg border border-slate-800">
+                  <span class="text-slate-400 block text-[11px]">Cumulative Prior Paid:</span>
+                  <span class="text-rose-400 font-bold" id="hist-total-prior-paid">₹0.00</span>
+                </div>
+                <div class="p-2.5 bg-slate-950/60 rounded-lg border border-slate-800">
+                  <span class="text-slate-400 block text-[11px]">Remaining Balance:</span>
+                  <span class="text-emerald-400 font-bold" id="hist-remaining-balance">₹0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prior Claims Table -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+              <div class="px-5 py-3 border-b border-slate-800">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Historical Claims Settled Under Policy</h4>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-slate-950/60 text-slate-400 uppercase font-medium border-b border-slate-800">
+                    <tr>
+                      <th class="py-3 px-4">Prior Claim ID</th>
+                      <th class="py-3 px-4">Admission Date</th>
+                      <th class="py-3 px-4">Diagnosis</th>
+                      <th class="py-3 px-4">Hospital</th>
+                      <th class="py-3 px-4 text-right">Settled Amount</th>
+                      <th class="py-3 px-4 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="prior-claims-tbody" class="divide-y divide-slate-800/60 font-mono">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: Rule Audit Trail & Formulas -->
+          <div id="studio-tab-rules" class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-3 hidden">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <span>⚖️</span> Rule Execution Audit Trail
+            </h3>
+            <p class="text-xs text-slate-400">Detailed breakdown of every policy clause and mathematical formula evaluated for this claim:</p>
+            <div id="rules-audit-list" class="space-y-2 mt-2">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right 1 Col: Settlement Financial Waterfall & Leakage Cards -->
+        <div class="space-y-4">
+
+          <!-- Prevented Financial Leakage Highlight Card -->
+          <div class="bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-xl p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                Financial Leakage Prevented
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">Calculated Math</span>
+            </div>
+            <div class="flex items-baseline space-x-2">
+              <span class="text-3xl font-extrabold text-emerald-400 font-mono" id="leakage-prevented-amount">₹0.00</span>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Direct financial overpayment prevented by checking room rent caps, proportionate deductions, non-payable consumables, and overlooked co-pays/deductibles.
+            </p>
+
+            <!-- Suspected Anomaly Callout -->
+            <div id="suspected-leakage-card" class="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hidden">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-amber-400 flex items-center gap-1">
+                  <span>⚠</span> Suspected Provider Leakage
+                </span>
+                <span class="text-xs text-amber-300 font-mono font-bold" id="suspected-leakage-amount">₹0.00</span>
+              </div>
+              <p class="text-[11px] text-amber-200/80 mt-1">
+                Statistical pricing outlier flagged against regional procedure benchmarks. Requires Medical Officer audit.
+              </p>
+            </div>
+          </div>
+
+          <!-- Settlement Waterfall Breakdown -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <span>💧</span> Settlement Financial Waterfall
+            </h3>
+
+            <div class="space-y-2.5 text-xs font-mono">
+              <div class="flex justify-between py-1 border-b border-slate-800 text-slate-300">
+                <span>Gross Claim Invoiced</span>
+                <span id="wf-gross" class="font-bold text-white">₹0.00</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+                <span>(-) Excluded Consumables</span>
+                <span id="wf-excluded">-₹0.00</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+                <span>(-) Room / ICU Rent Excess</span>
+                <span id="wf-sublimit">-₹0.00</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+                <span>(-) Proportionate Deduction</span>
+                <span id="wf-proportionate">-₹0.00</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+                <span>(-) Procedure Sub-Limit Cap</span>
+                <span id="wf-proc-cap">-₹0.00</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800 text-amber-400">
+                <span>(-) Policy Deductible</span>
+                <span id="wf-deductible">-₹0.00</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800 text-amber-400">
+                <span>(-) Policy Co-Payment</span>
+                <span id="wf-copay">-₹0.00</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-800 text-rose-400">
+                <span>(-) Balance Sum Insured Cap</span>
+                <span id="wf-sum-insured-cap">-₹0.00</span>
+              </div>
+              <div class="flex justify-between py-2 text-sm border-t-2 border-slate-700 font-bold bg-slate-950/40 px-2 rounded">
+                <span class="text-emerald-400">Calculated Settlement</span>
+                <span id="wf-calculated-admissible" class="text-emerald-400">₹0.00</span>
+              </div>
+              <div class="flex justify-between py-1 text-slate-400 px-2">
+                <span>Proposed Settlement (Handler)</span>
+                <span id="wf-proposed" class="text-slate-300">₹0.00</span>
+              </div>
+            </div>
+
+            <!-- Human in the Loop Action Buttons -->
+            <div class="pt-3 border-t border-slate-800 space-y-2">
+              <button onclick="alert('Settlement confirmed! Audit record logged for disbursement.')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition">
+                ✔ Confirm Calculated Settlement
+              </button>
+              <button onclick="alert('Draft clarification request generated for hospital.')" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition">
+                📨 Request Clarification Letter
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Upload & Data Ingestion Modal -->
+  <div id="upload-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📂</span>
+          <div>
+            <h3 class="text-base font-bold text-white">Claims Data Ingestion Studio</h3>
+            <p class="text-xs text-slate-400">Accepts CSV, Excel (.xlsx), JSON, or text documents with strict schema validation</p>
+          </div>
+        </div>
+        <button onclick="toggleUploadModal()" class="text-slate-400 hover:text-white text-lg p-1">✕</button>
+      </div>
+
+      <!-- Quick Download Sample Files for Evaluators -->
+      <div class="p-3.5 bg-slate-950/60 rounded-xl border border-slate-800 space-y-2">
+        <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Download Evaluator Test Samples:</span>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <a href="/api/v1/ingest/samples/csv" download class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1">
+            <span>📥</span> Sample Claims (CSV)
+          </a>
+          <a href="/api/v1/ingest/samples/xlsx" download class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1">
+            <span>📊</span> Sample Claims (Excel)
+          </a>
+          <a href="/api/v1/ingest/samples/txt" download class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1">
+            <span>📄</span> Hospital Bill Document (TXT)
+          </a>
+          <a href="/api/v1/ingest/samples/invalid" download class="px-2.5 py-1 rounded bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 flex items-center gap-1" title="Tests that invalid records are explicitly rejected">
+            <span>⚠️</span> Invalid Data Demo (Errors Test)
+          </a>
+        </div>
+      </div>
+
+      <!-- File Upload Zone -->
+      <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-8 text-center transition bg-slate-950/30 space-y-3 cursor-pointer" onclick="document.getElementById('file-input').click()">
+        <input type="file" id="file-input" class="hidden" accept=".csv,.xlsx,.xls,.json,.txt,.doc" onchange="handleFileSelected(event)">
+        <div class="text-3xl">📤</div>
+        <div>
+          <span class="text-sm font-semibold text-white">Click to upload or drag & drop</span>
+          <p class="text-xs text-slate-400 mt-1">Supports CSV, Excel (.xlsx), JSON, or Medical Bill Text files</p>
+        </div>
+        <div id="selected-file-label" class="text-xs font-mono text-cyan-400 font-semibold hidden"></div>
+      </div>
+
+      <!-- Ingestion Validation Output / Error Table -->
+      <div id="ingestion-feedback" class="hidden space-y-3">
+        <div id="ingestion-status-badge" class="p-3 rounded-lg text-xs font-medium"></div>
+        <div id="ingestion-errors-container" class="hidden max-h-48 overflow-y-auto rounded-lg border border-rose-900/40 bg-rose-950/20 p-3 space-y-2">
+          <div class="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1">
+            <span>❌</span> Validation Errors Found (Records Not Silently Ignored):
+          </div>
+          <div id="ingestion-errors-list" class="text-xs space-y-1 font-mono text-rose-300"></div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-end space-x-3 pt-2">
+        <button onclick="toggleUploadModal()" class="px-4 py-2 rounded-lg text-xs text-slate-400 hover:text-white">Cancel</button>
+        <button id="btn-process-upload" onclick="processFileUpload()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition" disabled>
+          Ingest & Process Batch
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    let activeClaimsList = [];
+    let currentFilter = "ALL";
+    let searchQuery = "";
+    let selectedUploadFile = null;
+    let activeClaimReport = null;
+
+    function formatINR(val) {
+      if (val === undefined || val === null) return "₹0.00";
+      return "₹" + Number(val).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    async function initApp() {
+      try {
+        const healthRes = await fetch("/health");
+        const health = await healthRes.json();
+        document.getElementById("groq-model-badge").innerText = health.groq_model || "Offline";
+
+        await refreshDashboard();
+      } catch (err) {
+        console.error("Initialization error:", err);
+      }
+    }
+
+    async function refreshDashboard() {
+      try {
+        const res = await fetch("/api/v1/claims");
+        const data = await res.json();
+
+        const m = data.portfolio_metrics;
+        document.getElementById("metric-total-claims").innerText = data.total_claims;
+        document.getElementById("metric-total-invoiced").innerText = formatINR(m.total_invoiced);
+        document.getElementById("metric-prevented-leakage").innerText = formatINR(m.total_prevented_leakage);
+        document.getElementById("metric-flagged-count").innerText = `${m.flagged_count + m.rejected_count} breaches`;
+
+        activeClaimsList = data.claims || [];
+
+        const emptyState = document.getElementById("empty-portfolio-state");
+        const tableContainer = document.getElementById("portfolio-table-container");
+
+        if (activeClaimsList.length === 0) {
+          emptyState.classList.remove("hidden");
+          tableContainer.classList.add("hidden");
+        } else {
+          emptyState.classList.add("hidden");
+          tableContainer.classList.remove("hidden");
+          renderPortfolioTable();
+        }
+      } catch (err) {
+        console.error("Error refreshing dashboard:", err);
+      }
+    }
+
+    function renderPortfolioTable() {
+      const tbody = document.getElementById("portfolio-tbody");
+      tbody.innerHTML = "";
+
+      let filtered = activeClaimsList.filter(item => {
+        const s = item.summary;
+        const c = item.claim;
+
+        // Status filter
+        if (currentFilter !== "ALL" && s.overall_status !== currentFilter) {
+          return false;
+        }
+
+        // Search query
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchId = c.claim_id.toLowerCase().includes(q);
+          const matchName = c.claimant.name.toLowerCase().includes(q);
+          const matchDiag = c.incident_details.diagnosis_description.toLowerCase().includes(q);
+          const matchHosp = (c.incident_details.hospital_name || '').toLowerCase().includes(q);
+          return matchId || matchName || matchDiag || matchHosp;
+        }
+
+        return true;
+      });
+
+      document.getElementById("queue-badge-count").innerText = `${filtered.length} claims`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-500 font-sans">No claims match the selected filter.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const c = item.claim;
+        const s = item.summary;
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/40 transition cursor-pointer";
+        tr.onclick = (e) => {
+          if (!e.target.closest("button")) {
+            inspectClaim(c.claim_id);
+          }
+        };
+
+        let badgeClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+        if (s.overall_status === "REJECTED") badgeClass = "bg-rose-500/20 text-rose-300 border-rose-500/40";
+        if (s.overall_status === "FLAGGED_LEAKAGE") badgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-cyan-400">${c.claim_id}</td>
+          <td class="py-3 px-4 text-white font-sans">
+            <div class="font-semibold">${c.claimant.name}</div>
+            <div class="text-[11px] text-slate-400">${c.claimant.relationship_to_insured} • ${c.claimant.age} yrs</div>
+          </td>
+          <td class="py-3 px-4 text-slate-200 font-sans">
+            <div class="font-medium truncate max-w-xs" title="${c.incident_details.diagnosis_description}">${c.incident_details.diagnosis_description}</div>
+            <div class="text-[11px] text-indigo-400 font-mono">${c.incident_details.icd10_code || 'N/A'}</div>
+          </td>
+          <td class="py-3 px-4 text-slate-300 font-sans">
+            <div class="truncate max-w-xs">${c.incident_details.hospital_name || c.incident_details.hospital_id}</div>
+            <div class="text-[11px] text-emerald-400 font-mono">${c.policy_id}</div>
+          </td>
+          <td class="py-3 px-4 text-right text-slate-200">${formatINR(s.total_claimed)}</td>
+          <td class="py-3 px-4 text-right text-emerald-400 font-semibold">${formatINR(s.calculated_settlement)}</td>
+          <td class="py-3 px-4 text-right font-bold ${s.calculated_leakage_prevented > 0 ? 'text-rose-400' : 'text-slate-500'}">
+            ${s.calculated_leakage_prevented > 0 ? formatINR(s.calculated_leakage_prevented) : '-'}
+          </td>
+          <td class="py-3 px-4 text-center">
+            <span class="text-[10px] font-sans px-2.5 py-0.5 rounded-full border ${badgeClass} uppercase font-semibold">
+              ${s.overall_status}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="inspectClaim('${c.claim_id}')" class="px-2.5 py-1 rounded bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/30 transition text-xs font-sans font-medium">
+              Inspect Breaches →
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterClaims(status) {
+      currentFilter = status;
+      ["all", "flagged", "rejected", "approved"].forEach(id => {
+        const btn = document.getElementById(`filter-${id}`);
+        if (id.toUpperCase() === status || (id === "all" && status === "ALL") || (id === "flagged" && status === "FLAGGED_LEAKAGE")) {
+          btn.className = "px-3 py-1 rounded-md font-medium bg-indigo-600 text-white transition";
+        } else {
+          btn.className = "px-3 py-1 rounded-md text-slate-400 hover:text-white transition";
+        }
+      });
+      renderPortfolioTable();
+    }
+
+    function handleSearchClaims(query) {
+      searchQuery = query;
+      renderPortfolioTable();
+    }
+
+    async function seedDemoBatch() {
+      const btn = document.getElementById("btn-seed-demo");
+      btn.innerText = "Loading...";
+      try {
+        await fetch("/api/v1/claims/seed-demo", { method: "POST" });
+        await refreshDashboard();
+      } catch (err) {
+        alert("Failed to load demo batch: " + err.message);
+      } finally {
+        btn.innerText = "⚡ Load Demo Batch";
+      }
+    }
+
+    async function clearPortfolio() {
+      if (confirm("Reset claims dashboard to empty state?")) {
+        try {
+          await fetch("/api/v1/claims", { method: "DELETE" });
+          await refreshDashboard();
+          navigateToDashboard();
+        } catch (err) {
+          alert("Failed to clear portfolio: " + err.message);
+        }
+      }
+    }
+
+    // =========================================================================
+    // NAVIGATION & CLAIM ADJUDICATION (PAGE 2)
+    // =========================================================================
+    function navigateToDashboard() {
+      document.getElementById("dashboard-view").classList.remove("hidden");
+      document.getElementById("adjudication-view").classList.add("hidden");
+    }
+
+    async function inspectClaim(claimId) {
+      try {
+        const res = await fetch(`/api/v1/claims/${claimId}/adjudicate`);
+        if (!res.ok) throw new Error("Could not fetch claim adjudication report.");
+        const report = await res.json();
+        activeClaimReport = report;
+
+        // Switch views
+        document.getElementById("dashboard-view").classList.add("hidden");
+        document.getElementById("adjudication-view").classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Update Header & Breadcrumb
+        document.getElementById("adj-breadcrumb-claim-id").innerText = report.claim_id;
+        document.getElementById("claim-id-label").innerText = report.claim_id;
+        document.getElementById("policy-id-badge").innerText = report.policy_id;
+
+        const rawItem = activeClaimsList.find(i => i.claim.claim_id === claimId);
+        const c = rawItem ? rawItem.claim : null;
+
+        if (c) {
+          document.getElementById("patient-name").innerText = c.claimant.name;
+          document.getElementById("patient-age-rel").innerText = `${c.claimant.relationship_to_insured} (${c.claimant.age}y)`;
+          document.getElementById("diagnosis-text").innerText = c.incident_details.diagnosis_description;
+          document.getElementById("diagnosis-text").title = c.incident_details.diagnosis_description;
+          document.getElementById("icd-code-badge").innerText = `ICD: ${c.incident_details.icd10_code || 'N/A'}`;
+          document.getElementById("pre-existing-badge").innerText = `Tenure: ${c.incident_details.policy_tenure_months}mo ${c.incident_details.is_pre_existing ? '(PED)' : ''}`;
+          document.getElementById("hospital-name").innerText = c.incident_details.hospital_name || c.incident_details.hospital_id;
+        }
+
+        renderAdjudicationReport(report, c);
+      } catch (err) {
+        alert("Error inspecting claim: " + err.message);
+      }
+    }
+
+    function renderAdjudicationReport(report, rawClaim) {
+      const s = report.summary;
+
+      // Verdict badge
+      const verdictBadge = document.getElementById("verdict-badge");
+      if (s.overall_status === "REJECTED") {
+        verdictBadge.className = "text-sm font-bold px-3 py-1 rounded-md inline-block uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/40";
+        verdictBadge.innerText = "❌ REJECTED (100% LEAKAGE)";
+      } else if (s.overall_status === "FLAGGED_LEAKAGE") {
+        verdictBadge.className = "text-sm font-bold px-3 py-1 rounded-md inline-block uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/40";
+        verdictBadge.innerText = "⚠️ FLAGGED FINANCIAL LEAKAGE";
+      } else {
+        verdictBadge.className = "text-sm font-bold px-3 py-1 rounded-md inline-block uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+        verdictBadge.innerText = "✔ APPROVED SETTLEMENT";
+      }
+
+      // Recommendations Banner
+      const recBanner = document.getElementById("recommendation-banner");
+      if (report.recommendations && report.recommendations.length > 0) {
+        recBanner.classList.remove("hidden");
+        document.getElementById("recommendation-detail").innerText = report.recommendations[0];
+        if (s.overall_status === "REJECTED") {
+          recBanner.className = "rounded-xl p-4 border bg-rose-950/30 border-rose-500/30 text-rose-200";
+          document.getElementById("recommendation-icon").innerText = "🛑";
+          document.getElementById("recommendation-title").innerText = "Critical Policy Violation";
+        } else if (s.overall_status === "FLAGGED_LEAKAGE") {
+          recBanner.className = "rounded-xl p-4 border bg-amber-950/30 border-amber-500/30 text-amber-200";
+          document.getElementById("recommendation-icon").innerText = "⚠️";
+          document.getElementById("recommendation-title").innerText = "Settlement Correction Required";
+        } else {
+          recBanner.className = "rounded-xl p-4 border bg-emerald-950/30 border-emerald-500/30 text-emerald-200";
+          document.getElementById("recommendation-icon").innerText = "✔";
+          document.getElementById("recommendation-title").innerText = "Claim Verified & Approved";
+        }
+      } else {
+        recBanner.classList.add("hidden");
+      }
+
+      // Financial Waterfall
+      document.getElementById("wf-gross").innerText = formatINR(s.total_claimed);
+      document.getElementById("wf-excluded").innerText = s.total_excluded > 0 ? `-${formatINR(s.total_excluded)}` : "₹0.00";
+      document.getElementById("wf-sublimit").innerText = s.total_sublimit_deduction > 0 ? `-${formatINR(s.total_sublimit_deduction)}` : "₹0.00";
+      document.getElementById("wf-proportionate").innerText = s.total_proportionate_deduction > 0 ? `-${formatINR(s.total_proportionate_deduction)}` : "₹0.00";
+      document.getElementById("wf-proc-cap").innerText = s.procedure_cap_deduction > 0 ? `-${formatINR(s.procedure_cap_deduction)}` : "₹0.00";
+      document.getElementById("wf-deductible").innerText = s.deductible_applied > 0 ? `-${formatINR(s.deductible_applied)}` : "₹0.00";
+      document.getElementById("wf-copay").innerText = s.copay_applied > 0 ? `-${formatINR(s.copay_applied)}` : "₹0.00";
+      document.getElementById("wf-sum-insured-cap").innerText = s.balance_sum_insured_cap_deduction > 0 ? `-${formatINR(s.balance_sum_insured_cap_deduction)}` : "₹0.00";
+      document.getElementById("wf-calculated-admissible").innerText = formatINR(s.calculated_settlement);
+      document.getElementById("wf-proposed").innerText = formatINR(s.proposed_settlement);
+
+      // Leakage Highlights
+      document.getElementById("leakage-prevented-amount").innerText = formatINR(s.calculated_leakage_prevented);
+      const suspCard = document.getElementById("suspected-leakage-card");
+      if (s.suspected_leakage_total > 0) {
+        suspCard.classList.remove("hidden");
+        document.getElementById("suspected-leakage-amount").innerText = formatINR(s.suspected_leakage_total);
+      } else {
+        suspCard.classList.add("hidden");
+      }
+
+      // Line Items Table
+      const tbody = document.getElementById("line-items-tbody");
+      tbody.innerHTML = "";
+      document.getElementById("line-items-count-badge").innerText = report.line_items.length;
+
+      if (report.line_items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-500 font-sans">No line items evaluated (Claim rejected at coverage level).</td></tr>`;
+      } else {
+        report.line_items.forEach(item => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-800/40 transition";
+
+          let statusBadgeClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
+          if (item.status === "EXCLUDED") statusBadgeClass = "bg-rose-500/20 text-rose-300 border-rose-500/30";
+          if (item.status === "BREACHED") statusBadgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/30";
+
+          tr.innerHTML = `
+            <td class="py-3 px-4 font-mono text-slate-400">${item.line_id}</td>
+            <td class="py-3 px-4 text-slate-300 font-sans text-xs">${item.category}</td>
+            <td class="py-3 px-4 text-white font-sans text-xs">
+              <div class="font-medium">${item.description}</div>
+              ${item.rules_applied.map(r => `<div class="text-[11px] text-slate-400 mt-0.5">• ${r.reason}</div>`).join('')}
+            </td>
+            <td class="py-3 px-4 text-right text-slate-200">${formatINR(item.claimed_amount)}</td>
+            <td class="py-3 px-4 text-right text-emerald-400 font-semibold">${formatINR(item.admissible_amount)}</td>
+            <td class="py-3 px-4 text-right ${item.discrepancy_amount > 0 ? 'text-rose-400 font-bold' : 'text-slate-600'}">
+              ${item.discrepancy_amount > 0 ? formatINR(item.discrepancy_amount) : '-'}
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="text-[10px] font-sans px-2 py-0.5 rounded-full border ${statusBadgeClass} uppercase font-semibold">
+                ${item.status}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Prior Claims History Tab
+      const historyList = (rawClaim && rawClaim.claim_history) ? rawClaim.claim_history : [];
+      document.getElementById("history-count-badge").innerText = historyList.length;
+      const priorTbody = document.getElementById("prior-claims-tbody");
+      priorTbody.innerHTML = "";
+
+      let totalPriorPaid = historyList.reduce((acc, h) => acc + (h.paid_amount || 0), 0);
+      let originalSI = 500000.0;
+      let remainingSI = Math.max(0, originalSI - totalPriorPaid);
+      if (rawClaim && rawClaim.policy_id.includes("SENIOR")) {
+        originalSI = 300000.0;
+        remainingSI = 80000.0;
+      }
+
+      document.getElementById("hist-original-si").innerText = formatINR(originalSI);
+      document.getElementById("hist-total-prior-paid").innerText = formatINR(totalPriorPaid);
+      document.getElementById("hist-remaining-balance").innerText = formatINR(remainingSI);
+      
+      const pctUsed = Math.min(100, Math.round((totalPriorPaid / originalSI) * 100));
+      document.getElementById("sum-insured-progress-bar").style.width = `${pctUsed}%`;
+      document.getElementById("sum-insured-depletion-ratio").innerText = `${pctUsed}% Used (₹${totalPriorPaid.toLocaleString()} / ₹${originalSI.toLocaleString()})`;
+
+      if (historyList.length === 0) {
+        priorTbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-500 font-sans">No prior claims recorded under this policy (First claim of policy year).</td></tr>`;
+      } else {
+        historyList.forEach(h => {
+          const ptr = document.createElement("tr");
+          ptr.className = "hover:bg-slate-800/40 transition";
+          ptr.innerHTML = `
+            <td class="py-3 px-4 font-bold text-cyan-400">${h.previous_claim_id}</td>
+            <td class="py-3 px-4 text-slate-300 font-sans">${h.admission_date}</td>
+            <td class="py-3 px-4 text-white font-sans">${h.diagnosis}</td>
+            <td class="py-3 px-4 text-slate-400 font-sans">${h.hospital_name || 'Network Hospital'}</td>
+            <td class="py-3 px-4 text-right text-rose-400 font-semibold">${formatINR(h.paid_amount)}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="text-[10px] px-2 py-0.5 rounded-full border border-slate-700 bg-slate-800 text-slate-300 font-sans uppercase">
+                ${h.settlement_status || 'SETTLED'}
+              </span>
+            </td>
+          `;
+          priorTbody.appendChild(ptr);
+        });
+      }
+
+      // Rules Audit Trail
+      const rulesList = document.getElementById("rules-audit-list");
+      rulesList.innerHTML = "";
+      const allRules = [...report.claim_level_rules, ...report.line_items.flatMap(i => i.rules_applied)];
+      
+      allRules.forEach(r => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "p-3 rounded-lg bg-slate-950/50 border border-slate-800 text-xs space-y-1";
+        
+        let badgeColor = "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
+        if (r.status === "FAILED" || r.status === "EXCLUDED") badgeColor = "text-rose-400 border-rose-500/30 bg-rose-500/10";
+        if (r.status === "BREACHED" || r.status === "APPLIED" || r.status === "ANOMALY_SUSPECTED") badgeColor = "text-amber-400 border-amber-500/30 bg-amber-500/10";
+
+        itemDiv.innerHTML = `
+          <div class="flex items-center justify-between font-mono">
+            <span class="text-cyan-400 font-bold">${r.rule_id}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded border ${badgeColor} font-sans uppercase font-medium">${r.status}</span>
+          </div>
+          <div class="text-white font-medium font-sans">${r.rule_name}</div>
+          <div class="text-slate-300 font-sans">${r.reason}</div>
+          ${r.formula_applied ? `<div class="text-[11px] font-mono text-slate-400 bg-slate-900 p-1.5 rounded mt-1 border border-slate-800">Formula: ${r.formula_applied}</div>` : ''}
+        `;
+        rulesList.appendChild(itemDiv);
+      });
+
+      // Default to line items tab
+      switchStudioTab('items');
+    }
+
+    function switchStudioTab(tab) {
+      ["items", "history", "rules"].forEach(t => {
+        const content = document.getElementById(`studio-tab-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tab) {
+          content.classList.remove("hidden");
+          btn.className = "pb-2.5 border-b-2 border-indigo-500 text-white flex items-center gap-1.5 transition";
+        } else {
+          content.classList.add("hidden");
+          btn.className = "pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition";
+        }
+      });
+    }
+
+    // =========================================================================
+    // UPLOAD & FILE INGESTION LOGIC
+    // =========================================================================
+    function toggleUploadModal() {
+      const modal = document.getElementById("upload-modal");
+      modal.classList.toggle("hidden");
+    }
+
+    function handleFileSelected(event) {
+      const file = event.target.files[0];
+      if (file) {
+        selectedUploadFile = file;
+        const label = document.getElementById("selected-file-label");
+        label.innerText = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        label.classList.remove("hidden");
+        document.getElementById("btn-process-upload").disabled = false;
+      }
+    }
+
+    async function processFileUpload() {
+      if (!selectedUploadFile) return;
+
+      const btn = document.getElementById("btn-process-upload");
+      btn.disabled = true;
+      btn.innerText = "Processing & Validating...";
+
+      const feedback = document.getElementById("ingestion-feedback");
+      const statusBadge = document.getElementById("ingestion-status-badge");
+      const errorsContainer = document.getElementById("ingestion-errors-container");
+      const errorsList = document.getElementById("ingestion-errors-list");
+
+      feedback.classList.remove("hidden");
+      errorsContainer.classList.add("hidden");
+      errorsList.innerHTML = "";
+
+      const formData = new FormData();
+      formData.append("file", selectedUploadFile);
+
+      try {
+        const res = await fetch("/api/v1/ingest/upload-and-validate", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        const ing = data.ingestion_result;
+
+        if (data.ingestion_status === "SUCCESS" || data.ingestion_status === "PARTIAL_SUCCESS") {
+          statusBadge.className = "p-3 rounded-lg text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+          statusBadge.innerHTML = `✔ Successfully ingested <b>${ing.valid_records_count} claims</b> from ${selectedUploadFile.name}. Format detected: <b>${ing.format_detected.toUpperCase()}</b>.`;
+          
+          await refreshDashboard();
+          toggleUploadModal();
+          navigateToDashboard();
+        } else {
+          statusBadge.className = "p-3 rounded-lg text-xs font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30";
+          statusBadge.innerHTML = `⚠️ Ingestion reported <b>${ing.errors.length} validation errors</b>. Records were NOT silently ignored.`;
+
+          errorsContainer.classList.remove("hidden");
+          ing.errors.forEach(err => {
+            const rowDiv = document.createElement("div");
+            rowDiv.innerHTML = `• <span class="font-bold text-white">[${err.record_id || 'Row ' + err.row_number}]</span> ${err.field_name}: ${err.error_message} (Value: <i>${err.rejected_value}</i>)`;
+            errorsList.appendChild(rowDiv);
+          });
+        }
+      } catch (err) {
+        statusBadge.className = "p-3 rounded-lg text-xs font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30";
+        statusBadge.innerText = `Network or Parsing error: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Ingest & Process Batch";
+      }
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+[
+  {
+    "claim_id": "CLM-001",
+    "case_title": "Comprehensive Operational Leakage (Room Rent + Consumables + Overlooked Deductible/Copay)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CLMNT-001",
+      "name": "Rohan Gupta",
+      "relationship_to_insured": "SELF",
+      "age": 36
+    },
+    "incident_details": {
+      "admission_date": "2026-08-10T10:00:00Z",
+      "discharge_date": "2026-08-14T11:00:00Z",
+      "hospital_id": "HOSP-MAX-DEL",
+      "hospital_name": "Max Healthcare Saket",
+      "icd10_code": "K35.8",
+      "diagnosis_description": "Acute Appendicitis with Localized Peritonitis",
+      "policy_tenure_months": 8,
+      "is_pre_existing": false,
+      "proposed_settlement_amount": 145000.0
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-DELUXE",
+        "description": "Single Deluxe Private Room (4 days)",
+        "quantity": 4,
+        "unit_price": 7500.0,
+        "total_amount": 30000.0,
+        "service_date": "2026-08-10"
+      },
+      {
+        "line_id": "L2",
+        "category": "SURGERY",
+        "item_code": "SURG-APP",
+        "description": "Laparoscopic Appendectomy Surgical Fee",
+        "quantity": 1,
+        "unit_price": 80000.0,
+        "total_amount": 80000.0,
+        "service_date": "2026-08-11"
+      },
+      {
+        "line_id": "L3",
+        "category": "CONSULTATION",
+        "item_code": "DOC-VISIT",
+        "description": "Surgeon & Anesthetist Visit Charges (4 days)",
+        "quantity": 4,
+        "unit_price": 3000.0,
+        "total_amount": 12000.0,
+        "service_date": "2026-08-11"
+      },
+      {
+        "line_id": "L4",
+        "category": "CONSUMABLE",
+        "item_code": "PPE-PACK",
+        "description": "Surgical PPE Kits & Face Shields (4 sets)",
+        "quantity": 4,
+        "unit_price": 1200.0,
+        "total_amount": 4800.0,
+        "service_date": "2026-08-11"
+      },
+      {
+        "line_id": "L5",
+        "category": "CONSUMABLE",
+        "item_code": "GLOVES-DISP",
+        "description": "Nitrile Gloves & Cotton Swabs Box",
+        "quantity": 2,
+        "unit_price": 850.0,
+        "total_amount": 1700.0,
+        "service_date": "2026-08-11"
+      },
+      {
+        "line_id": "L6",
+        "category": "INVESTIGATION",
+        "item_code": "LAB-CBC-USG",
+        "description": "Pre-op Ultrasound Abdomen & CBC",
+        "quantity": 1,
+        "unit_price": 6500.0,
+        "total_amount": 6500.0,
+        "service_date": "2026-08-10"
+      }
+    ],
+    "claim_history": [
+      {
+        "previous_claim_id": "CLM-HIST-2026-042",
+        "admission_date": "2026-03-10",
+        "diagnosis": "Acute Gastroenteritis & Dehydration",
+        "hospital_name": "Max Healthcare Saket",
+        "paid_amount": 45000.0,
+        "settlement_status": "SETTLED"
+      }
+    ]
+  },
+  {
+    "claim_id": "CLM-002",
+    "case_title": "Exhausted Balance Sum Insured Overpayment",
+    "policy_id": "POL-SENIOR-CARE-02",
+    "claimant": {
+      "claimant_id": "CLMNT-002",
+      "name": "Devi Prasad",
+      "relationship_to_insured": "SELF",
+      "age": 68
+    },
+    "incident_details": {
+      "admission_date": "2026-09-01T09:00:00Z",
+      "discharge_date": "2026-09-04T16:00:00Z",
+      "hospital_id": "HOSP-APOLLO-CHE",
+      "hospital_name": "Apollo Hospitals Greams Road",
+      "icd10_code": "M17.0",
+      "diagnosis_description": "Severe Knee Osteoarthritis (Knee Replacement)",
+      "policy_tenure_months": 28,
+      "is_pre_existing": true,
+      "proposed_settlement_amount": 135000.0
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-STD",
+        "description": "Standard Room (3 days)",
+        "quantity": 3,
+        "unit_price": 4000.0,
+        "total_amount": 12000.0,
+        "service_date": "2026-09-01"
+      },
+      {
+        "line_id": "L2",
+        "category": "SURGERY",
+        "item_code": "SURG-TKR",
+        "description": "Total Knee Arthroplasty (Unilateral)",
+        "quantity": 1,
+        "unit_price": 120000.0,
+        "total_amount": 120000.0,
+        "service_date": "2026-09-02"
+      },
+      {
+        "line_id": "L3",
+        "category": "PHARMACY",
+        "item_code": "MEDS-POSTOP",
+        "description": "Post-operative Antibiotics & Analgesics",
+        "quantity": 1,
+        "unit_price": 15000.0,
+        "total_amount": 15000.0,
+        "service_date": "2026-09-02"
+      }
+    ],
+    "claim_history": [
+      {
+        "previous_claim_id": "CLM-HIST-2026-015",
+        "admission_date": "2026-02-14",
+        "diagnosis": "Cataract Surgery Left Eye",
+        "hospital_name": "Apollo Hospitals",
+        "paid_amount": 30000.0,
+        "settlement_status": "SETTLED"
+      },
+      {
+        "previous_claim_id": "CLM-HIST-2026-089",
+        "admission_date": "2026-06-20",
+        "diagnosis": "Hypertension & Cardiac Observation",
+        "hospital_name": "Apollo Hospitals",
+        "paid_amount": 190000.0,
+        "settlement_status": "SETTLED"
+      }
+    ]
+  },
+  {
+    "claim_id": "CLM-003",
+    "case_title": "Waiting Period Breach (Pre-Existing Disease in Waiting Phase)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CLMNT-003",
+      "name": "Kavita Verma",
+      "relationship_to_insured": "SPOUSE",
+      "age": 34
+    },
+    "incident_details": {
+      "admission_date": "2026-05-12T08:00:00Z",
+      "discharge_date": "2026-05-14T17:00:00Z",
+      "hospital_id": "HOSP-FORTIS-NOI",
+      "hospital_name": "Fortis Hospital Noida",
+      "icd10_code": "E11.9",
+      "diagnosis_description": "Type 2 Diabetes Mellitus with Ketoacidosis",
+      "policy_tenure_months": 9,
+      "is_pre_existing": true,
+      "proposed_settlement_amount": 62000.0
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ICU_RENT",
+        "item_code": "ICU-BED",
+        "description": "Medical ICU Admission (2 days)",
+        "quantity": 2,
+        "unit_price": 9000.0,
+        "total_amount": 18000.0,
+        "service_date": "2026-05-12"
+      },
+      {
+        "line_id": "L2",
+        "category": "INVESTIGATION",
+        "item_code": "BLOOD-PANEL",
+        "description": "Continuous Blood Glucose & Electrolyte Monitoring",
+        "quantity": 1,
+        "unit_price": 24000.0,
+        "total_amount": 24000.0,
+        "service_date": "2026-05-12"
+      },
+      {
+        "line_id": "L3",
+        "category": "PHARMACY",
+        "item_code": "INSULIN-IV",
+        "description": "IV Insulin Infusion & Supportive Therapy",
+        "quantity": 1,
+        "unit_price": 20000.0,
+        "total_amount": 20000.0,
+        "service_date": "2026-05-13"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-004",
+    "case_title": "Clean Legitimate Claim (Zero Leakage, Fully Admissible)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CLMNT-004",
+      "name": "Rohan Gupta",
+      "relationship_to_insured": "SELF",
+      "age": 36
+    },
+    "incident_details": {
+      "admission_date": "2026-10-01T08:00:00Z",
+      "discharge_date": "2026-10-01T20:00:00Z",
+      "hospital_id": "HOSP-SHROFF-DEL",
+      "hospital_name": "Dr. Shroff Eye Hospital Delhi",
+      "icd10_code": "H25.9",
+      "diagnosis_description": "Cataract Daycare Surgery",
+      "policy_tenure_months": 26,
+      "is_pre_existing": false,
+      "proposed_settlement_amount": 26550.0
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "SURGERY",
+        "item_code": "DAYCARE-CATARACT",
+        "description": "Cataract Surgery Daycare Package",
+        "quantity": 1,
+        "unit_price": 34500.0,
+        "total_amount": 34500.0,
+        "service_date": "2026-10-01"
+      }
+    ],
+    "claim_history": [
+      {
+        "previous_claim_id": "CLM-HIST-2026-042",
+        "admission_date": "2026-03-10",
+        "diagnosis": "Acute Gastroenteritis",
+        "hospital_name": "Max Healthcare",
+        "paid_amount": 45000.0,
+        "settlement_status": "SETTLED"
+      }
+    ]
+  },
+  {
+    "claim_id": "CLM-005",
+    "case_title": "Clinical Jargon Disguising Exclusions & Benchmark Price Outlier",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CLMNT-005",
+      "name": "Vikram Malhotra",
+      "relationship_to_insured": "SELF",
+      "age": 45
+    },
+    "incident_details": {
+      "admission_date": "2026-10-15T09:00:00Z",
+      "discharge_date": "2026-10-17T14:00:00Z",
+      "hospital_id": "HOSP-METRO-PRV",
+      "hospital_name": "Metro City Super Speciality",
+      "icd10_code": "K35.8",
+      "diagnosis_description": "Acute Abdomen - Laparoscopy",
+      "policy_tenure_months": 14,
+      "is_pre_existing": false,
+      "proposed_settlement_amount": 178000.0
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "SUITE-ROOM",
+        "description": "Executive Suite (2 days)",
+        "quantity": 2,
+        "unit_price": 12000.0,
+        "total_amount": 24000.0,
+        "service_date": "2026-10-15"
+      },
+      {
+        "line_id": "L2",
+        "category": "SURGERY",
+        "item_code": "SURG-LAP-APP",
+        "description": "Laparoscopic Appendectomy (Outlier Price)",
+        "quantity": 1,
+        "unit_price": 125000.0,
+        "total_amount": 125000.0,
+        "service_date": "2026-10-16"
+      },
+      {
+        "line_id": "L3",
+        "category": "CONSUMABLE",
+        "item_code": "MISC-09",
+        "description": "Disposable Trocar Cannula 10mm & Surgical Drape",
+        "quantity": 3,
+        "unit_price": 4500.0,
+        "total_amount": 13500.0,
+        "service_date": "2026-10-16"
+      },
+      {
+        "line_id": "L4",
+        "category": "ADMINISTRATIVE",
+        "item_code": "ADM-FEE",
+        "description": "Hospital Registration fee and TV charges",
+        "quantity": 1,
+        "unit_price": 3500.0,
+        "total_amount": 3500.0,
+        "service_date": "2026-10-15"
+      },
+      {
+        "line_id": "L5",
+        "category": "PHARMACY",
+        "item_code": "PHARM-IV",
+        "description": "Post-operative IV fluids and analgesics",
+        "quantity": 1,
+        "unit_price": 12000.0,
+        "total_amount": 12000.0,
+        "service_date": "2026-10-16"
+      }
+    ],
+    "claim_history": []
+  }
+]
