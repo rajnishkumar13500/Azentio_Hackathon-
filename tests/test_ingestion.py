@@ -76,3 +76,25 @@ def test_api_upload_and_validate():
     assert rep1["claim_id"] == "CLM-CSV-101"
     assert rep1["summary"]["total_claimed"] == 99000.0
 
+def test_ingest_pdf():
+    pdf_path = Path(__file__).parent.parent / "claims-ingestion" / "sample_data" / "documents" / "hospital_bill.pdf"
+    if pdf_path.exists():
+        with open(pdf_path, "rb") as f:
+            content = f.read()
+        result = ingestion_service.ingest_file("hospital_bill.pdf", content)
+        assert result.success is True
+        assert result.total_records >= 1
+        assert len(result.claims) >= 1
+        assert result.format_detected == "pdf"
+
+def test_ingest_image_png():
+    png_path = Path(__file__).parent.parent / "claims-ingestion" / "sample_data" / "documents" / "hospital_bill.png"
+    if png_path.exists():
+        with open(png_path, "rb") as f:
+            content = f.read()
+        result = ingestion_service.ingest_file("hospital_bill.png", content)
+        assert result.success is True
+        assert result.total_records >= 1
+        assert len(result.claims) >= 1
+        assert result.format_detected == "image_ocr"
+

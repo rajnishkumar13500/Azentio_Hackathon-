@@ -57,12 +57,39 @@ class PDFExtractor:
             reader = PdfReader(file_path)
             for idx, page in enumerate(reader.pages):
                 text = (page.extract_text() or "").strip()
-                results.append({
-                    "page": idx + 1,
-                    "text": text,
-                    "method": "digital_pypdf",
-                    "confidence": 95.0 if len(text) > 40 else 20.0
-                })
+                if len(text) > 40:
+                    results.append({
+                        "page": idx + 1,
+                        "text": text,
+                        "method": "digital_pypdf",
+                        "confidence": 95.0
+                    })
+                elif hasattr(page, "images") and len(page.images) > 0:
+                    # Run OCR on embedded image
+                    page_text = ""
+                    avg_conf = 0.0
+                    for img_idx, img in enumerate(page.images):
+                        temp_img_path = f"/tmp/pypdf_page_{idx+1}_{img_idx}.png"
+                        with open(temp_img_path, "wb") as f_img:
+                            f_img.write(img.data)
+                        ocr_res = self.ocr_provider.extract_text(temp_img_path, page_number=idx + 1)
+                        if os.path.exists(temp_img_path):
+                            os.remove(temp_img_path)
+                        page_text += ("\n" + ocr_res.text)
+                        avg_conf = ocr_res.confidence
+                    results.append({
+                        "page": idx + 1,
+                        "text": page_text.strip(),
+                        "method": "ocr_pypdf_image",
+                        "confidence": avg_conf
+                    })
+                else:
+                    results.append({
+                        "page": idx + 1,
+                        "text": text,
+                        "method": "digital_pypdf",
+                        "confidence": 20.0
+                    })
             return results
         except Exception as e:
             results.append({

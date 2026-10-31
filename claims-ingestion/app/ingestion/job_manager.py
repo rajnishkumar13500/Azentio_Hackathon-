@@ -9,9 +9,8 @@ from app.persistence.models.import_models import ImportJob, ImportFile
 from app.ingestion.parsers.csv_parser import CSVParser
 from app.ingestion.parsers.excel_parser import ExcelParser
 from app.ingestion.parsers.json_parser import JSONParser
-from app.ingestion.documents.pdf_extractor import PDFExtractor
-from app.ingestion.documents.tesseract_provider import TesseractProvider
-from app.ingestion.documents.field_extractor import DocumentFieldExtractor
+from app.ingestion.parsers.pdf_parser import PDFParser
+from app.ingestion.parsers.image_parser import ImageParser
 from app.ingestion.parsers.base import ParsedSourceRecord
 from app.ingestion.staging_service import StagingService
 from app.audit.audit_service import AuditService
@@ -114,8 +113,8 @@ class JobManager:
         csv_parser = CSVParser()
         excel_parser = ExcelParser()
         json_parser = JSONParser()
-        pdf_extractor = PDFExtractor()
-        ocr_provider = TesseractProvider()
+        pdf_parser = PDFParser()
+        image_parser = ImageParser()
 
         for f in files:
             fmt = f.file_format.upper()
@@ -131,37 +130,11 @@ class JobManager:
                 res = json_parser.parse(f.storage_path, f.filename)
                 parsed_records = res.records
             elif fmt == "PDF":
-                pdf_res = pdf_extractor.extract_text_and_pages(f.storage_path)
-                for page_item in pdf_res:
-                    fields = DocumentFieldExtractor.extract_candidate_fields(page_item["text"])
-                    parsed_records.append(ParsedSourceRecord(
-                        source_file=f.filename,
-                        source_page=page_item["page"],
-                        record_type_hint="INVOICE",
-                        raw_payload={
-                            "document_type": "PDF",
-                            "extracted_text": page_item["text"],
-                            "extraction_method": page_item["method"],
-                            "confidence": page_item["confidence"],
-                            **fields
-                        },
-                        is_skipped=False
-                    ))
+                res = pdf_parser.parse(f.storage_path, f.filename)
+                parsed_records = res.records
             elif fmt in ["PNG", "JPG", "JPEG", "IMAGE"]:
-                ocr_res = ocr_provider.extract_text(f.storage_path)
-                fields = DocumentFieldExtractor.extract_candidate_fields(ocr_res.text)
-                parsed_records.append(ParsedSourceRecord(
-                    source_file=f.filename,
-                    record_type_hint="INVOICE",
-                    raw_payload={
-                        "document_type": "IMAGE_OCR",
-                        "extracted_text": ocr_res.text,
-                        "extraction_method": "tesseract",
-                        "confidence": ocr_res.confidence,
-                        **fields
-                    },
-                    is_skipped=False
-                ))
+                res = image_parser.parse(f.storage_path, f.filename)
+                parsed_records = res.records
 
             if parsed_records:
                 staged = StagingService.stage_records(

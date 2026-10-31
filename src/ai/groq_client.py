@@ -1,7 +1,10 @@
 import json
 import logging
 from typing import Dict, Any, Optional
-from groq import Groq
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
 from src.config import settings
 
 logger = logging.getLogger(__name__)

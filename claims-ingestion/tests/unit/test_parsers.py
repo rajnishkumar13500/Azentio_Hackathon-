@@ -5,6 +5,8 @@ import openpyxl
 from app.ingestion.parsers.csv_parser import CSVParser
 from app.ingestion.parsers.excel_parser import ExcelParser
 from app.ingestion.parsers.json_parser import JSONParser
+from app.ingestion.parsers.pdf_parser import PDFParser
+from app.ingestion.parsers.image_parser import ImageParser
 
 def test_csv_parser_valid():
     parser = CSVParser()
@@ -78,3 +80,22 @@ def test_json_parser_array_and_collections():
         assert "CLAIM" in res_obj.detected_record_types
         assert "PROVIDER" in res_obj.detected_record_types
     os.remove(f.name)
+
+def test_pdf_parser():
+    sample_pdf = os.path.join(os.path.dirname(__file__), "../../sample_data/documents/hospital_bill.pdf")
+    if os.path.exists(sample_pdf):
+        parser = PDFParser()
+        res = parser.parse(sample_pdf, "hospital_bill.pdf")
+        assert res.success is True
+        assert len(res.records) >= 1
+        assert res.records[0].raw_payload["document_type"] == "PDF"
+
+def test_image_parser():
+    sample_png = os.path.join(os.path.dirname(__file__), "../../sample_data/documents/hospital_bill.png")
+    if os.path.exists(sample_png):
+        parser = ImageParser()
+        res = parser.parse(sample_png, "hospital_bill.png")
+        assert res.success is True
+        assert len(res.records) == 1
+        assert res.records[0].raw_payload["document_type"] == "IMAGE_OCR"
+        assert res.records[0].raw_payload["confidence"] > 0
