@@ -626,12 +626,86 @@
         </div>
       </section>
 
-      <!-- Line Items Adjudication Table -->
-      <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
-            Itemized Bill Line Items & Adjudication Rules
-          </h3>
+      <!-- Level 2 Step 5: Comprehensive Analyst Review & Escalation Dossier Report -->
+      <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4" id="analystDossierSection">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-lg bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-700 font-bold">
+              📋
+            </div>
+            <div>
+              <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <span>Analyst Review & Escalation Dossier Report</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 border border-brand-200">Level 2 Step 5</span>
+              </h3>
+              <p class="text-[11px] text-slate-500">Audits granular findings, records overrides/escalations, and computes net adjusted settlement</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="dossierEscalationBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-mono">
+              ROUTING: NORMAL
+            </span>
+            <button type="button" onclick="downloadAnalystReportJson()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-semibold transition flex items-center gap-1 shadow-sm" title="Download Full JSON Dossier">
+              <span>📥</span>
+              <span>Export Dossier (JSON)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Metric Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Findings Audited</span>
+            <div class="text-base font-bold text-slate-900 font-mono" id="dossierReviewedStats">0 / 0 Reviewed</div>
+            <span class="text-[10px] text-slate-500" id="dossierPendingStats">0 pending decisions</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">Escalation Unit</span>
+            <div class="text-base font-bold text-slate-800 font-mono" id="dossierTargetUnit">Standard Review</div>
+            <span class="text-[10px] text-slate-500">Routing pathway</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block">False Positive Override</span>
+            <div class="text-base font-bold text-emerald-700 font-mono" id="dossierFalsePosCredits">₹0.00</div>
+            <span class="text-[10px] text-emerald-600">Reimbursed to claimant</span>
+          </div>
+          <div class="p-3 rounded-xl bg-brand-50/70 border border-brand-200">
+            <span class="text-[10px] text-brand-700 uppercase font-semibold block">Net Adjusted Settlement</span>
+            <div class="text-base font-bold text-brand-800 font-mono" id="dossierNetSettlement">₹0.00</div>
+            <span class="text-[10px] text-brand-600" id="dossierNetLeakage">Prevented: ₹0.00</span>
+          </div>
+        </div>
+
+        <!-- Decisions Breakdown Chips -->
+        <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 text-[11px]">
+          <span class="text-slate-400 font-semibold uppercase text-[10px]">Decision Breakdown:</span>
+          <span class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-medium" id="chipConfirmed">
+            ✔ Confirmed Discrepancy: <b>0</b>
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium" id="chipFalsePos">
+            🛡️ False Positive: <b>0</b>
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 font-medium" id="chipEvidence">
+            📩 Addl Evidence: <b>0</b>
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 font-medium" id="chipEscalated">
+            🚨 Escalated: <b>0</b>
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 font-medium" id="chipAccepted">
+            ⚡ Correction Accepted: <b>0</b>
+          </span>
+        </div>
+      </section>
+
+      <!-- Itemized Bill Line Items & Adjudication Rules Section -->
+      <section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div>
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Itemized Bill Line Items & Adjudication Rules
+            </h3>
+            <p class="text-[11px] text-slate-500">Record granular analyst decisions on each billed line item finding</p>
+          </div>
           <span class="text-xs text-slate-500 font-mono" id="line-items-count">0 items</span>
         </div>
 
@@ -647,12 +721,45 @@
                 <th class="py-2.5 px-3 text-right">Discrepancy ₹</th>
                 <th class="py-2.5 px-3 text-center">Status</th>
                 <th class="py-2.5 px-3">Rule Applied</th>
+                <th class="py-2.5 px-3 text-center font-bold text-slate-700">Analyst Decision</th>
               </tr>
             </thead>
             <tbody id="lineItemsTableBody" class="divide-y divide-slate-100">
               <!-- Dynamically populated -->
             </tbody>
           </table>
+        </div>
+
+        <!-- Adjudication Rules & Policy Findings Sub-Table -->
+        <div class="pt-4 border-t border-slate-100 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span>⚖️</span>
+                <span>Policy Adjudication Rules & Triggered Violations</span>
+              </h4>
+              <p class="text-[11px] text-slate-500">Claim-level caps, deductibles, co-pays, and unbundling rule findings</p>
+            </div>
+            <span class="text-[11px] text-slate-400 font-mono" id="rulesFindingCount">0 rules triggered</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50/80 border-b border-slate-200 font-semibold text-slate-500 text-[11px]">
+                <tr>
+                  <th class="py-2.5 px-3">Rule ID</th>
+                  <th class="py-2.5 px-3">Rule Name & Policy Clause</th>
+                  <th class="py-2.5 px-3">Finding / Violation Formula</th>
+                  <th class="py-2.5 px-3 text-right">Discrepancy ₹</th>
+                  <th class="py-2.5 px-3 text-center">Rule Status</th>
+                  <th class="py-2.5 px-3 text-center font-bold text-slate-700">Analyst Decision</th>
+                </tr>
+              </thead>
+              <tbody id="rulesTableBody" class="divide-y divide-slate-100">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -945,6 +1052,84 @@
     </div>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- MODAL: ANALYST DECISION & ESCALATION (LEVEL 2 STEP 5)                     -->
+  <!-- ========================================================================= -->
+  <div id="analystDecisionModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 transform transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center text-lg font-bold">
+            ⚖️
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900" id="decisionModalFindingTitle">Record Analyst Decision</h3>
+            <p class="text-xs text-slate-500 font-mono" id="decisionModalFindingSubtitle">Finding ID: line_1</p>
+          </div>
+        </div>
+        <button onclick="closeDecisionModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <!-- Finding Summary Banner -->
+      <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs space-y-1">
+        <div class="flex justify-between text-slate-600">
+          <span class="font-medium">Finding Context:</span>
+          <span class="font-bold text-slate-900" id="decisionModalFindingContext">Line Item Discrepancy</span>
+        </div>
+        <div class="flex justify-between text-slate-600">
+          <span class="font-medium">Identified Discrepancy:</span>
+          <span class="font-mono font-bold text-rose-600" id="decisionModalDiscrepancy">₹0.00</span>
+        </div>
+      </div>
+
+      <!-- Decision Type Selection -->
+      <div class="space-y-1.5 text-xs">
+        <label class="font-bold text-slate-800 block">Select Adjudication Decision:</label>
+        <select id="analystDecisionSelect" onchange="onDecisionTypeChange()" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-brand-500">
+          <option value="CONFIRM_DISCREPANCY">✔ Confirm Discrepancy (Validate Leakage Deduction)</option>
+          <option value="MARK_FALSE_POSITIVE">🛡️ Mark as False Positive (Override with Mandatory Reason)</option>
+          <option value="REQUEST_ADDITIONAL_EVIDENCE">📩 Request Additional Evidence (Hold Finding Pending Docs)</option>
+          <option value="ESCALATE">🚨 Escalate to Senior Claims Reviewer or SIU</option>
+          <option value="ACCEPT_CORRECTION">⚡ Accept Recommended Settlement Correction</option>
+        </select>
+      </div>
+
+      <!-- Escalation Target (visible only when ESCALATE is chosen) -->
+      <div id="escalationTargetGroup" class="hidden space-y-1.5 text-xs">
+        <label class="font-bold text-purple-900 block">Escalation Routing Target:</label>
+        <select id="escalationTargetSelect" class="w-full p-2.5 bg-purple-50 border border-purple-200 rounded-xl font-semibold text-purple-900 focus:outline-none focus:border-purple-500">
+          <option value="SPECIAL_INVESTIGATION_UNIT">🚨 Special Investigation Unit (SIU) - Fraud / Collusion</option>
+          <option value="SENIOR_CLAIMS_REVIEWER">⚖️ Senior Claims Reviewer - Complex Policy Dispute</option>
+        </select>
+      </div>
+
+      <!-- Justification / Reason (Mandatory for False Positive) -->
+      <div class="space-y-1.5 text-xs">
+        <div class="flex justify-between items-center">
+          <label class="font-bold text-slate-800 block" id="decisionReasonLabel">Auditor Justification / Reason:</label>
+          <span class="text-[10px] text-rose-500 font-semibold hidden" id="reasonRequiredNotice">* Mandatory for False Positive</span>
+        </div>
+        <textarea id="decisionReasonInput" rows="3" placeholder="Enter specific medical, policy, or evidence justification..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-brand-500"></textarea>
+      </div>
+
+      <!-- Reviewer Identity -->
+      <div class="space-y-1 text-xs">
+        <label class="font-semibold text-slate-600 block">Reviewer Identity:</label>
+        <input type="text" id="decisionAnalystId" value="Senior Claims Auditor - Level 2" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs">
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button onclick="closeDecisionModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
+          Cancel
+        </button>
+        <button onclick="submitDecisionModalForm()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white transition shadow-sm shadow-brand-600/30">
+          Save Decision & Apply Policy
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-brand-500/30 text-xs font-semibold hidden flex items-center space-x-2 transition-all">
     <span class="w-2 h-2 rounded-full bg-brand-400"></span>
@@ -965,6 +1150,8 @@
     let selectedUploadFile = null;
     let categoryChartInstance = null;
     let severityChartInstance = null;
+    let currentClaimDecisions = {};
+    let currentDecisionFinding = { findingId: null, findingType: 'LINE_ITEM', description: '', discrepancy: 0 };
 
     // Format Indian Rupees
     function formatINR(num) {
@@ -1356,8 +1543,20 @@
       // Clinical Summary
       document.getElementById('ai-clinical-notes').innerText = report.recommendations.join(' • ') || "All claims line items comply with medical necessity and policy guidelines.";
 
-      // Line items table
+      // Line items table & Adjudication Rules
       renderLineItemsTable(report.line_items || []);
+      renderRulesTable(report);
+      refreshAnalystReviewData(report.claim_id);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function renderLineItemsTable(items) {
@@ -1368,7 +1567,7 @@
       if (items.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="py-8 text-center text-slate-400 italic">
+            <td colspan="9" class="py-8 text-center text-slate-400 italic">
               No individual line items (Claim evaluated at package level).
             </td>
           </tr>
@@ -1386,6 +1585,43 @@
 
         const primaryRule = line.rules_applied && line.rules_applied.length > 0 ? line.rules_applied[0].rule_name : 'Standard Pay';
 
+        // Analyst decision badge or button
+        const dec = currentClaimDecisions[line.line_id];
+        let decisionHtml = '';
+        if (dec) {
+          let badgeColor = 'bg-slate-100 text-slate-700 border-slate-200';
+          let label = dec.decision.replace(/_/g, ' ');
+          if (dec.decision === 'CONFIRM_DISCREPANCY') {
+            badgeColor = 'bg-rose-100 text-rose-800 border-rose-300';
+            label = '✔ Confirmed';
+          } else if (dec.decision === 'MARK_FALSE_POSITIVE') {
+            badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            label = '🛡️ False Positive';
+          } else if (dec.decision === 'REQUEST_ADDITIONAL_EVIDENCE') {
+            badgeColor = 'bg-amber-100 text-amber-800 border-amber-300';
+            label = '📩 Addl Evidence';
+          } else if (dec.decision === 'ESCALATE') {
+            badgeColor = 'bg-purple-100 text-purple-800 border-purple-300';
+            label = '🚨 Escalated';
+          } else if (dec.decision === 'ACCEPT_CORRECTION') {
+            badgeColor = 'bg-blue-100 text-blue-800 border-blue-300';
+            label = '⚡ Accepted';
+          }
+          const tooltip = dec.reason ? `${label}: ${dec.reason}` : label;
+          decisionHtml = `
+            <div class="flex items-center justify-center gap-1">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeColor}" title="${escapeHtml(tooltip)}">${label}</span>
+              <button onclick="openDecisionModal('${line.line_id}', 'LINE_ITEM', '${escapeHtml(line.description)}', ${line.discrepancy_amount})" class="text-[11px] text-slate-400 hover:text-slate-700 p-0.5" title="Change Decision">✏️</button>
+            </div>
+          `;
+        } else {
+          decisionHtml = `
+            <button onclick="openDecisionModal('${line.line_id}', 'LINE_ITEM', '${escapeHtml(line.description)}', ${line.discrepancy_amount})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px] border border-slate-200 transition">
+              ⚖️ Record Decision
+            </button>
+          `;
+        }
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="py-2.5 px-3 font-mono text-slate-500">${line.line_id}</td>
@@ -1396,9 +1632,259 @@
           <td class="py-2.5 px-3 text-right font-mono text-rose-600 font-bold">${line.discrepancy_amount > 0 ? formatINR(line.discrepancy_amount) : '-'}</td>
           <td class="py-2.5 px-3 text-center">${statusBadge}</td>
           <td class="py-2.5 px-3 text-slate-500 text-[11px] truncate max-w-xs">${primaryRule}</td>
+          <td class="py-2.5 px-3 text-center">${decisionHtml}</td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function renderRulesTable(report) {
+      const tbody = document.getElementById('rulesTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const allRules = (report.claim_level_rules || []).concat(
+        (report.line_items || []).flatMap(li => li.rules_applied || [])
+      );
+
+      const triggered = [];
+      const seen = new Set();
+      allRules.forEach(r => {
+        if (!seen.has(r.rule_id) && (r.status !== 'PASSED' || r.discrepancy_amount > 0)) {
+          seen.add(r.rule_id);
+          triggered.push(r);
+        }
+      });
+
+      const countEl = document.getElementById('rulesFindingCount');
+      if (countEl) countEl.innerText = `${triggered.length} rules triggered`;
+
+      if (triggered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-4 text-center text-slate-400 italic">
+              No policy rule breaches or deductible/copay adjustments triggered.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      triggered.forEach(rule => {
+        const dec = currentClaimDecisions[rule.rule_id];
+        let decisionHtml = '';
+        if (dec) {
+          let badgeColor = 'bg-slate-100 text-slate-700 border-slate-200';
+          let label = dec.decision.replace(/_/g, ' ');
+          if (dec.decision === 'CONFIRM_DISCREPANCY') {
+            badgeColor = 'bg-rose-100 text-rose-800 border-rose-300';
+            label = '✔ Confirmed';
+          } else if (dec.decision === 'MARK_FALSE_POSITIVE') {
+            badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            label = '🛡️ False Positive';
+          } else if (dec.decision === 'REQUEST_ADDITIONAL_EVIDENCE') {
+            badgeColor = 'bg-amber-100 text-amber-800 border-amber-300';
+            label = '📩 Addl Evidence';
+          } else if (dec.decision === 'ESCALATE') {
+            badgeColor = 'bg-purple-100 text-purple-800 border-purple-300';
+            label = '🚨 Escalated';
+          } else if (dec.decision === 'ACCEPT_CORRECTION') {
+            badgeColor = 'bg-blue-100 text-blue-800 border-blue-300';
+            label = '⚡ Accepted';
+          }
+          const tooltip = dec.reason ? `${label}: ${dec.reason}` : label;
+          decisionHtml = `
+            <div class="flex items-center justify-center gap-1">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeColor}" title="${escapeHtml(tooltip)}">${label}</span>
+              <button onclick="openDecisionModal('${rule.rule_id}', 'RULE_VIOLATION', '${escapeHtml(rule.rule_name)}', ${rule.discrepancy_amount})" class="text-[11px] text-slate-400 hover:text-slate-700 p-0.5" title="Change Decision">✏️</button>
+            </div>
+          `;
+        } else {
+          decisionHtml = `
+            <button onclick="openDecisionModal('${rule.rule_id}', 'RULE_VIOLATION', '${escapeHtml(rule.rule_name)}', ${rule.discrepancy_amount})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[10px] border border-slate-200 transition">
+              ⚖️ Record Decision
+            </button>
+          `;
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono text-slate-600 font-bold">${rule.rule_id}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-800">${rule.rule_name}</td>
+          <td class="py-2.5 px-3 text-slate-600 leading-tight max-w-sm">${rule.reason || '-'}</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600">${rule.discrepancy_amount > 0 ? formatINR(rule.discrepancy_amount) : '-'}</td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">${rule.status}</span>
+          </td>
+          <td class="py-2.5 px-3 text-center">${decisionHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function refreshAnalystReviewData(claimId) {
+      try {
+        const [decRes, repRes] = await Promise.all([
+          fetch(`/api/v1/investigation/${claimId}/decisions`),
+          fetch(`/api/v1/investigation/${claimId}/analyst-report`)
+        ]);
+        if (decRes.ok) {
+          currentClaimDecisions = await decRes.json();
+        }
+        if (repRes.ok) {
+          const report = await repRes.json();
+          updateDossierCard(report);
+        }
+        if (activeClaimReport) {
+          renderLineItemsTable(activeClaimReport.line_items || []);
+          renderRulesTable(activeClaimReport);
+        }
+      } catch (err) {
+        console.error("Error refreshing analyst review:", err);
+      }
+    }
+
+    function updateDossierCard(report) {
+      const statsEl = document.getElementById('dossierReviewedStats');
+      if (!statsEl) return;
+      statsEl.innerText = `${report.total_reviewed} / ${report.total_findings} Reviewed`;
+      document.getElementById('dossierPendingStats').innerText = `${report.pending_review} pending decisions`;
+      
+      const badge = document.getElementById('dossierEscalationBadge');
+      if (report.escalation_status === 'SIU_ESCALATED') {
+        badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-purple-100 text-purple-900 border border-purple-300 font-mono";
+        badge.innerText = "ROUTING: 🚨 SIU INVESTIGATION";
+        document.getElementById('dossierTargetUnit').innerText = "Special Investigation Unit";
+      } else if (report.escalation_status === 'SENIOR_REVIEW_REQUESTED') {
+        badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-mono";
+        badge.innerText = "ROUTING: ⚖️ SENIOR REVIEW";
+        document.getElementById('dossierTargetUnit').innerText = "Senior Reviewer";
+      } else {
+        badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-mono";
+        badge.innerText = "ROUTING: NORMAL";
+        document.getElementById('dossierTargetUnit').innerText = "Standard Review";
+      }
+
+      const falsePosDiff = Math.max(0, report.net_adjusted_settlement - report.original_admissible_amount);
+      document.getElementById('dossierFalsePosCredits').innerText = formatINR(falsePosDiff);
+      document.getElementById('dossierNetSettlement').innerText = formatINR(report.net_adjusted_settlement);
+      document.getElementById('dossierNetLeakage').innerText = `Prevented: ${formatINR(report.net_adjusted_leakage)}`;
+
+      const b = report.decisions_breakdown || {};
+      document.getElementById('chipConfirmed').innerHTML = `✔ Confirmed Discrepancy: <b>${b.CONFIRM_DISCREPANCY || 0}</b>`;
+      document.getElementById('chipFalsePos').innerHTML = `🛡️ False Positive: <b>${b.MARK_FALSE_POSITIVE || 0}</b>`;
+      document.getElementById('chipEvidence').innerHTML = `📩 Addl Evidence: <b>${b.REQUEST_ADDITIONAL_EVIDENCE || 0}</b>`;
+      document.getElementById('chipEscalated').innerHTML = `🚨 Escalated: <b>${b.ESCALATE || 0}</b>`;
+      document.getElementById('chipAccepted').innerHTML = `⚡ Correction Accepted: <b>${b.ACCEPT_CORRECTION || 0}</b>`;
+    }
+
+    function openDecisionModal(findingId, findingType, description, discrepancy) {
+      currentDecisionFinding = { findingId, findingType, description, discrepancy };
+      document.getElementById('decisionModalFindingTitle').innerText = `Record Decision: ${findingId}`;
+      document.getElementById('decisionModalFindingSubtitle').innerText = `${findingType}: ${description}`;
+      document.getElementById('decisionModalFindingContext').innerText = description;
+      document.getElementById('decisionModalDiscrepancy').innerText = formatINR(discrepancy || 0);
+
+      const existing = currentClaimDecisions[findingId];
+      if (existing) {
+        document.getElementById('analystDecisionSelect').value = existing.decision;
+        document.getElementById('decisionReasonInput').value = existing.reason || '';
+        if (existing.escalation_target) {
+          document.getElementById('escalationTargetSelect').value = existing.escalation_target;
+        }
+      } else {
+        document.getElementById('analystDecisionSelect').value = 'CONFIRM_DISCREPANCY';
+        document.getElementById('decisionReasonInput').value = '';
+      }
+      onDecisionTypeChange();
+      document.getElementById('analystDecisionModal').classList.remove('hidden');
+    }
+
+    function closeDecisionModal() {
+      document.getElementById('analystDecisionModal').classList.add('hidden');
+    }
+
+    function onDecisionTypeChange() {
+      const sel = document.getElementById('analystDecisionSelect').value;
+      const escGroup = document.getElementById('escalationTargetGroup');
+      const reqNotice = document.getElementById('reasonRequiredNotice');
+
+      if (sel === 'ESCALATE') {
+        escGroup.classList.remove('hidden');
+      } else {
+        escGroup.classList.add('hidden');
+      }
+
+      if (sel === 'MARK_FALSE_POSITIVE') {
+        reqNotice.classList.remove('hidden');
+        document.getElementById('decisionReasonInput').placeholder = "Mandatory: enter clinical/operational reason why this finding is a false positive...";
+      } else {
+        reqNotice.classList.add('hidden');
+        document.getElementById('decisionReasonInput').placeholder = "Enter specific medical, policy, or evidence justification...";
+      }
+    }
+
+    async function submitDecisionModalForm() {
+      if (!activeClaimReport) return;
+      const claimId = activeClaimReport.claim_id;
+      const decision = document.getElementById('analystDecisionSelect').value;
+      const reason = document.getElementById('decisionReasonInput').value.trim();
+      const analystId = document.getElementById('decisionAnalystId').value.trim() || 'Senior Claims Auditor';
+      const escalationTarget = decision === 'ESCALATE' ? document.getElementById('escalationTargetSelect').value : null;
+
+      if (decision === 'MARK_FALSE_POSITIVE' && !reason) {
+        alert("Please provide a mandatory justification reason when marking a finding as False Positive.");
+        document.getElementById('decisionReasonInput').focus();
+        return;
+      }
+
+      const payload = {
+        finding_id: currentDecisionFinding.findingId,
+        finding_type: currentDecisionFinding.findingType,
+        decision: decision,
+        reason: reason || null,
+        escalation_target: escalationTarget,
+        analyst_id: analystId
+      };
+
+      try {
+        const res = await fetch(`/api/v1/investigation/${claimId}/decision`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Failed to record decision.");
+        }
+        showToast(`Decision recorded: ${decision.replace(/_/g, ' ')}`);
+        closeDecisionModal();
+        await refreshAnalystReviewData(claimId);
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    async function downloadAnalystReportJson() {
+      if (!activeClaimReport) return;
+      const claimId = activeClaimReport.claim_id;
+      try {
+        const res = await fetch(`/api/v1/investigation/${claimId}/analyst-report`);
+        if (!res.ok) throw new Error("Could not fetch analyst report.");
+        const data = await res.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Analyst_Investigation_Dossier_${claimId}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Investigation Dossier downloaded.");
+      } catch (err) {
+        alert("Download error: " + err.message);
+      }
     }
 
     // =========================================================================

@@ -12,9 +12,17 @@ from .models import (
     DocumentFieldComparison,
     DocumentLineItemComparison,
     DocumentReconciliationReport,
+    AnalystDecisionType,
+    EscalationTarget,
+    FindingType,
+    SettlementCorrection,
+    FindingDecision,
+    FindingDecisionRequest,
+    AnalystInvestigationReport,
 )
 from .correlation import CrossClaimCorrelationEngine
 from .document_comparator import DocumentInvoiceAnalyzer, document_analyzer
+from .analyst_service import AnalystReviewService, analyst_service
 
 __all__ = [
     "CorrelationRelationshipType",
@@ -28,5 +36,14 @@ __all__ = [
     "DocumentReconciliationReport",
     "DocumentInvoiceAnalyzer",
     "document_analyzer",
+    "AnalystDecisionType",
+    "EscalationTarget",
+    "FindingType",
+    "SettlementCorrection",
+    "FindingDecision",
+    "FindingDecisionRequest",
+    "AnalystInvestigationReport",
+    "AnalystReviewService",
+    "analyst_service",
 ]
 

@@ -2,6 +2,7 @@
 Data models for Claims Investigation Workspace & Cross-Claim Correlation.
 """
 
+from datetime import datetime, UTC
 from enum import Enum
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
@@ -129,4 +130,83 @@ class DocumentReconciliationReport(BaseModel):
     line_item_reconciliations: List[DocumentLineItemComparison] = Field(default_factory=list)
     extracted_metadata: Dict[str, Any] = Field(default_factory=dict)
     summary_verdict: str = "VERIFIED_MATCH"
+
+
+# =============================================================================
+# Level 2 Step 4 & 5: Recommended Settlement Corrections & Analyst Review
+# =============================================================================
+
+class AnalystDecisionType(str, Enum):
+    CONFIRM_DISCREPANCY = "CONFIRM_DISCREPANCY"
+    MARK_FALSE_POSITIVE = "MARK_FALSE_POSITIVE"
+    REQUEST_ADDITIONAL_EVIDENCE = "REQUEST_ADDITIONAL_EVIDENCE"
+    ESCALATE = "ESCALATE"
+    ACCEPT_CORRECTION = "ACCEPT_CORRECTION"
+
+
+class EscalationTarget(str, Enum):
+    SENIOR_CLAIMS_REVIEWER = "SENIOR_CLAIMS_REVIEWER"
+    SPECIAL_INVESTIGATION_UNIT = "SPECIAL_INVESTIGATION_UNIT"
+
+
+class FindingType(str, Enum):
+    LINE_ITEM = "LINE_ITEM"
+    RULE_VIOLATION = "RULE_VIOLATION"
+    CORRELATION = "CORRELATION"
+    DOCUMENT_VARIANCE = "DOCUMENT_VARIANCE"
+
+
+class SettlementCorrection(BaseModel):
+    correction_id: str
+    finding_id: str
+    finding_type: FindingType
+    category: str
+    description: str
+    original_amount: float
+    corrected_amount: float
+    adjustment_amount: float
+    calculation_formula: str
+    policy_rule_or_evidence: str
+    status: str = "RECOMMENDED"
+
+
+class FindingDecision(BaseModel):
+    finding_id: str
+    finding_type: FindingType
+    decision: AnalystDecisionType
+    reason: Optional[str] = None
+    escalation_target: Optional[EscalationTarget] = None
+    analyst_id: str = "Senior Claims Auditor"
+    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
+    original_leakage: float = 0.0
+    adjusted_leakage: float = 0.0
+
+
+class FindingDecisionRequest(BaseModel):
+    finding_id: str
+    finding_type: FindingType = FindingType.LINE_ITEM
+    decision: AnalystDecisionType
+    reason: Optional[str] = None
+    escalation_target: Optional[EscalationTarget] = None
+    analyst_id: Optional[str] = "Senior Claims Auditor"
+
+
+class AnalystInvestigationReport(BaseModel):
+    claim_id: str
+    case_title: str
+    total_findings: int
+    total_reviewed: int
+    pending_review: int
+    decisions_breakdown: Dict[str, int]
+    escalation_status: str  # NORMAL, SENIOR_REVIEW_REQUESTED, SIU_ESCALATED
+    original_claimed_amount: float
+    original_admissible_amount: float
+    original_leakage_prevented: float
+    net_adjusted_settlement: float
+    net_adjusted_leakage: float
+    line_item_findings: List[Dict[str, Any]]
+    rule_findings: List[Dict[str, Any]]
+    recommended_corrections: List[SettlementCorrection]
+    decisions: List[FindingDecision]
+    audit_notes: List[str] = Field(default_factory=list)
 

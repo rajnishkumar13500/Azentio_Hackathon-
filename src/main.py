@@ -18,7 +18,7 @@ if sys.platform == "win32":
 
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, UTC
 from fastapi import FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.responses import FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -47,6 +47,14 @@ from src.investigation import (
     CorrelationRelationshipType,
     document_analyzer,
     DocumentReconciliationReport,
+    AnalystDecisionType,
+    EscalationTarget,
+    FindingType,
+    SettlementCorrection,
+    FindingDecision,
+    FindingDecisionRequest,
+    AnalystInvestigationReport,
+    analyst_service,
 )
 
 logger = logging.getLogger(__name__)
@@ -651,7 +659,7 @@ def save_investigation_note(claim_id: str, req: InvestigationNoteRequest):
     })
     current["notes"] = req.notes
     current["adjudicated_by"] = req.adjudicated_by or current.get("adjudicated_by") or "Claims Analyst"
-    current["timestamp"] = datetime.utcnow().isoformat()
+    current["timestamp"] = datetime.now(UTC).isoformat()
     _adjudications[claim_id] = current
     return {
         "status": "SUCCESS",
@@ -686,24 +694,96 @@ def get_raw_supporting_document(document_name: str):
             }
     raise HTTPException(status_code=404, detail=f"Supporting document '{document_name}' not found.")
 
+@app.post("/api/v1/investigation/{claim_id}/decision", response_model=FindingDecision)
+@app.post("/api/investigation/{claim_id}/decision", response_model=FindingDecision)
+def record_finding_decision_endpoint(claim_id: str, req: FindingDecisionRequest):
+    """
+    Level 2 Step 5: Records an analyst review decision on any finding (line item or rule violation).
+    Supported decisions:
+    - CONFIRM_DISCREPANCY: Confirms discrepancy as audited leakage.
+    - MARK_FALSE_POSITIVE: Marks finding as false positive (requires mandatory reason).
+    - REQUEST_ADDITIONAL_EVIDENCE: Requests further documentation from claimant or hospital.
+    - ESCALATE: Escalates finding to Senior Claims Reviewer or SIU (Special Investigation Unit).
+    - ACCEPT_CORRECTION: Accepts recommended settlement correction.
+    """
+    report = adjudicate_claim(claim_id)
+    # Find matching finding metadata if line item
+    finding_meta = {}
+    if req.finding_type == FindingType.LINE_ITEM:
+        matching_line = next((li for li in report.line_items if li.line_id == req.finding_id), None)
+        if matching_line:
+            finding_meta["discrepancy_amount"] = matching_line.discrepancy_amount
+    else:
+        all_rules = report.claim_level_rules + [r for li in report.line_items for r in li.rules_applied]
+        matching_rule = next((r for r in all_rules if r.rule_id == req.finding_id), None)
+        if matching_rule:
+            finding_meta["discrepancy_amount"] = matching_rule.discrepancy_amount
+
+    try:
+        decision = analyst_service.record_decision(claim_id, req, finding_meta)
+        return decision
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/v1/investigation/{claim_id}/decisions")
+@app.get("/api/investigation/{claim_id}/decisions")
+def get_finding_decisions_endpoint(claim_id: str):
+    """Returns all recorded analyst decisions on findings for the specified claim."""
+    return analyst_service.get_decisions(claim_id)
+
+@app.get("/api/v1/investigation/{claim_id}/corrections", response_model=List[SettlementCorrection])
+@app.get("/api/investigation/{claim_id}/corrections", response_model=List[SettlementCorrection])
+def get_recommended_corrections_endpoint(claim_id: str):
+    """
+    Level 2 Step 4: Returns specific settlement adjustments showing original amount,
+    corrected amount, calculation formula, and governing policy rule.
+    """
+    report = adjudicate_claim(claim_id)
+    return analyst_service.generate_corrections(report)
+
+@app.get("/api/v1/investigation/{claim_id}/analyst-report", response_model=AnalystInvestigationReport)
+@app.get("/api/investigation/{claim_id}/analyst-report", response_model=AnalystInvestigationReport)
+def get_analyst_investigation_report_endpoint(claim_id: str):
+    """
+    Level 2 Step 5: Generates comprehensive Analyst Review & Escalation Dossier
+    with reviewed vs pending findings breakdown, escalation status, and net adjusted settlement.
+    """
+    report = adjudicate_claim(claim_id)
+    claim = claims_repository.get_by_id(claim_id)
+    policies_data, claims_data = load_data()
+    if not claim:
+        raw = next((c for c in claims_data if c["claim_id"] == claim_id), None)
+        if not raw:
+            raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found.")
+        claim = Claim(**raw)
+    policy_dict = policies_data.get(claim.policy_id, policies_data.get("POL-COMPREHENSIVE-01"))
+    policy = Policy(**policy_dict)
+
+    return analyst_service.build_analyst_report(claim, policy, report)
+
 @app.get("/api/v1/investigation/{claim_id}/workspace")
 @app.get("/api/investigation/{claim_id}/workspace")
 def get_investigation_workspace(claim_id: str):
     """
-    Level 2 Step 3: Consolidated Claims Investigation Workspace payload containing:
+    Level 2 Step 3 & 5: Consolidated Claims Investigation Workspace payload containing:
     1. Original Claim & Line Items
     2. Relevant Policy Terms & Sub-Limits
     3. Related Claims (Cross-Claim Correlations)
     4. Extracted Document Evidence & Discrepancies
     5. Calculated Leakage Amount & Arithmetic Proof
-    6. Analyst Notes & Evidence Audit History
+    6. Specific Recommended Settlement Corrections
+    7. Granular Analyst Review Decisions & Escalation Status
+    8. Analyst Working Notes & Available Forensic Documents
     """
     report = adjudicate_claim(claim_id)
     claim = claims_repository.get_by_id(claim_id)
+    policies_data, claims_data = load_data()
     if not claim:
-        policies_data, claims_data = load_data()
         raw = next((c for c in claims_data if c["claim_id"] == claim_id), None)
         claim = Claim(**raw) if raw else None
+
+    policy_dict = policies_data.get(claim.policy_id if claim else "", policies_data.get("POL-COMPREHENSIVE-01"))
+    policy = Policy(**policy_dict)
 
     # Get correlation report
     engine = CrossClaimCorrelationEngine(claims_repository.get_all() or ([claim] if claim else []))
@@ -715,6 +795,10 @@ def get_investigation_workspace(claim_id: str):
     except Exception:
         doc_evidence = None
 
+    # Get recommended corrections and analyst investigation report
+    corrections = analyst_service.generate_corrections(report)
+    analyst_rep = analyst_service.build_analyst_report(claim, policy, report) if claim else None
+
     return {
         "claim_id": claim_id,
         "original_claim": claim,
@@ -722,6 +806,9 @@ def get_investigation_workspace(claim_id: str):
         "validation_report": report,
         "correlations": correlations,
         "document_evidence": doc_evidence,
+        "corrections": corrections,
+        "analyst_report": analyst_rep,
+        "decisions": analyst_service.get_decisions(claim_id),
         "adjudication": report.adjudication,
         "available_documents": [
             "hospital_tax_invoice_saket.txt",
@@ -831,6 +918,8 @@ def download_sample_file(file_format: str):
         "corr": (jury_dir / "04_level2_cross_claim_correlations.json", "04_level2_cross_claim_correlations.json", "application/json"),
         "json": (jury_dir / "05_sample_synthetic_claims.json", "05_sample_synthetic_claims.json", "application/json"),
         "invalid": (jury_dir / "06_sample_invalid_claim.csv", "06_sample_invalid_claim.csv", "text/csv"),
+        "step4": (jury_dir / "Step_4_Settlement_Corrections" / "01_settlement_corrections_case.json", "01_settlement_corrections_case.json", "application/json"),
+        "step5": (jury_dir / "Step_5_Analyst_Review_and_Escalation" / "01_analyst_review_case.json", "01_analyst_review_case.json", "application/json"),
     }
     fmt = file_format.lower()
     if fmt not in mapping:

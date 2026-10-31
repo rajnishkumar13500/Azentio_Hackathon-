@@ -1,0 +1,73 @@
+[
+  {
+    "claim_id": "CLM-SETTLE-001",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "case_title": "Cholecystectomy Settlement Correction & Deductible Application Case",
+    "claimant": {
+      "claimant_id": "C-901",
+      "name": "Sunita Verma",
+      "age": 42,
+      "gender": "FEMALE",
+      "relationship_to_insured": "SELF",
+      "phone": "+91-98112-99881",
+      "email": "sunita.verma@example.com"
+    },
+    "incident_details": {
+      "hospital_id": "HOSP-MAX-DELHI",
+      "hospital_name": "Max Super Speciality Hospital, Saket",
+      "admission_date": "2026-08-10",
+      "discharge_date": "2026-08-14",
+      "diagnosis_description": "Acute Cholecystitis undergoing Laparoscopic Cholecystectomy",
+      "icd10_code": "K81.0",
+      "procedure_code": "PROC-LAP-CHOLE",
+      "invoice_number": "INV-MAX-2026-901",
+      "policy_tenure_months": 24,
+      "is_pre_existing": false,
+      "room_type": "DELUXE_ROOM"
+    },
+    "line_items": [
+      {
+        "line_id": "line_1",
+        "category": "ROOM_RENT",
+        "description": "Deluxe Private Room (4 Days @ ₹12,000/day)",
+        "claimed_amount": 48000.0,
+        "unit_rate": 12000.0,
+        "quantity": 4.0
+      },
+      {
+        "line_id": "line_2",
+        "category": "SURGEON_FEE",
+        "description": "Lead Laparoscopic Surgeon Professional Fee",
+        "claimed_amount": 75000.0,
+        "unit_rate": 75000.0,
+        "quantity": 1.0
+      },
+      {
+        "line_id": "line_3",
+        "category": "OT_CHARGES",
+        "description": "Operation Theatre & Anesthesia Equipment Charge",
+        "claimed_amount": 25000.0,
+        "unit_rate": 25000.0,
+        "quantity": 1.0
+      },
+      {
+        "line_id": "line_4",
+        "category": "CONSUMABLES",
+        "description": "Disposable Gowns, Gloves, and Sanitizers (Non-admissible)",
+        "claimed_amount": 8500.0,
+        "unit_rate": 8500.0,
+        "quantity": 1.0
+      },
+      {
+        "line_id": "line_5",
+        "category": "PHARMACY",
+        "description": "Post-Operative Antibiotics and Analgesic Infusions",
+        "claimed_amount": 14500.0,
+        "unit_rate": 14500.0,
+        "quantity": 1.0
+      }
+    ],
+    "proposed_settlement": 171000.0
+  }
+]
+
