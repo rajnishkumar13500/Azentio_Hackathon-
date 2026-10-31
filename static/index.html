@@ -76,11 +76,6 @@
           <span>Load Demo Batch</span>
         </button>
 
-        <button id="btn-seed-corr" onclick="seedCorrelationBatch()" class="text-xs bg-brand-900/60 hover:bg-brand-800 text-brand-200 border border-brand-700/60 px-3 py-2 rounded-xl font-medium transition flex items-center gap-1.5" title="Load Level 2 Cross-Claim Correlation Benchmark Dataset">
-          <span>🔗</span>
-          <span>Load L2 Correlations</span>
-        </button>
-
         <button id="btn-clear-portfolio" onclick="clearPortfolio()" class="text-xs bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 px-2.5 py-2 rounded-xl font-medium transition flex items-center gap-1" title="Reset Portfolio to Clean State">
           <span>🗑️</span>
           <span class="hidden sm:inline">Reset</span>
@@ -614,15 +609,28 @@
       </div>
 
       <!-- Drag & Drop Zone Styled in Azentio Emerald Theme -->
-      <div id="dropZone" onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-brand-300 hover:border-brand-500 rounded-2xl p-7 text-center cursor-pointer transition bg-brand-50/40 space-y-2">
-        <div class="w-12 h-12 mx-auto rounded-full bg-brand-100/80 flex items-center justify-center text-brand-600 mb-2">
+      <div id="dropZone" class="border-2 border-dashed border-brand-300 hover:border-brand-500 rounded-2xl p-6 text-center transition bg-brand-50/40 space-y-3">
+        <div class="w-12 h-12 mx-auto rounded-full bg-brand-100/80 flex items-center justify-center text-brand-600">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
         </div>
         <div class="text-xs text-slate-800 font-semibold" id="dropZoneLabel">
-          Click to browse or drag & drop claims file here
+          Choose a file or select the entire <span class="font-mono text-brand-700 bg-brand-100/70 px-1.5 py-0.5 rounded">data/jury_examples/</span> folder
         </div>
         <p class="text-[11px] text-slate-500">Supports .csv, .xlsx, .json, and hospital invoice .txt files</p>
+        
+        <div class="flex items-center justify-center gap-2 pt-1">
+          <button type="button" onclick="document.getElementById('fileInput').click()" class="px-3.5 py-1.5 rounded-xl bg-white border border-brand-300 hover:border-brand-500 text-brand-800 text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+            <span>📄</span>
+            <span>Select File</span>
+          </button>
+          <button type="button" onclick="document.getElementById('folderInput').click()" class="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-sm shadow-brand-600/30 transition flex items-center gap-1.5">
+            <span>📁</span>
+            <span>Select Jury Folder</span>
+          </button>
+        </div>
+
         <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.json,.txt" onchange="handleFileSelected(this.files)">
+        <input type="file" id="folderInput" class="hidden" webkitdirectory directory onchange="handleFolderSelected(this.files)">
       </div>
 
       <!-- Selected File Confirmation Card -->
@@ -631,7 +639,7 @@
           <span class="text-brand-600 font-bold text-base">📄</span>
           <div class="truncate">
             <span class="font-bold text-brand-900 block truncate" id="selectedFileName">filename.csv</span>
-            <span class="text-[11px] text-brand-700" id="selectedFileSize">0 KB</span>
+            <span class="text-[11px] text-brand-700 block truncate" id="selectedFileSize">0 KB</span>
           </div>
         </div>
         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-200 text-brand-900 uppercase tracking-wider" id="selectedFileExt">CSV</span>
@@ -639,12 +647,14 @@
 
       <!-- Instant Ingestion Buttons for Jury Presentation -->
       <div class="border-t border-slate-100 pt-3 space-y-2">
-        <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">One-Click Sample Ingestion (Grade-Ready Demo):</span>
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">One-Click Jury Examples (<span class="font-mono text-brand-700">data/jury_examples/</span>):</span>
+        </div>
         <div class="grid grid-cols-2 gap-2 text-xs">
           <button onclick="ingestSampleFileDirect('csv')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-800 border border-slate-200 hover:border-brand-300 font-medium transition text-left flex items-center justify-between">
             <span class="flex items-center gap-1.5 truncate">
               <span>📊</span>
-              <span class="truncate">Sample CSV Claims</span>
+              <span class="truncate">01 Sample CSV Claims</span>
             </span>
             <span class="text-[10px] font-bold text-brand-600">RUN ⚡</span>
           </button>
@@ -652,7 +662,7 @@
           <button onclick="ingestSampleFileDirect('xlsx')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-800 border border-slate-200 hover:border-brand-300 font-medium transition text-left flex items-center justify-between">
             <span class="flex items-center gap-1.5 truncate">
               <span>📑</span>
-              <span class="truncate">Sample Excel (.xlsx)</span>
+              <span class="truncate">02 Sample Excel (.xlsx)</span>
             </span>
             <span class="text-[10px] font-bold text-brand-600">RUN ⚡</span>
           </button>
@@ -660,7 +670,23 @@
           <button onclick="ingestSampleFileDirect('txt')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-800 border border-slate-200 hover:border-brand-300 font-medium transition text-left flex items-center justify-between">
             <span class="flex items-center gap-1.5 truncate">
               <span>📝</span>
-              <span class="truncate">Hospital Bill (.txt)</span>
+              <span class="truncate">03 Hospital Bill (.txt)</span>
+            </span>
+            <span class="text-[10px] font-bold text-brand-600">RUN ⚡</span>
+          </button>
+
+          <button onclick="ingestSampleFileDirect('corr')" class="p-2.5 rounded-xl bg-brand-50/60 hover:bg-brand-100 text-brand-900 border border-brand-300 font-medium transition text-left flex items-center justify-between">
+            <span class="flex items-center gap-1.5 truncate">
+              <span>🔗</span>
+              <span class="truncate font-semibold">04 L2 Correlations (JSON)</span>
+            </span>
+            <span class="text-[10px] font-bold text-brand-700">RUN ⚡</span>
+          </button>
+
+          <button onclick="ingestSampleFileDirect('json')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-800 border border-slate-200 hover:border-brand-300 font-medium transition text-left flex items-center justify-between">
+            <span class="flex items-center gap-1.5 truncate">
+              <span>🌟</span>
+              <span class="truncate">05 Synthetic Claims (JSON)</span>
             </span>
             <span class="text-[10px] font-bold text-brand-600">RUN ⚡</span>
           </button>
@@ -668,7 +694,7 @@
           <button onclick="ingestSampleFileDirect('invalid')" class="p-2.5 rounded-xl bg-rose-50/60 hover:bg-rose-50 text-rose-700 border border-rose-200 font-medium transition text-left flex items-center justify-between">
             <span class="flex items-center gap-1.5 truncate">
               <span>⚠</span>
-              <span class="truncate">Error Trap Sample</span>
+              <span class="truncate">06 Error Trap Guardrail</span>
             </span>
             <span class="text-[10px] font-bold text-rose-600">TEST</span>
           </button>
@@ -1211,7 +1237,37 @@
       document.getElementById('selectedFileExt').innerText = ext;
       
       document.getElementById('dropZoneLabel').innerText = `File Selected: ${selectedUploadFile.name}`;
-      document.getElementById('btnUploadSubmit').disabled = false;
+      const submitBtn = document.getElementById('btnUploadSubmit');
+      submitBtn.disabled = false;
+      submitBtn.innerText = `Process & Validate File`;
+    }
+
+    function handleFolderSelected(files) {
+      if (!files || files.length === 0) return;
+      const validFiles = Array.from(files).filter(f => {
+        const ext = f.name.split('.').pop().toLowerCase();
+        return ['csv', 'xlsx', 'json', 'txt'].includes(ext) && !f.name.startsWith('.');
+      });
+
+      if (validFiles.length === 0) {
+        alert("No supported claim files (.csv, .xlsx, .json, .txt) found in selected folder.");
+        return;
+      }
+
+      const folderName = files[0].webkitRelativePath ? files[0].webkitRelativePath.split('/')[0] : 'jury_examples';
+      const infoCard = document.getElementById('selectedFileInfo');
+      infoCard.classList.remove('hidden');
+      document.getElementById('selectedFileName').innerText = `Folder: ${folderName} (${validFiles.length} demo files ready)`;
+      document.getElementById('selectedFileSize').innerText = validFiles.map(f => f.name).join(' • ');
+      document.getElementById('selectedFileExt').innerText = 'FOLDER';
+      document.getElementById('dropZoneLabel').innerText = `Folder Loaded: ${folderName} (${validFiles.length} files)`;
+
+      // Pick the primary L2 correlation file or first available
+      const primaryFile = validFiles.find(f => f.name.includes('correlation') || f.name.includes('04')) || validFiles[0];
+      selectedUploadFile = primaryFile;
+      const submitBtn = document.getElementById('btnUploadSubmit');
+      submitBtn.disabled = false;
+      submitBtn.innerText = `Process & Validate (${primaryFile.name})`;
     }
 
     async function uploadSelectedFile() {
@@ -1222,10 +1278,12 @@
     // Direct one-click sample file ingestion
     async function ingestSampleFileDirect(formatKey) {
       const mapping = {
-        'csv': 'sample_claims.csv',
-        'xlsx': 'sample_claims.xlsx',
-        'txt': 'sample_hospital_invoice.txt',
-        'invalid': 'sample_invalid_claim.csv'
+        'csv': '01_sample_claims.csv',
+        'xlsx': '02_sample_claims.xlsx',
+        'txt': '03_sample_hospital_invoice.txt',
+        'corr': '04_level2_cross_claim_correlations.json',
+        'json': '05_sample_synthetic_claims.json',
+        'invalid': '06_sample_invalid_claim.csv'
       };
 
       const filename = mapping[formatKey];

@@ -70,3 +70,4 @@ class CrossClaimCorrelationReport(BaseModel):
     correlations: List[CorrelationMatch] = Field(default_factory=list)
     network_nodes: List[NetworkNode] = Field(default_factory=list)
     network_edges: List[NetworkEdge] = Field(default_factory=list)
+

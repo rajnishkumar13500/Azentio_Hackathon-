@@ -562,20 +562,31 @@ async def upload_and_validate(file: UploadFile = File(...)):
 @app.get("/api/v1/ingest/samples/{file_format}")
 def download_sample_file(file_format: str):
     samples_dir = settings.DATA_DIR / "samples"
+    jury_dir = settings.DATA_DIR / "jury_examples"
     mapping = {
-        "csv": ("sample_claims.csv", "text/csv"),
-        "xlsx": ("sample_claims.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-        "txt": ("sample_hospital_invoice.txt", "text/plain"),
-        "invalid": ("sample_invalid_claim.csv", "text/csv"),
+        "csv": (jury_dir / "01_sample_claims.csv", "01_sample_claims.csv", "text/csv"),
+        "xlsx": (jury_dir / "02_sample_claims.xlsx", "02_sample_claims.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        "txt": (jury_dir / "03_sample_hospital_invoice.txt", "03_sample_hospital_invoice.txt", "text/plain"),
+        "corr": (jury_dir / "04_level2_cross_claim_correlations.json", "04_level2_cross_claim_correlations.json", "application/json"),
+        "json": (jury_dir / "05_sample_synthetic_claims.json", "05_sample_synthetic_claims.json", "application/json"),
+        "invalid": (jury_dir / "06_sample_invalid_claim.csv", "06_sample_invalid_claim.csv", "text/csv"),
     }
     fmt = file_format.lower()
     if fmt not in mapping:
-        raise HTTPException(status_code=404, detail=f"Sample format '{fmt}' not found. Supported: csv, xlsx, txt, invalid.")
+        # Fallback check
+        if fmt in ["excel"]:
+            fmt = "xlsx"
+        elif fmt in ["doc", "bill", "invoice"]:
+            fmt = "txt"
+        else:
+            raise HTTPException(status_code=404, detail=f"Sample format '{fmt}' not found. Supported: csv, xlsx, txt, corr, json, invalid.")
 
-    filename, media_type = mapping[fmt]
-    file_path = samples_dir / filename
+    file_path, filename, media_type = mapping[fmt]
     if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Sample file missing from disk.")
+        # Fallback to samples_dir
+        file_path = samples_dir / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"Sample file '{filename}' missing from disk.")
     return FileResponse(file_path, media_type=media_type, filename=filename)
 
 def run_cli_demo():

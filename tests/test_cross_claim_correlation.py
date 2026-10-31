@@ -116,3 +116,4 @@ def test_network_graph_construction(correlation_engine, correlation_dataset):
     target_node = next(n for n in report.network_nodes if n.metadata.get("is_target"))
     assert target_node.id == "claim:CLM-CORR-001"
     assert len(report.network_edges) >= 4
+
