@@ -55,12 +55,39 @@ def generate_customer_report_html(
         badge_border = "#a7f3d0"
         status_label = "FULLY APPROVED SETTLEMENT"
 
+    # Fetch analyst decisions if available
+    try:
+        from src.investigation.analyst_service import analyst_service
+        decisions = analyst_service.get_decisions(claim.claim_id)
+    except Exception:
+        decisions = {}
+
     # Line items rows
     line_rows = ""
     for idx, item in enumerate(report.line_items, 1):
         status_color = "#059669" if item.status == "PASSED" else ("#dc2626" if item.status == "EXCLUDED" else "#d97706")
         status_bg = "#ecfdf5" if item.status == "PASSED" else ("#fef2f2" if item.status == "EXCLUDED" else "#fffbeb")
         reason = item.rules_applied[0].reason if item.rules_applied else "Complies with policy terms"
+
+        # Analyst Decision badge
+        dec = decisions.get(item.line_id)
+        if dec:
+            d_val = dec.decision.value if hasattr(dec.decision, "value") else str(dec.decision)
+            if d_val == "CONFIRM_DISCREPANCY":
+                dec_badge = '<span style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">✔ Confirmed</span>'
+            elif d_val == "MARK_FALSE_POSITIVE":
+                r_txt = f' title="{dec.reason}"' if dec.reason else ''
+                dec_badge = f'<span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;"{r_txt}>🛡️ False Positive</span>'
+            elif d_val == "REQUEST_ADDITIONAL_EVIDENCE":
+                dec_badge = '<span style="background: #fffbeb; color: #92400e; border: 1px solid #fde68a; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">📩 Addl Evidence</span>'
+            elif d_val == "ESCALATE":
+                dec_badge = '<span style="background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">🚨 Escalated</span>'
+            elif d_val == "ACCEPT_CORRECTION":
+                dec_badge = '<span style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">⚡ Accepted</span>'
+            else:
+                dec_badge = f'<span style="background: #f8fafc; color: #64748b; padding: 2px 6px; border-radius: 4px; font-size: 10px;">{d_val}</span>'
+        else:
+            dec_badge = '<span style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px;">Pending Review</span>'
 
         line_rows += f"""
         <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px;">
@@ -72,6 +99,63 @@ def generate_customer_report_html(
             <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 700; color: #b91c1c;">{format_inr(item.discrepancy_amount) if item.discrepancy_amount > 0 else '-'}</td>
             <td style="padding: 8px 10px; text-align: center;">
                 <span style="background: {status_bg}; color: {status_color}; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;">{item.status}</span>
+            </td>
+            <td style="padding: 8px 10px; text-align: center;">
+                {dec_badge}
+            </td>
+        </tr>
+        """
+
+    # Policy Adjudication Rules & Triggered Violations rows
+    rule_rows = ""
+    all_rules = (report.claim_level_rules or []) + [r for li in report.line_items for r in li.rules_applied]
+    seen_rules = set()
+    triggered_rules = []
+    for r in all_rules:
+        if r.rule_id not in seen_rules and (r.status != "PASSED" or r.discrepancy_amount > 0):
+            seen_rules.add(r.rule_id)
+            triggered_rules.append(r)
+
+    if triggered_rules:
+        for r in triggered_rules:
+            dec = decisions.get(r.rule_id)
+            if dec:
+                d_val = dec.decision.value if hasattr(dec.decision, "value") else str(dec.decision)
+                if d_val == "CONFIRM_DISCREPANCY":
+                    r_dec_badge = '<span style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">✔ Confirmed</span>'
+                elif d_val == "MARK_FALSE_POSITIVE":
+                    r_txt = f' title="{dec.reason}"' if dec.reason else ''
+                    r_dec_badge = f'<span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;"{r_txt}>🛡️ False Positive</span>'
+                elif d_val == "REQUEST_ADDITIONAL_EVIDENCE":
+                    r_dec_badge = '<span style="background: #fffbeb; color: #92400e; border: 1px solid #fde68a; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">📩 Addl Evidence</span>'
+                elif d_val == "ESCALATE":
+                    r_dec_badge = '<span style="background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">🚨 Escalated</span>'
+                elif d_val == "ACCEPT_CORRECTION":
+                    r_dec_badge = '<span style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">⚡ Accepted</span>'
+                else:
+                    r_dec_badge = f'<span style="background: #f8fafc; color: #64748b; padding: 2px 6px; border-radius: 4px; font-size: 10px;">{d_val}</span>'
+            else:
+                r_dec_badge = '<span style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px;">Pending Review</span>'
+
+            rule_rows += f"""
+            <tr style="border-bottom: 1px solid #e2e8f0; font-size: 11px;">
+                <td style="padding: 8px 10px; font-family: monospace; font-weight: 700; color: #475569;">{r.rule_id}</td>
+                <td style="padding: 8px 10px; font-weight: 600; color: #1e293b;">{r.rule_name}</td>
+                <td style="padding: 8px 10px; color: #334155;">{r.reason or '-'}</td>
+                <td style="padding: 8px 10px; text-align: right; font-family: monospace; font-weight: 700; color: #b91c1c;">{format_inr(r.discrepancy_amount) if r.discrepancy_amount > 0 else '-'}</td>
+                <td style="padding: 8px 10px; text-align: center;">
+                    <span style="background: #fef2f2; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px;">{r.status}</span>
+                </td>
+                <td style="padding: 8px 10px; text-align: center;">
+                    {r_dec_badge}
+                </td>
+            </tr>
+            """
+    else:
+        rule_rows = """
+        <tr>
+            <td colspan="6" style="padding: 12px 10px; text-align: center; color: #64748b; font-style: italic; font-size: 11px;">
+                No policy rule breaches or deductible/copay adjustments triggered for this claim.
             </td>
         </tr>
         """
@@ -360,9 +444,9 @@ def generate_customer_report_html(
     <!-- Step 4 Arithmetic Proof -->
     {proof_html}
 
-    <!-- Itemized Bill Breakdown -->
+    <!-- Itemized Bill Items Breakdown -->
     <div style="margin-top: 20px;">
-        <div style="font-weight: 700; font-size: 12px; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">2. Itemized Bill Line-Level Audit</div>
+        <div style="font-weight: 700; font-size: 12px; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">2. Itemized Bill Line Items & Adjudication Breakdown</div>
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left; font-size: 11px;">
@@ -373,10 +457,31 @@ def generate_customer_report_html(
                     <th style="padding: 6px 10px; text-align: right;">Admissible ₹</th>
                     <th style="padding: 6px 10px; text-align: right;">Disallowed ₹</th>
                     <th style="padding: 6px 10px; text-align: center;">Status</th>
+                    <th style="padding: 6px 10px; text-align: center;">Analyst Decision</th>
                 </tr>
             </thead>
             <tbody>
                 {line_rows}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Policy Adjudication Rules & Triggered Violations -->
+    <div style="margin-top: 20px;">
+        <div style="font-weight: 700; font-size: 12px; color: #0f172a; margin-bottom: 8px; text-transform: uppercase;">3. Policy Adjudication Rules & Triggered Violations</div>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left; font-size: 11px;">
+                    <th style="padding: 6px 10px;">Rule ID</th>
+                    <th style="padding: 6px 10px;">Policy Clause & Rule Name</th>
+                    <th style="padding: 6px 10px;">Finding / Violation Formula</th>
+                    <th style="padding: 6px 10px; text-align: right;">Discrepancy (₹)</th>
+                    <th style="padding: 6px 10px; text-align: center;">Rule Status</th>
+                    <th style="padding: 6px 10px; text-align: center;">Analyst Decision</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rule_rows}
             </tbody>
         </table>
     </div>
