@@ -84,3 +84,25 @@ def test_v1_chat_completions():
     assert len(data["choices"]) > 0
     assert "message" in data["choices"][0]
     assert data["choices"][0]["message"]["role"] == "assistant"
+
+def test_investigation_correlation_endpoints():
+    # 1. Seed correlation benchmark dataset
+    seed_res = client.post("/api/v1/investigation/seed-correlation-dataset")
+    assert seed_res.status_code == 200
+    assert seed_res.json()["count"] >= 10
+
+    # 2. Query correlations for double dipping target
+    corr_res = client.get("/api/v1/investigation/CLM-CORR-001/correlations")
+    assert corr_res.status_code == 200
+    report = corr_res.json()
+    assert report["claim_id"] == "CLM-CORR-001"
+    assert report["total_correlated_claims"] >= 1
+    assert report["highest_severity"] == "CRITICAL"
+    assert len(report["network_nodes"]) >= 5
+    assert len(report["network_edges"]) >= 4
+
+    # 3. Query all portfolio correlations
+    all_corr_res = client.get("/api/v1/investigation/correlations/all")
+    assert all_corr_res.status_code == 200
+    all_data = all_corr_res.json()
+    assert all_data["total_flagged_with_correlations"] >= 1

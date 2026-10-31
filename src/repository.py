@@ -44,5 +44,17 @@ class ClaimsRepository:
             loaded.append(c)
         return loaded
 
+    def seed_correlation_batch(self) -> List[Claim]:
+        """Loads the Level 2 cross-claim correlation dataset into the repository."""
+        corr_file = settings.DATA_DIR / "synthetic" / "cross_claim_correlation_dataset.json"
+        with open(corr_file, "r", encoding="utf-8") as f:
+            raw_claims = json.load(f)
+        loaded = []
+        for raw in raw_claims:
+            c = Claim(**raw)
+            self._claims[c.claim_id] = c
+            loaded.append(c)
+        return loaded
+
 claims_repository = ClaimsRepository()
 

@@ -34,6 +34,11 @@ from src.ingestion import ingestion_service, IngestionResult
 from src.repository import claims_repository
 from src.report_generator import generate_customer_report_html
 from src.ai.groq_client import groq_agent
+from src.investigation import (
+    CrossClaimCorrelationEngine,
+    CrossClaimCorrelationReport,
+    CorrelationRelationshipType,
+)
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -433,6 +438,77 @@ def clear_portfolio_claims():
     """Resets the dashboard to empty state."""
     claims_repository.clear()
     return {"message": "Portfolio cleared. Ready for fresh file upload."}
+
+@app.post("/api/v1/investigation/seed-correlation-dataset")
+def seed_correlation_dataset_endpoint():
+    """Seeds the active portfolio with the Level 2 Cross-Claim Correlation benchmark cases."""
+    loaded = claims_repository.seed_correlation_batch()
+    return {
+        "message": f"Successfully loaded {len(loaded)} Level 2 correlation benchmark claims into portfolio.",
+        "count": len(loaded),
+    }
+
+@app.get("/api/v1/investigation/{claim_id}/correlations", response_model=CrossClaimCorrelationReport)
+@app.get("/api/investigation/{claim_id}/correlations", response_model=CrossClaimCorrelationReport)
+def get_claim_correlations(claim_id: str):
+    """
+    Level 2 Step 1: Discovers multi-entity cross-claim correlations across policies,
+    claimants, providers, invoices, and incidents. Returns matching attributes,
+    explanation, and network graph nodes/edges.
+    """
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        _, claims_data = load_data()
+        raw = next((c for c in claims_data if c["claim_id"] == claim_id), None)
+        if not raw:
+            corr_file = settings.DATA_DIR / "synthetic" / "cross_claim_correlation_dataset.json"
+            if corr_file.exists():
+                with open(corr_file, "r", encoding="utf-8") as f:
+                    corr_data = json.load(f)
+                raw = next((c for c in corr_data if c["claim_id"] == claim_id), None)
+        if not raw:
+            raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found.")
+        claim = Claim(**raw)
+
+    all_claims = claims_repository.get_all()
+    if not all_claims or len(all_claims) <= 1:
+        corr_file = settings.DATA_DIR / "synthetic" / "cross_claim_correlation_dataset.json"
+        if corr_file.exists():
+            with open(corr_file, "r", encoding="utf-8") as f:
+                corr_data = json.load(f)
+            engine = CrossClaimCorrelationEngine(corr_data + [claim])
+            return engine.correlate(claim)
+
+    engine = CrossClaimCorrelationEngine(all_claims)
+    return engine.correlate(claim)
+
+@app.get("/api/v1/investigation/correlations/all")
+@app.get("/api/investigation/correlations/all")
+def get_all_portfolio_correlations():
+    """
+    Scans the active portfolio and returns all claims with suspicious cross-claim linkages.
+    """
+    claims = claims_repository.get_all()
+    if not claims:
+        corr_file = settings.DATA_DIR / "synthetic" / "cross_claim_correlation_dataset.json"
+        if corr_file.exists():
+            with open(corr_file, "r", encoding="utf-8") as f:
+                claims = [Claim(**c) for c in json.load(f)]
+        else:
+            return {"total_claims_scanned": 0, "flagged_correlations": []}
+
+    engine = CrossClaimCorrelationEngine(claims)
+    results = []
+    for c in claims:
+        rep = engine.correlate(c)
+        if rep.total_correlated_claims > 0 and rep.highest_severity in ["CRITICAL", "HIGH"]:
+            results.append(rep)
+
+    return {
+        "total_claims_scanned": len(claims),
+        "total_flagged_with_correlations": len(results),
+        "correlations": results,
+    }
 
 @app.post("/api/v1/ingest/upload", response_model=IngestionResult)
 async def upload_claims_file(file: UploadFile = File(...)):

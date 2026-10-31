@@ -1,0 +1,497 @@
+[
+  {
+    "claim_id": "CLM-CORR-001",
+    "case_title": "Primary Policy Claim (Cross-Policy Double Dipping Target)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-901",
+      "name": "Vikram Seth",
+      "relationship_to_insured": "SELF",
+      "age": 42
+    },
+    "incident_details": {
+      "admission_date": "2026-08-10T10:00:00Z",
+      "discharge_date": "2026-08-14T11:00:00Z",
+      "hospital_id": "HOSP-MAX-DEL",
+      "hospital_name": "Max Healthcare Saket",
+      "icd10_code": "K35.8",
+      "diagnosis_description": "Acute Appendicitis with Localized Peritonitis",
+      "proposed_settlement_amount": 180000.0,
+      "invoice_number": "INV-MAX-2026-991",
+      "invoice_date": "2026-08-14"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-DELUXE",
+        "description": "Single Deluxe Private Room (4 days)",
+        "quantity": 4,
+        "unit_price": 10000.0,
+        "total_amount": 40000.0,
+        "service_date": "2026-08-10"
+      },
+      {
+        "line_id": "L2",
+        "category": "SURGERY",
+        "item_code": "SURG-APP",
+        "description": "Laparoscopic Appendectomy Surgical Fee",
+        "quantity": 1,
+        "unit_price": 140000.0,
+        "total_amount": 140000.0,
+        "service_date": "2026-08-11"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-002",
+    "case_title": "Secondary Policy Claim (Exact Same Invoice Double Dip)",
+    "policy_id": "POL-CORP-GROUP-05",
+    "claimant": {
+      "claimant_id": "CUST-901",
+      "name": "Vikram Seth",
+      "relationship_to_insured": "SELF",
+      "age": 42
+    },
+    "incident_details": {
+      "admission_date": "2026-08-10T10:00:00Z",
+      "discharge_date": "2026-08-14T11:00:00Z",
+      "hospital_id": "HOSP-MAX-DEL",
+      "hospital_name": "Max Healthcare Saket",
+      "icd10_code": "K35.8",
+      "diagnosis_description": "Acute Appendicitis with Localized Peritonitis",
+      "proposed_settlement_amount": 180000.0,
+      "invoice_number": "INV-MAX-2026-991",
+      "invoice_date": "2026-08-14"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-DELUXE",
+        "description": "Single Deluxe Private Room (4 days)",
+        "quantity": 4,
+        "unit_price": 10000.0,
+        "total_amount": 40000.0,
+        "service_date": "2026-08-10"
+      },
+      {
+        "line_id": "L2",
+        "category": "SURGERY",
+        "item_code": "SURG-APP",
+        "description": "Laparoscopic Appendectomy Surgical Fee",
+        "quantity": 1,
+        "unit_price": 140000.0,
+        "total_amount": 140000.0,
+        "service_date": "2026-08-11"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-003",
+    "case_title": "Delhi Hospital Admission (Simultaneous Stay Conflict)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-902",
+      "name": "Anita Roy",
+      "relationship_to_insured": "SELF",
+      "age": 38
+    },
+    "incident_details": {
+      "admission_date": "2026-09-10T09:00:00Z",
+      "discharge_date": "2026-09-15T18:00:00Z",
+      "hospital_id": "HOSP-APO-DEL",
+      "hospital_name": "Apollo Hospitals Delhi",
+      "icd10_code": "A09.0",
+      "diagnosis_description": "Severe Gastroenteritis Inpatient Management",
+      "proposed_settlement_amount": 65000.0,
+      "invoice_number": "INV-APO-9910",
+      "invoice_date": "2026-09-15"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-GEN",
+        "description": "Inpatient General Care Room (5 days)",
+        "quantity": 5,
+        "unit_price": 13000.0,
+        "total_amount": 65000.0,
+        "service_date": "2026-09-10"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-004",
+    "case_title": "Mumbai Hospital Admission (Physically Overlapping Inpatient)",
+    "policy_id": "POL-TRAVEL-02",
+    "claimant": {
+      "claimant_id": "CUST-902",
+      "name": "Anita Roy",
+      "relationship_to_insured": "SELF",
+      "age": 38
+    },
+    "incident_details": {
+      "admission_date": "2026-09-11T12:00:00Z",
+      "discharge_date": "2026-09-14T14:00:00Z",
+      "hospital_id": "HOSP-FOR-MUM",
+      "hospital_name": "Fortis Hospital Mumbai",
+      "icd10_code": "M54.5",
+      "diagnosis_description": "Acute Lumbar Radiculopathy Emergency Admission",
+      "proposed_settlement_amount": 78000.0,
+      "invoice_number": "INV-FOR-7712",
+      "invoice_date": "2026-09-14"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-PVT",
+        "description": "Private Room (3 days)",
+        "quantity": 3,
+        "unit_price": 26000.0,
+        "total_amount": 78000.0,
+        "service_date": "2026-09-11"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-005",
+    "case_title": "Unbundled Stay Part 1: Room & Pharmacy",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-903",
+      "name": "Rajesh Khanna",
+      "relationship_to_insured": "SELF",
+      "age": 51
+    },
+    "incident_details": {
+      "admission_date": "2026-10-01T08:00:00Z",
+      "discharge_date": "2026-10-04T16:00:00Z",
+      "hospital_id": "HOSP-MAN-BLR",
+      "hospital_name": "Manipal Hospital Bangalore",
+      "icd10_code": "K40.9",
+      "diagnosis_description": "Unilateral Inguinal Hernia Surgery",
+      "proposed_settlement_amount": 45000.0,
+      "invoice_number": "INV-MAN-101A",
+      "invoice_date": "2026-10-04"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-STD",
+        "description": "Standard Private Room (3 days)",
+        "quantity": 3,
+        "unit_price": 10000.0,
+        "total_amount": 30000.0,
+        "service_date": "2026-10-01"
+      },
+      {
+        "line_id": "L2",
+        "category": "PHARMACY",
+        "item_code": "PHARM-POST",
+        "description": "Post-Op Inpatient Antibiotics",
+        "quantity": 1,
+        "unit_price": 15000.0,
+        "total_amount": 15000.0,
+        "service_date": "2026-10-02"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-006",
+    "case_title": "Unbundled Stay Part 2: Surgical Procedure Fee",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-903",
+      "name": "Rajesh Khanna",
+      "relationship_to_insured": "SELF",
+      "age": 51
+    },
+    "incident_details": {
+      "admission_date": "2026-10-01T08:00:00Z",
+      "discharge_date": "2026-10-04T16:00:00Z",
+      "hospital_id": "HOSP-MAN-BLR",
+      "hospital_name": "Manipal Hospital Bangalore",
+      "icd10_code": "K40.9",
+      "diagnosis_description": "Unilateral Inguinal Hernia Surgery",
+      "proposed_settlement_amount": 95000.0,
+      "invoice_number": "INV-MAN-101B",
+      "invoice_date": "2026-10-04"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "SURGERY",
+        "item_code": "SURG-HERNIA",
+        "description": "Laparoscopic Mesh Hernioplasty",
+        "quantity": 1,
+        "unit_price": 95000.0,
+        "total_amount": 95000.0,
+        "service_date": "2026-10-02"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-007",
+    "case_title": "High Velocity Provider Visit 1",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-904",
+      "name": "Suresh Patel",
+      "relationship_to_insured": "SELF",
+      "age": 49
+    },
+    "incident_details": {
+      "admission_date": "2026-10-02T10:00:00Z",
+      "discharge_date": "2026-10-03T11:00:00Z",
+      "hospital_id": "HOSP-CITY-CLINIC",
+      "hospital_name": "City Wellness Ortho Clinic",
+      "icd10_code": "M79.7",
+      "diagnosis_description": "Fibromyalgia & Myofascial Pain Therapy",
+      "proposed_settlement_amount": 48000.0,
+      "invoice_number": "INV-CW-101",
+      "invoice_date": "2026-10-03"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "INVESTIGATION",
+        "item_code": "THERAPY-01",
+        "description": "Specialized Regenerative Laser Session",
+        "quantity": 1,
+        "unit_price": 48000.0,
+        "total_amount": 48000.0,
+        "service_date": "2026-10-02"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-008",
+    "case_title": "High Velocity Provider Visit 2",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-904",
+      "name": "Suresh Patel",
+      "relationship_to_insured": "SELF",
+      "age": 49
+    },
+    "incident_details": {
+      "admission_date": "2026-10-06T10:00:00Z",
+      "discharge_date": "2026-10-07T11:00:00Z",
+      "hospital_id": "HOSP-CITY-CLINIC",
+      "hospital_name": "City Wellness Ortho Clinic",
+      "icd10_code": "M79.7",
+      "diagnosis_description": "Fibromyalgia & Myofascial Pain Therapy",
+      "proposed_settlement_amount": 52000.0,
+      "invoice_number": "INV-CW-104",
+      "invoice_date": "2026-10-07"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "INVESTIGATION",
+        "item_code": "THERAPY-02",
+        "description": "Specialized Regenerative Laser Session 2",
+        "quantity": 1,
+        "unit_price": 52000.0,
+        "total_amount": 52000.0,
+        "service_date": "2026-10-06"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-009",
+    "case_title": "High Velocity Provider Visit 3 (Within 10 Days)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-904",
+      "name": "Suresh Patel",
+      "relationship_to_insured": "SELF",
+      "age": 49
+    },
+    "incident_details": {
+      "admission_date": "2026-10-10T10:00:00Z",
+      "discharge_date": "2026-10-11T11:00:00Z",
+      "hospital_id": "HOSP-CITY-CLINIC",
+      "hospital_name": "City Wellness Ortho Clinic",
+      "icd10_code": "M79.7",
+      "diagnosis_description": "Fibromyalgia & Myofascial Pain Therapy",
+      "proposed_settlement_amount": 50000.0,
+      "invoice_number": "INV-CW-109",
+      "invoice_date": "2026-10-11"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "INVESTIGATION",
+        "item_code": "THERAPY-03",
+        "description": "Specialized Regenerative Laser Session 3",
+        "quantity": 1,
+        "unit_price": 50000.0,
+        "total_amount": 50000.0,
+        "service_date": "2026-10-10"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-010",
+    "case_title": "Current Legitimate Claim (Baseline History Target)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-905",
+      "name": "Deepa Nair",
+      "relationship_to_insured": "SELF",
+      "age": 34
+    },
+    "incident_details": {
+      "admission_date": "2026-10-15T09:00:00Z",
+      "discharge_date": "2026-10-17T14:00:00Z",
+      "hospital_id": "HOSP-FOR-DEL",
+      "hospital_name": "Fortis Hospital Delhi",
+      "icd10_code": "K81.0",
+      "diagnosis_description": "Acute Cholecystitis Medical Management",
+      "proposed_settlement_amount": 75000.0,
+      "invoice_number": "INV-FOR-DEL-882",
+      "invoice_date": "2026-10-17"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ROOM-STD",
+        "description": "Standard Room (2 days)",
+        "quantity": 2,
+        "unit_price": 10000.0,
+        "total_amount": 20000.0,
+        "service_date": "2026-10-15"
+      },
+      {
+        "line_id": "L2",
+        "category": "CONSULTATION",
+        "item_code": "CONSULT-MED",
+        "description": "Physician & Gastroenterologist Care",
+        "quantity": 1,
+        "unit_price": 55000.0,
+        "total_amount": 55000.0,
+        "service_date": "2026-10-16"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-011",
+    "case_title": "Historical Settled Claim (14 Months Earlier)",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-905",
+      "name": "Deepa Nair",
+      "relationship_to_insured": "SELF",
+      "age": 34
+    },
+    "incident_details": {
+      "admission_date": "2025-08-10T10:00:00Z",
+      "discharge_date": "2025-08-11T12:00:00Z",
+      "hospital_id": "HOSP-APO-DEL",
+      "hospital_name": "Apollo Hospitals Delhi",
+      "icd10_code": "S52.5",
+      "diagnosis_description": "Closed Fracture Lower End of Radius (Settled)",
+      "proposed_settlement_amount": 22000.0,
+      "invoice_number": "INV-APO-2025-110",
+      "invoice_date": "2025-08-11"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "SURGERY",
+        "item_code": "CAST-01",
+        "description": "Orthopedic Closed Reduction & Cast",
+        "quantity": 1,
+        "unit_price": 22000.0,
+        "total_amount": 22000.0,
+        "service_date": "2025-08-10"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-012",
+    "case_title": "Recycled Hospital Invoice Patient A",
+    "policy_id": "POL-COMPREHENSIVE-01",
+    "claimant": {
+      "claimant_id": "CUST-906",
+      "name": "Sunil Varma",
+      "relationship_to_insured": "SELF",
+      "age": 45
+    },
+    "incident_details": {
+      "admission_date": "2026-10-20T08:00:00Z",
+      "discharge_date": "2026-10-22T17:00:00Z",
+      "hospital_id": "HOSP-METRO-01",
+      "hospital_name": "Metro Super Speciality Hospital",
+      "icd10_code": "I20.0",
+      "diagnosis_description": "Unstable Angina Observation",
+      "proposed_settlement_amount": 88000.0,
+      "invoice_number": "INV-METRO-4421",
+      "invoice_date": "2026-10-22"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ICU-OBS",
+        "description": "Coronary Care Unit Monitoring (2 days)",
+        "quantity": 2,
+        "unit_price": 44000.0,
+        "total_amount": 88000.0,
+        "service_date": "2026-10-20"
+      }
+    ],
+    "claim_history": []
+  },
+  {
+    "claim_id": "CLM-CORR-013",
+    "case_title": "Recycled Hospital Invoice Patient B (Same Provider & Invoice #)",
+    "policy_id": "POL-SENIOR-CARE-02",
+    "claimant": {
+      "claimant_id": "CUST-907",
+      "name": "Manish Tiwari",
+      "relationship_to_insured": "SELF",
+      "age": 62
+    },
+    "incident_details": {
+      "admission_date": "2026-10-24T09:00:00Z",
+      "discharge_date": "2026-10-26T15:00:00Z",
+      "hospital_id": "HOSP-METRO-01",
+      "hospital_name": "Metro Super Speciality Hospital",
+      "icd10_code": "J18.9",
+      "diagnosis_description": "Pneumonia Inpatient Admission",
+      "proposed_settlement_amount": 88000.0,
+      "invoice_number": "INV-METRO-4421",
+      "invoice_date": "2026-10-26"
+    },
+    "line_items": [
+      {
+        "line_id": "L1",
+        "category": "ROOM_RENT",
+        "item_code": "ICU-OBS",
+        "description": "Coronary Care Unit Monitoring (2 days)",
+        "quantity": 2,
+        "unit_price": 44000.0,
+        "total_amount": 88000.0,
+        "service_date": "2026-10-24"
+      }
+    ],
+    "claim_history": []
+  }
+]
