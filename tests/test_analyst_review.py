@@ -147,3 +147,22 @@ def test_analyst_investigation_report_and_workspace():
     assert "decisions" in ws_data
     assert len(ws_data["decisions"]) >= 3
 
+
+def test_preview_report_includes_itemized_lines_and_rules():
+    """
+    Test that the HTML preview/report endpoint contains:
+    - Itemized Bill Line Items & Adjudication Breakdown
+    - Policy Adjudication Rules & Triggered Violations
+    - Line item rows and rule rows
+    """
+    res = client.get("/api/v1/claims/CLM-001/report")
+    assert res.status_code == 200
+    html = res.text
+
+    assert "Itemized Bill Line Items" in html
+    assert "Policy Adjudication Rules &amp; Triggered Violations" in html or "Policy Adjudication Rules & Triggered Violations" in html
+    assert "Rule ID" in html
+    assert "Analyst Decision" in html
+    assert "line_1" in html
+    assert "Deluxe Room Rent" in html or "Room Rent" in html
+

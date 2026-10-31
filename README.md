@@ -1,4 +1,4 @@
-# Azentio.ai — Insurance Claims Intelligence & Financial Leakage Prevention Studio
+# Azentio.ai — Insurance Claims Intelligence, Forensic Investigation & Financial Leakage Prevention Studio
 
 <div align="center">
 
@@ -7,12 +7,12 @@
 ![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-059669?style=for-the-badge&logo=python&logoColor=white)
 ![Groq AI](https://img.shields.io/badge/Groq%20AI-Qwen%203.8--27B-10b981?style=for-the-badge&logo=openai&logoColor=022c22)
 ![Theme](https://img.shields.io/badge/UI%20Theme-Emerald%20%26%20Mint-34d399?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Pytest-34%20Passing-059669?style=for-the-badge&logo=pytest&logoColor=white)
+![Tests](https://img.shields.io/badge/Pytest-61%2B%20Passing-059669?style=for-the-badge&logo=pytest&logoColor=white)
 
-**Autonomous, Explainable & Enterprise-Grade Claims Adjudication Platform**  
+**Autonomous, Explainable & Enterprise-Grade Claims Adjudication & Forensic Investigation Platform**  
 *Azentio Hackathon 2026: AI for Insurance Claims Intelligence & Financial Leakage Prevention*
 
-[Architecture](#-end-to-end-unified-architecture) • [Duplicate Detection Flow](#-step-3-4-tier-duplicate-detection--clinical-embeddings) • [Policy Waterfall Flow](#-step-2-policy-rule-waterfall-engine) • [Investigation Lifecycle](#-level-2--level-3-cross-claim-correlation--investigation-workspace) • [Quick Start](#-quick-start--verification)
+[Architecture](#-end-to-end-system-architecture) • [Level 1: Validation & Detection](#-level-1-claims-validation--leakage-detection) • [Level 2: Forensic Investigation](#-level-2-forensic-investigation--settlement-corrections) • [Jury Guide](#-jury-demonstration-guide--pre-packaged-datasets) • [API Reference](#-comprehensive-api-reference) • [Quick Start](#-quick-start--verification)
 
 </div>
 
@@ -20,42 +20,48 @@
 
 ## 📑 Table of Contents
 1. [Executive Summary & Problem Statement](#-executive-summary--problem-statement)
-2. [End-to-End Unified Architecture](#-end-to-end-unified-architecture)
-3. [Step 1: Multi-Format Claims Ingestion](#-step-1-multi-format-claims-ingestion)
-4. [Step 2: Policy Rule Waterfall Engine](#-step-2-policy-rule-waterfall-engine)
-5. [Step 3: 4-Tier Duplicate Detection & Clinical Embeddings](#-step-3-4-tier-duplicate-detection--clinical-embeddings)
-6. [Step 4: Financial Leakage Assessment & Arithmetic Proofs](#-step-4-financial-leakage-assessment--arithmetic-proofs)
-7. [Step 5: Azentio.ai Claims Alert Dashboard & Adjudication Studio](#-step-5-azentioai-claims-alert-dashboard--adjudication-studio)
-8. [Level 2 & Level 3: Cross-Claim Correlation & Investigation Workspace](#-level-2--level-3-cross-claim-correlation--investigation-workspace)
-9. [Complete End-to-End Validation & Audit Sequence](#-complete-end-to-end-validation--audit-sequence)
-10. [REST API Specification](#-rest-api-specification)
-11. [Repository Structure](#-repository-structure)
-12. [Configuration & Environment Variables](#-configuration--environment-variables)
-13. [Quick Start & Verification](#-quick-start--verification)
-14. [Test Suite & Benchmark Verification](#-test-suite--benchmark-verification)
+2. [End-to-End System Architecture](#-end-to-end-system-architecture)
+3. [Level 1: Claims Validation & Leakage Detection](#-level-1-claims-validation--leakage-detection)
+   - [Step 1: Multi-Format Claims Ingestion Pipeline](#step-1-multi-format-claims-ingestion-pipeline)
+   - [Step 2: 8-Stage Policy Rule Waterfall Engine](#step-2-8-stage-policy-rule-waterfall-engine)
+   - [Step 3: 4-Tier Duplicate Detection & Clinical Embeddings](#step-3-4-tier-duplicate-detection--clinical-embeddings)
+   - [Step 4: Deterministic Arithmetic Discrepancy Proofs](#step-4-deterministic-arithmetic-discrepancy-proofs)
+   - [Step 5: Interactive Alert Dashboard & Adjudication Studio](#step-5-interactive-alert-dashboard--adjudication-studio)
+4. [Level 2: Forensic Investigation & Settlement Corrections](#-level-2-forensic-investigation--settlement-corrections)
+   - [1. Cross-Claim Multi-Entity Correlation](#1-cross-claim-multi-entity-correlation)
+   - [2. Supporting Document & Invoice Evidence Reconciliation](#2-supporting-document--invoice-evidence-reconciliation)
+   - [3. Claims Investigation Workspace](#3-claims-investigation-workspace)
+   - [4. Recommended Settlement Corrections](#4-recommended-settlement-corrections)
+   - [5. Analyst Review & Escalation Dossier](#5-analyst-review--escalation-dossier)
+5. [End-to-End Claims Validation & Audit Sequence](#-end-to-end-claims-validation--audit-sequence)
+6. [Settlement Report & Explanation of Benefits (EOB)](#-settlement-report--explanation-of-benefits-eob)
+7. [Jury Demonstration Guide & Pre-Packaged Datasets](#-jury-demonstration-guide--pre-packaged-datasets)
+8. [Comprehensive API Reference](#-comprehensive-api-reference)
+9. [Repository Structure](#-repository-structure)
+10. [Configuration & Environment Variables](#-configuration--environment-variables)
+11. [Quick Start & Verification](#-quick-start--verification)
+12. [Automated Test Suite](#-automated-test-suite)
 
 ---
 
 ## 📌 Executive Summary & Problem Statement
 
-Insurance carriers process massive volumes of healthcare, motor, and general insurance claims consisting of multi-format invoices, hospital bills, pharmacy bills, and itemized receipts. Operational and financial leakage occurs when claims are overpaid due to:
+Insurance carriers process massive volumes of healthcare, motor, and general claims submitted across varied, unstructured channels: paper invoices, hospital PDFs, scanned discharge summaries, Excel rosters, and API payloads. Significant operational and financial leakage occurs due to:
 
-- **Duplicate Submissions**: Identical invoice resubmissions or subtle near-duplicates with altered invoice numbers, date slop ($\pm 1\text{--}3$ days), or rounded amounts.
-- **Double-Billed Line Items**: The same diagnostic test, consult, or imaging billed multiple times on a single hospital bill.
-- **Policy Breaches**: Room rent breaches triggering mandatory proportionate deductions on associated surgeon and doctor fees.
-- **Excluded Items**: Non-payable consumables (PPE, sanitizers, gloves, admin charges) disguised under clinical jargon.
-- **Unapplied Cost-Sharing**: Overlooked annual deductibles, procedure sub-limits, or mandatory co-payments.
-- **Exhausted Benefit Ceilings**: Payments exceeding remaining balance sum insured.
-- **Provider Collusion & Phantom Billing**: Cross-claim correlation patterns revealing shared provider syndicates or overlapping hospitalization periods.
+- **Duplicate Claims & Double Dipping**: Identical invoices submitted across different policies, or subtle near-duplicates with altered dates, split stays, or modified amounts.
+- **Sub-Limit & Proportionate Breaches**: Billed room rent exceeding daily policy limits without cascading proportional deductions across associated surgeon and consultant charges.
+- **Unsubstantiated & Disguised Charges**: Billed hospital items not present on the actual tax invoice, or non-payable consumables disguised under generic clinical jargon.
+- **Unapplied Cost-Sharing**: Missed annual deductibles, co-payment percentages, or balance sum insured ceilings.
+- **Cross-Claim Collusion**: High-velocity provider billing rings and split stay unbundling designed to bypass individual policy authorization limits.
 
 > [!IMPORTANT]
-> **Azentio.ai** provides an automated, explainable, and enterprise-grade claims adjudication studio that connects **deterministic mathematical validation** with **semantic AI intelligence** to eliminate overpayments before settlement.
+> **Azentio.ai** combines **deterministic mathematical rule engines** with **Groq Qwen clinical intelligence**, **vector embeddings**, and **forensic document reconciliation** into a single unified claims studio.
 
 ---
 
-## 🏛 End-to-End Unified Architecture
+## 🏛 End-to-End System Architecture
 
-The **Azentio.ai** architecture connects multi-format ingestion, 4-tier duplicate detection, an 8-stage IRDAI policy waterfall, arithmetic leakage proof generation, and a human-in-the-loop adjudication workbench:
+The **Azentio.ai** architecture connects Level 1 ingestion, duplicate detection, and policy waterfalls with Level 2 forensic cross-claim investigation and automated EOB dispatch:
 
 ```mermaid
 %%{init: {
@@ -84,11 +90,11 @@ flowchart TD
     classDef alertRed fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#991b1b,font-weight:bold;
     classDef warnAmber fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#92400e,font-weight:bold;
 
-    subgraph IngestionLayer ["1. Multi-Format Ingestion Layer"]
-        RAW["Multi-Format Raw Claims Batch"]
+    subgraph IngestionLayer ["1. Multi-Format Ingestion & Evidence Ingestion"]
+        RAW["Multi-Format Raw Claims & Evidence Uploads"]
         P1["CSV / Excel Parser (openpyxl)"]
-        P2["JSON Nested Claims Ingester"]
-        P3["Unstructured TXT & Document OCR"]
+        P2["JSON Nested Ingestion & SQLite Staging"]
+        P3["Unstructured TXT, Scanned PDFs & OCR"]
         NORM["Schema Normalizer & ISO-8601 Sanitizer"]
     end
 
@@ -116,15 +122,16 @@ flowchart TD
         FORMULA["Structured Audit Formula & Evidence Narrative"]
     end
 
-    subgraph InvestigationLayer ["5. Advanced Investigation & Escalation Studio"]
+    subgraph InvestigationLayer ["5. Level 2 Forensic Investigation & Workspace"]
         CORR["Cross-Claim Correlation Engine (Graph Linkage)"]
-        DOC_DIFF["Document Reconciliation (Invoice vs Discharge vs Repair)"]
-        ACTIONS["Analyst Action Center (Confirm Denial / Adjust / Dismiss)"]
+        DOC_DIFF["Forensic Document Comparator (Invoice vs Discharge vs Repair)"]
+        WORKSPACE["Analyst Investigation Workspace & Policy Terms Registry"]
+        ACTIONS["Analyst Action Center (5 Decisions, SIU Escalation)"]
     end
 
     subgraph DownstreamLayer ["6. Azentio.ai Studio & Downstream Ecosystem"]
         DASH["Azentio.ai Interactive Alert Dashboard"]
-        EOB["Customer EOB Audit Report Generator (HTML)"]
+        EOB["Official EOB Settlement Audit Document (HTML)"]
         EMAIL["Live & Simulated SMTP Email Dispatcher"]
         API["OpenAI-Compatible REST Gateway (/v1/chat/completions)"]
     end
@@ -144,7 +151,8 @@ flowchart TD
     ST8 --> DET_PROOFS & SUSP_PROOFS
     DET_PROOFS & SUSP_PROOFS --> FORMULA
     FORMULA --> CORR & DOC_DIFF
-    CORR & DOC_DIFF --> ACTIONS
+    CORR & DOC_DIFF --> WORKSPACE
+    WORKSPACE --> ACTIONS
 
     ACTIONS --> DASH
     ACTIONS --> EOB
@@ -152,7 +160,7 @@ flowchart TD
     DASH --> API
 
     class RAW,NORM,ST8,DASH header;
-    class P1,P2,P3,T1,T2,ST2,ST4,ST5,ST6,ST7,DET_PROOFS,CORR,DOC_DIFF emerald;
+    class P1,P2,P3,T1,T2,ST2,ST4,ST5,ST6,ST7,DET_PROOFS,CORR,DOC_DIFF,WORKSPACE emerald;
     class T4,ST3,SUSP_PROOFS,ACTIONS,EOB,EMAIL,API mint;
     class T3,FORMULA aiDark;
     class REJ alertRed;
@@ -160,9 +168,11 @@ flowchart TD
 
 ---
 
-## 📥 Step 1: Multi-Format Claims Ingestion
+## 🛡️ Level 1: Claims Validation & Leakage Detection
 
-The ingestion service (`src/ingestion/`) processes heterogeneous raw claim formats with strict validation:
+### Step 1: Multi-Format Claims Ingestion Pipeline
+
+The ingestion service (`src/ingestion/` & `claims-ingestion/`) processes heterogeneous raw claim formats with strict validation:
 
 ```mermaid
 %%{init: {
@@ -194,7 +204,7 @@ flowchart LR
     DETECT -->|CSV| PARSE_CSV["CSV Parser (Delimiters, Header Mapping)"]
     DETECT -->|XLSX| PARSE_XLSX["Excel Parser (openpyxl Multi-Sheet)"]
     DETECT -->|JSON| PARSE_JSON["JSON Parser (Deep Schema Deserializer)"]
-    DETECT -->|TXT / PDF| PARSE_TXT["Text & OCR Parser (Key-Value Item Extraction)"]
+    DETECT -->|TXT / PDF / OCR| PARSE_TXT["Text & OCR Parser (PyPDF, Tesseract)"]
 
     PARSE_CSV & PARSE_XLSX & PARSE_JSON & PARSE_TXT --> VALIDATE{"Integrity & Schema Validation"}
 
@@ -209,15 +219,13 @@ flowchart LR
     class ERR alertRed;
 ```
 
-### Ingestion Capabilities & Integrity Safeguards:
-- **Zero Silent Record Drops**: Corrupted rows or invalid amounts trigger precise, line-numbered diagnostic errors returned directly to the caller.
-- **Automatic Format Detection**: Content sniffer distinguishes CSV, multi-tab Excel, deeply nested JSON, and unstructured hospital text bills.
-- **Pydantic v2 Data Contracts**: Strong typing and validation on `Claim`, `Policy`, `LineItem`, `RuleResult`, and `ValidationReport`.
-- **Pre-Packaged Samples**: Located under `data/samples/` (`sample_claims.csv`, `sample_claims.xlsx`, `sample_hospital_invoice.txt`, `sample_invalid_claim.csv`).
+- **Format Autodetection**: Ingests `.csv`, `.xlsx`, `.json`, `.txt`, `.pdf`, `.png`, and `.jpg` files without pre-processing.
+- **Canonical Pipeline (`claims-ingestion/`)**: Multi-format staging with SQLite persistence, OCR text extraction, referential integrity checks, and line-level error trapping so bad records are flagged with exact line numbers rather than silently dropped.
+- **Folder Upload**: Native directory picker allows selecting an entire demo folder (`data/jury_examples/`) with 1 click.
 
 ---
 
-## ⚙️ Step 2: Policy Rule Waterfall Engine
+### Step 2: 8-Stage Policy Rule Waterfall Engine
 
 Health insurance adjudication requires applying deductions in a mathematically strict sequence. Deducting co-pays or deductibles before exclusions produces mathematically incorrect payouts.
 
@@ -285,20 +293,19 @@ flowchart TD
     class CLEAN cleanGreen;
 ```
 
-### Mathematical Specifications:
-
+#### Mathematical Formulas:
 1. **Room Rent Proportionate Ratio**:
    $$\text{Proportionate Ratio} = \min\left(1.0, \frac{\text{Allowed Daily Limit}}{\text{Actual Daily Billed Rate}}\right)$$
 
 2. **Associate Medical Fees Scaling**:
    $$\text{Admissible Fee} = \text{Billed Fee} \times \text{Proportionate Ratio}$$
 
-3. **Financial Leakage Formula**:
+3. **Prevented Financial Leakage**:
    $$\text{Prevented Leakage} = \max\left(0, \text{Proposed Settlement} - \text{Calculated Settlement}\right)$$
 
 ---
 
-## 🔎 Step 3: 4-Tier Duplicate Detection & Clinical Embeddings
+### Step 3: 4-Tier Duplicate Detection & Clinical Embeddings
 
 The duplicate detection engine (`src/duplicate_detector/`) detects fraudulent or erroneous resubmissions across four complementary tiers without flagging valid recurring clinical treatments:
 
@@ -374,33 +381,21 @@ flowchart TD
     class GUARD_PASS,CLEAN_CLAIM cleanGreen;
 ```
 
-### Detection Tiers Deep-Dive:
-
-| Tier | Module | Strategy | Detection Scope |
-| :--- | :--- | :--- | :--- |
-| **Tier 1** | `exact_matcher.py` | Composite deterministic key hashing $O(1)$ | 100% duplicate claim resubmissions and cross-claim duplicate invoices. |
-| **Tier 2** | `intra_claim_matcher.py` | Pairwise line item comparison within the same claim | Intra-claim double billing (e.g., duplicate ECG or Chest X-Ray on the same day). |
-| **Tier 3** | `fuzzy_matcher.py` + `bert_embedder.py` | Token N-grams + `Bio_ClinicalBERT` cosine similarity | Near-duplicates with modified invoice IDs, date slop ($\pm 3$ days), or clinical jargon aliases (`Arthroplasty` $\leftrightarrow$ `Knee Replacement`). |
-| **Tier 4** | `repeat_guard.py` | Clinical frequency rule & episode guard | Protects legitimate recurring sessions (chemotherapy cycles, hemodialysis, physiotherapy). |
+- **Tier 1 (Fast Exact Matcher)**: $O(1)$ composite hash matching `(provider_id + invoice_number)` and `(claimant_id + date + amount)`.
+- **Tier 2 (Intra-Claim Line Item Matcher)**: Catches double-billing on the same invoice (e.g., duplicated diagnostics or laboratory tests).
+- **Tier 3 (Near-Duplicate & Semantic Matcher)**: Detects altered invoices (e.g. invoice suffix `-B`, date slop $\pm 1\text{--}3$ days) using `Sentence-Transformers` (`all-MiniLM-L6-v2`) and clinical ontology tokenization (`Arthroplasty` $\leftrightarrow$ `Knee Replacement`).
+- **Tier 4 (Repeat Service Guard)**: Protects valid recurring treatments (dialysis, chemotherapy, physiotherapy) from false-positive flags.
 
 ---
 
-## 🧮 Step 4: Financial Leakage Assessment & Arithmetic Proofs
+### Step 4: Deterministic Arithmetic Discrepancy Proofs
 
-Step 4 bridges detection and audit by generating formal mathematical proofs for every flagged issue (`src/duplicate_detector/leakage_calculator.py`):
+Generates a formal mathematical breakdown for every discrepancy:
+- **Formula**: Exact algebraic expression applied.
+- **Input Variables**: Real monetary values and parameters inserted.
+- **Calculated Leakage**: Exact numerical excess.
+- **Audit Explanation**: Clear, human-readable narrative.
 
-### 1. Calculated Discrepancy (Deterministic ₹ Proof)
-Used when policy terms or duplicate billing define the exact excess amount:
-- **Duplicate Resubmission**:
-  $$\text{Discrepancy} = 1.0 \times \text{Total Invoiced Amount} = ₹32,000$$
-- **Room Rent Breach**:
-  $$\text{Discrepancy} = (\text{Billed Rate} - \text{Daily Limit}) \times \text{Days} = (₹7,500 - ₹5,000) \times 4 = ₹10,000$$
-
-### 2. Suspected Leakage (Statistical Benchmark Anomaly ₹)
-Used for price outliers requiring human auditor review:
-- Regional pricing benchmarks identify procedures billed above normative percentiles without invalidating deterministic claims math.
-
-### 3. Structured Arithmetic Proof Schema:
 ```json
 {
   "finding_id": "FIND-CLM-001-EXACT-01",
@@ -416,34 +411,15 @@ Used for price outliers requiring human auditor review:
 
 ---
 
-## 🖥️ Step 5: Azentio.ai Claims Alert Dashboard & Adjudication Studio
+### Step 5: Interactive Alert Dashboard & Adjudication Studio
 
-The web application (`static/index.html`) is an enterprise UI built with Tailwind CSS, Chart.js, and Google Fonts:
-
-- **Executive KPI Ribbon**: Real-time display of total claims, billed volume, exact prevented leakage, suspected leakage, and flag rate.
-- **Interactive Visual Analytics**:
-  - *Doughnut Chart*: Breakdown of leakage exposure across scenarios.
-  - *Bar Chart*: Severity and review status distribution.
-  - *Provider Breakdown*: Hospital-wise claims volume and prevented overpayments.
-- **Multi-Dimensional Filters**: Filter claims by severity (Critical, High, Medium, Clean), scenario (Exact Duplicate, Intra-Claim Duplicate, Near Duplicate, Room Rent Breach, Consumable Exclusion), hospital provider, or free-text search.
-- **Drilldown Adjudication View**:
-  - Patient timeline, hospital info, ICD-10 code, and tenure.
-  - Arithmetic Proof card detailing the formula, input values, and clinical similarity score.
-  - Complete 8-stage settlement financial waterfall table.
-  - Itemized line items table with per-line status pills.
-  - AI clinical notes powered by Groq Qwen (`qwen/qwen3.8-27b`).
-- **Adjudicator Action Center & Customer Report Export**:
-  - **Confirm Denial**: Rejects 100% of duplicate / unauthorized claims.
-  - **Adjust Settlement**: Confirms adjusted admissible entitlement.
-  - **Dismiss Alert**: Approves claim as legitimate exception.
-  - **📥 Download Customer Report**: Generates and downloads an official Explanation of Benefits (EOB) audit document (`Azentio_Settlement_Report_{claim_id}.html`) ready to send to policyholders and hospitals.
-  - **📧 Email Customer Report**: Dispatches the official EOB report and digital audit certificate directly to the policyholder's inbox via live SMTP or persistent simulated audit archive (`data/dispatched_emails/`).
+- **KPI Ribbon**: Total portfolio billed, exact prevented leakage, suspected leakage, flag rate.
+- **Visual Analytics**: Chart.js charts for leakage by scenario, severity breakdown, and hospital provider distribution.
+- **Drilldown View**: Patient timeline, ICD-10 codes, arithmetic proof box, policy waterfall, and Qwen AI clinical rationale.
 
 ---
 
-## 🕵️ Level 2 & Level 3: Cross-Claim Correlation & Investigation Workspace
-
-Beyond single-claim evaluation, **Azentio.ai** provides advanced cross-claim correlation and document evidence reconciliation:
+## 🔍 Level 2: Forensic Investigation & Settlement Corrections
 
 ```mermaid
 %%{init: {
@@ -490,10 +466,10 @@ flowchart LR
 
     subgraph StepD ["Step D: Adjudication Action Matrix"]
         WORKSPACE --> DECIDE{"Adjudicator Decision"}
-        DECIDE -->|Fraud / 100% Duplicate| DENY["CONFIRM DENIAL (Reject Claim 100%)"]
-        DECIDE -->|Rate / Sublimit Overage| ADJUST["ADJUST SETTLEMENT (Approve Admissible Delta)"]
-        DECIDE -->|Valid Medical Exception| DISMISS["DISMISS ALERT (Approve as Legitimate)"]
-        DECIDE -->|Complex Syndicate Fraud| ESCALATE["ESCALATE (SIU / Legal / Medical Director)"]
+        DECIDE -->|Fraud / 100% Duplicate| DENY["Confirm Discrepancy (Reject Claim 100%)"]
+        DECIDE -->|Rate / Sublimit Overage| ADJUST["Accept Recommended Correction (Adjust Entitlement)"]
+        DECIDE -->|Valid Medical Exception| DISMISS["Mark False Positive (Mandatory Reason Verified)"]
+        DECIDE -->|Complex Syndicate Fraud| ESCALATE["Escalate to Senior Reviewer / SIU Investigation"]
     end
 
     subgraph StepE ["Step E: Audit Dispatch"]
@@ -509,9 +485,47 @@ flowchart LR
     class DISMISS,EMAIL_DISPATCH cleanGreen;
 ```
 
+### 1. Cross-Claim Multi-Entity Correlation
+Builds multi-dimensional linkages across policies, claimants, providers, invoices, and incidents:
+- **Cross-Policy Double Dipping**: Detects the same hospital invoice number submitted under two distinct policies (`CLM-CORR-001` vs `CLM-CORR-002`).
+- **Overlapping Hospitalization**: Identifies physically impossible concurrent inpatient stays for the same patient at different hospitals (`CLM-CORR-003` vs `CLM-CORR-004`).
+- **Split Incident Stay Unbundling**: Detects consecutive stays within 48 hours for the same condition artificially split into two claims to stay beneath individual approval limits.
+- **High-Velocity Provider Collusion**: Identifies sudden clusters of high-value claims submitted by the same hospital within hours.
+- **Recycled Invoices Across Patients**: Uncovers fraudulent recycling of identical hospital invoice numbers across unrelated claimants.
+- **Interactive Graph**: Generates nodes (Claim, Claimant, Provider, Invoice) and directed edges showing connection type and severity.
+
+### 2. Supporting Document & Invoice Evidence Reconciliation
+Extracts and cross-verifies sample supporting documents (hospital tax invoices, discharge summaries, repair estimates) against submitted claim data:
+- **Variance Detection**: Identifies total amount mismatches, admission/discharge date discrepancies, and ICD-10 diagnosis discrepancies.
+- **Line-Level Unit Rate Inflation**: Matches itemized invoice tables to detect rate inflation (e.g., surgeon fee billed at ₹80,000 in claim vs ₹70,000 on hospital invoice).
+- **Unsubstantiated Charges**: Flags phantom billed items not found anywhere in the supporting document.
+- **Verbatim Source Citations**: Every variance retains exact source document name, section, line number, and raw quote for forensic evidence.
+
+### 3. Claims Investigation Workspace
+Consolidates all evidence into an integrated 360° workspace for the claims auditor:
+- **Relevant Policy Terms & Sub-Limits Card**: Displays sum insured, balance sum insured, daily room/ICU caps, co-pay %, deductible, and proportionate clause status.
+- **Raw Document Inspector (`#rawDocModal`)**: Verbatim full-text document viewer with line count and size metrics.
+- **Adjudicator Working Notes Center**: Supports drafting interim notes during ongoing investigation (`POST /api/v1/investigation/{claim_id}/notes`) without prematurely closing the claim.
+
+### 4. Recommended Settlement Corrections
+Replaces generic warnings with specific, actionable adjustments:
+- Shows **Original Amount**, **Corrected Amount**, **Adjustment Amount**, **Calculation Formula**, and **Policy Rule / Evidence Citation**.
+- Covers non-payable consumable removals, room rent capping, proportionate scaling, procedure caps, deductibles, and co-payments.
+
+### 5. Analyst Review & Escalation Dossier
+Enforces full regulatory decision workflows on every finding:
+- **5 Supported Decisions**:
+  1. `Confirm Discrepancy`: Validates leakage deduction as audited fact.
+  2. `Mark as False Positive (with Reason)`: Enforces **mandatory justification reason** (API rejects empty reasons). Automatically credits back the discrepancy to the claimant.
+  3. `Request Additional Evidence`: Places finding in pending review state while requesting supporting documentation.
+  4. `Escalate to Senior Reviewer or SIU`: Routes finding to `SENIOR_CLAIMS_REVIEWER` or `SPECIAL_INVESTIGATION_UNIT` (SIU). Activates the `ROUTING: 🚨 SIU INVESTIGATION` banner.
+  5. `Accept Recommended Correction`: Locks in the specific settlement adjustment.
+- **Dynamic Settlement Recalculation**: Live calculation of Net Adjusted Settlement and False Positive Credits.
+- **Export Dossier**: One-click download of the complete investigation dossier in structured JSON format.
+
 ---
 
-## 🔄 Complete End-to-End Validation & Audit Sequence
+## 🔄 End-to-End Claims Validation & Audit Sequence
 
 The sequence below illustrates the complete lifecycle from claim submission to customer notification:
 
@@ -554,7 +568,7 @@ sequenceDiagram
     
     opt Adjudicator Action
         ClaimHandler->>StudioUI: Confirm Denial / Adjust Settlement / Dismiss
-        StudioUI->>Gateway: POST /api/v1/action
+        StudioUI->>Gateway: POST /api/v1/action or /api/v1/investigation/{id}/decision
         Gateway-->>StudioUI: Updated Adjudication State
         StudioUI->>StudioUI: Download Customer EOB Report (HTML)
         StudioUI->>Gateway: POST /api/v1/claims/{id}/send-email
@@ -564,23 +578,66 @@ sequenceDiagram
 
 ---
 
-## 🌐 REST API Specification
+## 📄 Settlement Report & Explanation of Benefits (EOB)
 
-| Endpoint | Method | Description |
-| :--- | :---: | :--- |
-| `/health` | `GET` | Service health, Groq model readiness, and canonical ingestion availability. |
-| `/v1/models` | `GET` | OpenAI-compatible models list (`qwen/qwen3.8-27b`, `Bio_ClinicalBERT`). |
-| `/v1/chat/completions` | `POST` | OpenAI-compatible LLM endpoint routing to Groq Qwen or deterministic fallback. |
-| `/api/v1/claims` | `GET` | Active claims portfolio with validation status, leakage totals, and reviews. |
-| `/api/v1/kpis` | `GET` | Executive metrics: flag rate, prevented leakage, provider distribution. |
-| `/api/v1/validate` | `POST` | Validates a claim payload through the 8-stage policy waterfall. |
-| `/api/v1/validate-demo/{id}` | `POST` | Adjudicates one of the 9 pre-configured demo benchmark cases. |
-| `/api/v1/claims/{id}/adjudicate` | `GET` | Full dossier: arithmetic proofs, waterfall breakdown, line decisions. |
-| `/api/v1/action` | `POST` | Persists adjudicator decisions (`CONFIRM_DENIAL`, `ADJUST_AMOUNT`, `DISMISS`). |
-| `/api/v1/investigation/{id}/correlations` | `GET` | Runs graph cross-claim correlation on the active portfolio. |
-| `/api/v1/investigation/{id}/compare-document`| `POST` | Reconciles claim line items against raw hospital tax invoices or estimates. |
-| `/api/v1/claims/{id}/report` | `GET` | Generates official Explanation of Benefits (EOB) HTML audit document. |
-| `/api/v1/claims/{id}/send-email` | `POST` | Dispatches settlement EOB document to customer inbox via SMTP. |
+Accessible via the **"Preview"** and **"Download Customer Report"** buttons:
+- **Publication-Quality EOB Certificate**: IRDAI-compliant layout containing claim reference, policy terms, and certified adjudicator seal.
+- **Itemized Bill Line Items Table**: Complete line-level breakdown with line ID, category, billed amount, admissible amount, disallowed amount, rule note, and **Analyst Decision** column.
+- **Policy Adjudication Rules & Triggered Violations Table**: Dedicated Section 3 displaying Rule ID, Policy Clause, Violation Formula, Discrepancy (₹), Rule Status, and **Analyst Decision** column.
+- **Direct Email Dispatch**: Sends the complete EOB statement directly to the customer's inbox via live SMTP or persistent simulation archive (`data/dispatched_emails/`).
+
+---
+
+## 📂 Jury Demonstration Guide & Pre-Packaged Datasets
+
+All jury demo files are structured into clean, individual folders under `data/jury_examples/`:
+
+| Step Folder | Key Files | What It Demonstrates |
+|---|---|---|
+| `Step_1_Cross_Claim_Correlation/` | `01_cross_claim_correlation_benchmark.json`<br>`README.txt` | Cross-policy invoice double dipping (`CLM-CORR-001` vs `002`), overlapping physical impossibility (`CLM-CORR-003` vs `004`), split stay unbundling, and network graph. |
+| `Step_2_Document_Analysis/` | `hospital_tax_invoice_saket.txt`<br>`clinical_discharge_summary.txt`<br>`repair_estimate_motor.txt`<br>`claim_for_document_audit.json` | Total variance (₹145k vs ₹135k), discharge date mismatch, unit rate inflation (₹80k vs ₹70k surgeon fee), and unsubstantiated charges. |
+| `Step_3_Claims_Investigation_Workspace/` | `01_investigation_claim_case.json`<br>`02_policy_terms_registry.json`<br>`README.txt` | 360° workspace, policy terms sub-limits card, raw document inspector, and interim working notes. |
+| `Step_4_Settlement_Corrections/` | `01_settlement_corrections_case.json`<br>`README.txt` | Specific non-generic adjustments with original amount, corrected amount, formula, and policy clause. |
+| `Step_5_Analyst_Review_and_Escalation/` | `01_analyst_review_case.json`<br>`README.txt` | Complex cardiac claim demonstrating all 5 analyst decisions, mandatory false-positive reason validation, SIU escalation, and live dossier recalculation. |
+
+---
+
+## 🔌 Comprehensive API Reference
+
+### Core Application & OpenAI Compatibility
+- `GET  /` — Web application UI.
+- `GET  /health` — Health check, Groq model status, and canonical ingestion availability.
+- `GET  /v1/models` — OpenAI-compatible model listing.
+- `POST /v1/chat/completions` — OpenAI-compatible completions endpoint.
+
+### Claims & Portfolio Management
+- `GET    /api/v1/claims` — List all claims in active portfolio with summary metrics.
+- `GET    /api/v1/claims/{claim_id}` — Get single claim details.
+- `DELETE /api/v1/claims` — Reset active portfolio.
+- `POST   /api/v1/claims/seed-demo` — Seed demo batch.
+- `GET    /api/v1/claims/{claim_id}/adjudicate` — Run policy waterfall on claim.
+- `GET    /api/v1/claims/{claim_id}/report` — Generate official EOB HTML report (`?download=true` for file attachment).
+- `POST   /api/v1/claims/{claim_id}/send-email` — Dispatch settlement report via email.
+
+### Ingestion Pipeline
+- `POST /api/v1/ingest/upload` — Ingest CSV, Excel, JSON, TXT, PDF, or image files.
+- `POST /api/v1/ingest/upload-and-validate` — Full pipeline: Ingest -> Validate -> Persist -> Adjudicate.
+- `POST /api/v1/ingest/canonical-sample` — Ingest sample dataset (`small` or `large`) via canonical pipeline.
+- `GET  /api/v1/ingest/samples/{file_format}` — Download sample files (`csv`, `xlsx`, `txt`, `corr`, `json`, `step4`, `step5`).
+
+### Level 2 Investigation Workspace
+- `POST /api/v1/investigation/seed-correlation-dataset` — Seed 13 benchmark correlation claims.
+- `GET  /api/v1/investigation/{claim_id}/correlations` — Get multi-entity correlations and network graph.
+- `GET  /api/v1/investigation/correlations/all` — Portfolio-wide correlation scan.
+- `GET  /api/v1/investigation/{claim_id}/document-evidence` — Reconcile claim against pre-linked documents.
+- `POST /api/v1/investigation/{claim_id}/compare-document` — Upload new document and reconcile against claim.
+- `GET  /api/v1/investigation/documents/{document_name}` — Get verbatim raw document content.
+- `POST /api/v1/investigation/{claim_id}/notes` — Save interim auditor working notes.
+- `GET  /api/v1/investigation/{claim_id}/workspace` — 360° consolidated workspace payload.
+- `GET  /api/v1/investigation/{claim_id}/corrections` — Recommended settlement corrections list.
+- `POST /api/v1/investigation/{claim_id}/decision` — Record analyst decision on a finding.
+- `GET  /api/v1/investigation/{claim_id}/decisions` — Retrieve all recorded decisions for a claim.
+- `GET  /api/v1/investigation/{claim_id}/analyst-report` — Generate complete Analyst Review & Escalation Dossier.
 
 ---
 
@@ -594,6 +651,13 @@ Azentio_Hackathon-/
 ├── README.md                         # Enterprise platform documentation & architecture diagrams
 ├── requirements.txt                  # Python dependencies (FastAPI, Scikit-learn, etc.)
 ├── run_detection_benchmark.py        # Benchmark verification script
+│
+├── claims-ingestion/                 # Canonical ingestion microservice
+│   ├── app/
+│   │   ├── domain/                   # Canonical data contracts
+│   │   ├── ingestion/                # Document OCR, Tesseract, staging service
+│   │   └── parsers/                  # CSV, Excel, JSON, PDF, Image parsers
+│   └── run_tests.py
 │
 ├── src/
 │   ├── main.py                       # FastAPI REST Gateway & OpenAI-compatible routes
@@ -657,13 +721,14 @@ Azentio_Hackathon-/
 │   ├── synthetic/                    # Benchmark claims portfolio & ground truth
 │   └── dispatched_emails/            # Persistent archive of customer settlement emails
 │
-└── tests/                            # Comprehensive Pytest Suite (34 Passing Tests)
+└── tests/                            # Comprehensive Pytest Suite (61+ Passing Tests)
+    ├── test_analyst_review.py
+    ├── test_investigation_workspace.py
+    ├── test_document_analysis.py
+    ├── test_cross_claim_correlation.py
     ├── test_duplicate_detector.py
     ├── test_clinical_embeddings.py
-    ├── test_cross_claim_correlation.py
-    ├── test_document_analysis.py
     ├── test_email_service.py
-    ├── test_analyst_review.py
     └── policy_rules/
 ```
 
@@ -682,12 +747,13 @@ GROQ_API_KEY=your_groq_api_key_here
 GROQ_MODEL=qwen/qwen3.8-27b
 GROQ_BASE_URL=https://api.groq.com
 
-# SMTP Email Configuration (Optional - Live or Simulated Archive)
+# SMTP Email Configuration (Optional - falls back to simulated archive)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
+SMTP_USER=your_email@example.com
 SMTP_PASSWORD=your_app_password
 SMTP_FROM_EMAIL=claims-adjudication@azentio.ai
+SMTP_FROM_NAME="Azentio.ai Claims Adjudication Team"
 ```
 
 ---
@@ -704,40 +770,40 @@ source .venv/bin/activate   # On Linux/macOS
 pip install -r requirements.txt
 ```
 
-### 2. Launch Azentio.ai Studio
+### 2. Run the Application
 ```bash
-# Starts the server and opens your default browser automatically
+# Launch Azentio.ai (starts FastAPI server on port 8000)
 python app.py
 
 # Or launch directly with Uvicorn
 uvicorn src.main:app --host 0.0.0.0 --port 8000
 ```
 
-### 3. Explore the Adjudication Studio
-- Navigate to `http://localhost:8000`.
-- Click **"⚡ Load Demo Batch"** to load the comprehensive hackathon benchmark cases.
-- Or click **"Ingest Claims File"** to upload your own CSV, Excel, JSON, or TXT bills.
-- Click **"Audit"** on any flagged claim to inspect the arithmetic proofs and full 8-stage waterfall.
-- Download the customer **EOB Settlement Report (HTML)** or dispatch it via email.
+### 3. Open the Studio
+Open `http://localhost:8000` in your browser:
+1. Click **"Ingest Claims File"** and use **"Select Jury Folder"** to pick any folder in `data/jury_examples/`.
+2. Click **"Audit"** to enter the Claims Investigation Workspace.
+3. Inspect **Policy Terms & Sub-Limits**, click **"👁️ Inspect Raw Document"**, test **Working Notes**, and record **Analyst Decisions**.
+4. Click **"Preview"** to examine the official Explanation of Benefits (EOB) certificate with itemized bill lines and triggered policy adjudication rules.
 
 ---
 
-## 🧪 Test Suite & Benchmark Verification
+## 🧪 Automated Test Suite
 
-Execute the complete pytest verification suite covering all 5 steps:
+Run the full pytest suite across all modules:
 
 ```bash
 pytest tests -v
 ```
 
-### Test Coverage Highlights:
-- `tests/policy_rules/test_api.py`: FastAPI endpoints, health check, UI serving, portfolio lifecycle.
-- `tests/policy_rules/test_ingestion.py`: CSV, Excel (.xlsx), JSON, and TXT parsing, validation, and error reporting.
-- `tests/policy_rules/test_rules.py`: Coverage rules, exclusions, room rent caps, proportionate deductions, deductibles, co-pays, balance sum insured.
-- `tests/test_duplicate_detector.py`: Exact duplicate claim detection, intra-claim line item matching, near-duplicate fuzzy matching, date slop, repeat guard.
-- `tests/test_clinical_embeddings.py`: Clinical ontology tokenizer, TF-IDF vectorizer, BERT semantic embeddings, and cosine similarity.
-- `tests/test_cross_claim_correlation.py`: Cross-claim link detection and suspicious provider rings.
-- `tests/test_document_analysis.py`: Supporting document line-level OCR reconciliation diffs.
-- `tests/test_email_service.py`: Customer EOB HTML generation and SMTP dispatch service.
+### Test Suite Breakdown:
+- `tests/test_analyst_review.py`: Tests all 5 analyst decisions, mandatory reason validation for false positives, SIU escalation, settlement corrections, and report preview tables.
+- `tests/test_investigation_workspace.py`: Tests 360° workspace payload, verbatim document text inspection, and working notes persistence.
+- `tests/test_document_analysis.py`: Tests invoice table extraction, stay date reconciliation, line-level unit rate inflation, and unsubstantiated charge detection.
+- `tests/test_cross_claim_correlation.py`: Tests cross-policy double dipping, overlapping stay physical impossibility, split stay unbundling, and graph generation.
+- `tests/test_duplicate_detector.py`: Tests 4-tier duplicate detection (exact, intra-claim, near-duplicate, repeat guard).
+- `tests/test_clinical_embeddings.py`: Tests clinical ontology tokenization and semantic similarity scoring.
+- `tests/test_email_service.py`: Tests customer settlement report generation and email dispatch.
+- `tests/policy_rules/`: Tests policy rules, ingestion parsers, and synthetic claim portfolios.
 
-**Verification Status**: **34 passed in ~6 seconds**.
+**Result**: **61+ tests passed with zero errors**.
