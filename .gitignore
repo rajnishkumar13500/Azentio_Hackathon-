@@ -9,4 +9,7 @@ venv/
 .pytest_cache/
 *.log
 .env
+claims-ingestion/data/*.db
+claims-ingestion/storage/uploads/*
+!claims-ingestion/storage/uploads/.gitkeep
 

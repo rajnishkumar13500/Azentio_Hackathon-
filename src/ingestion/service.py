@@ -1,7 +1,14 @@
 import os
 from typing import List, Dict, Any, Optional
 from src.ingestion.models import IngestionResult, IngestionError
-from src.ingestion.parsers import JsonClaimParser, CsvClaimParser, ExcelClaimParser, DocumentTextParser
+from src.ingestion.parsers import (
+    JsonClaimParser,
+    CsvClaimParser,
+    ExcelClaimParser,
+    DocumentTextParser,
+    PdfClaimParser,
+    ImageClaimParser,
+)
 from src.ingestion.validators import ClaimDataValidator
 from src.schemas import Claim
 
@@ -28,6 +35,12 @@ class IngestionService:
                 raw_claims_list = CsvClaimParser.parse(content)
             elif ext in ["xlsx", "xls"]:
                 raw_claims_list = ExcelClaimParser.parse(content)
+            elif ext in ["pdf"]:
+                format_detected = "pdf"
+                raw_claims_list = PdfClaimParser.parse(content)
+            elif ext in ["png", "jpg", "jpeg"]:
+                format_detected = "image_ocr"
+                raw_claims_list = ImageClaimParser.parse(content)
             elif ext in ["txt", "md", "doc"]:
                 format_detected = "document"
                 text_content = content.decode("utf-8", errors="replace")
@@ -42,7 +55,7 @@ class IngestionService:
                         IngestionError(
                             field_name="file_extension",
                             rejected_value=ext,
-                            error_message=f"Unsupported file format '{ext}'. Supported formats: CSV, XLSX, JSON, TXT/DOC."
+                            error_message=f"Unsupported file format '{ext}'. Supported formats: CSV, XLSX, JSON, PDF, PNG/JPG, TXT/DOC."
                         )
                     ]
                 )
