@@ -1,5 +1,5 @@
 from .policy import Policy, PolicySubLimits, WaitingPeriods
-from .claim import Claim, LineItem, Claimant, IncidentDetails
+from .claim import Claim, LineItem, Claimant, IncidentDetails, PriorClaimRecord
 from .validation import (
     RuleResult,
     RuleStatus,
@@ -16,10 +16,10 @@ __all__ = [
     "LineItem",
     "Claimant",
     "IncidentDetails",
+    "PriorClaimRecord",
     "RuleResult",
     "RuleStatus",
     "LineItemValidation",
     "ClaimValidationSummary",
     "ValidationReport",
 ]
-

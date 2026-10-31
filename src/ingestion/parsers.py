@@ -214,3 +214,4 @@ Return ONLY valid JSON matching this schema:
 
         content = response.choices[0].message.content
         return json.loads(content)
+

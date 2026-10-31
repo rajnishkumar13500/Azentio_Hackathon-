@@ -30,6 +30,14 @@ class LineItem(BaseModel):
     total_amount: float = Field(ge=0.0)
     service_date: Optional[str] = None
 
+class PriorClaimRecord(BaseModel):
+    previous_claim_id: str
+    admission_date: str
+    diagnosis: str
+    hospital_name: Optional[str] = None
+    paid_amount: float = Field(ge=0.0)
+    settlement_status: str = Field(default="SETTLED")
+
 class Claim(BaseModel):
     claim_id: str
     case_title: Optional[str] = None
@@ -37,4 +45,4 @@ class Claim(BaseModel):
     claimant: Claimant
     incident_details: IncidentDetails
     line_items: List[LineItem] = Field(default_factory=list)
-
+    claim_history: List[PriorClaimRecord] = Field(default_factory=list)

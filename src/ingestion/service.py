@@ -88,3 +88,4 @@ class IngestionService:
         )
 
 ingestion_service = IngestionService()
+

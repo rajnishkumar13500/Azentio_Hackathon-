@@ -27,6 +27,7 @@ from src.config import settings
 from src.schemas import Claim, Policy, ValidationReport
 from src.engine import validation_engine
 from src.ingestion import ingestion_service, IngestionResult
+from src.repository import claims_repository
 
 console = Console()
 
@@ -99,20 +100,105 @@ def validate_demo_claim(claim_id: str):
     policy = Policy(**policies_data[claim.policy_id])
     return validation_engine.validate_claim(claim, policy)
 
+@app.get("/api/v1/claims")
+def get_portfolio_dashboard():
+    """
+    Returns active claims in the portfolio dashboard with their computed validation status.
+    Starts EMPTY until files are uploaded or the demo batch is loaded.
+    """
+    claims = claims_repository.get_all()
+    policies_data, _ = load_data()
+
+    total_invoiced = 0.0
+    total_prevented_leakage = 0.0
+    total_suspected_leakage = 0.0
+    flagged_count = 0
+    rejected_count = 0
+    approved_count = 0
+
+    claims_with_summary = []
+    for c in claims:
+        policy_dict = policies_data.get(c.policy_id, policies_data.get("POL-COMPREHENSIVE-01"))
+        policy = Policy(**policy_dict)
+        report = validation_engine.validate_claim(c, policy)
+        s = report.summary
+
+        total_invoiced += s.total_claimed
+        total_prevented_leakage += s.calculated_leakage_prevented
+        total_suspected_leakage += s.suspected_leakage_total
+
+        if s.overall_status == "REJECTED":
+            rejected_count += 1
+        elif s.overall_status == "FLAGGED_LEAKAGE":
+            flagged_count += 1
+        else:
+            approved_count += 1
+
+        claims_with_summary.append({
+            "claim": c,
+            "summary": s,
+            "top_recommendation": report.recommendations[0] if report.recommendations else None,
+        })
+
+    return {
+        "total_claims": len(claims),
+        "portfolio_metrics": {
+            "total_invoiced": round(total_invoiced, 2),
+            "total_prevented_leakage": round(total_prevented_leakage, 2),
+            "total_suspected_leakage": round(total_suspected_leakage, 2),
+            "flagged_count": flagged_count,
+            "rejected_count": rejected_count,
+            "approved_count": approved_count,
+        },
+        "claims": claims_with_summary,
+    }
+
+@app.get("/api/v1/claims/{claim_id}")
+def get_claim_by_id(claim_id: str):
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
+    return claim
+
+@app.get("/api/v1/claims/{claim_id}/adjudicate", response_model=ValidationReport)
+def adjudicate_claim(claim_id: str):
+    claim = claims_repository.get_by_id(claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found in portfolio.")
+    policies_data, _ = load_data()
+    policy_dict = policies_data.get(claim.policy_id, policies_data.get("POL-COMPREHENSIVE-01"))
+    policy = Policy(**policy_dict)
+    return validation_engine.validate_claim(claim, policy)
+
+@app.post("/api/v1/claims/seed-demo")
+def seed_demo_claims():
+    """Populates the portfolio with the 5 pre-configured hackathon demo cases."""
+    loaded = claims_repository.seed_demo_batch()
+    return {"message": f"Successfully loaded {len(loaded)} demo claims into portfolio.", "count": len(loaded)}
+
+@app.delete("/api/v1/claims")
+def clear_portfolio_claims():
+    """Resets the dashboard to empty state."""
+    claims_repository.clear()
+    return {"message": "Portfolio cleared. Ready for fresh file upload."}
+
 @app.post("/api/v1/ingest/upload", response_model=IngestionResult)
 async def upload_claims_file(file: UploadFile = File(...)):
     """
     Ingests and validates claims data across CSV, Excel (.xlsx), JSON, or text documents.
     Validates identifiers, amounts, dates, and mandatory fields without silently ignoring bad records.
+    Persists valid claims into the active portfolio.
     """
     content = await file.read()
     result = ingestion_service.ingest_file(file.filename, content)
+    if result.claims:
+        claims_repository.add_claims(result.claims)
     return result
 
 @app.post("/api/v1/ingest/upload-and-validate")
 async def upload_and_validate(file: UploadFile = File(...)):
     """
-    Full pipeline: Ingests file -> Validates data integrity -> Runs policy rule engine on valid claims.
+    Full pipeline: Ingests file -> Validates data integrity -> Persists claims -> Runs policy rule engine.
     """
     content = await file.read()
     result = ingestion_service.ingest_file(file.filename, content)
@@ -123,6 +209,9 @@ async def upload_and_validate(file: UploadFile = File(...)):
             "ingestion_result": result,
             "validation_reports": [],
         }
+
+    # Persist valid claims into repository
+    claims_repository.add_claims(result.claims)
 
     policies_data, _ = load_data()
     validation_reports: List[ValidationReport] = []

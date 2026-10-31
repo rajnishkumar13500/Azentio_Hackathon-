@@ -81,6 +81,16 @@
         "total_amount": 6500.0,
         "service_date": "2026-08-10"
       }
+    ],
+    "claim_history": [
+      {
+        "previous_claim_id": "CLM-HIST-2026-042",
+        "admission_date": "2026-03-10",
+        "diagnosis": "Acute Gastroenteritis & Dehydration",
+        "hospital_name": "Max Healthcare Saket",
+        "paid_amount": 45000.0,
+        "settlement_status": "SETTLED"
+      }
     ]
   },
   {
@@ -134,6 +144,24 @@
         "unit_price": 15000.0,
         "total_amount": 15000.0,
         "service_date": "2026-09-02"
+      }
+    ],
+    "claim_history": [
+      {
+        "previous_claim_id": "CLM-HIST-2026-015",
+        "admission_date": "2026-02-14",
+        "diagnosis": "Cataract Surgery Left Eye",
+        "hospital_name": "Apollo Hospitals",
+        "paid_amount": 30000.0,
+        "settlement_status": "SETTLED"
+      },
+      {
+        "previous_claim_id": "CLM-HIST-2026-089",
+        "admission_date": "2026-06-20",
+        "diagnosis": "Hypertension & Cardiac Observation",
+        "hospital_name": "Apollo Hospitals",
+        "paid_amount": 190000.0,
+        "settlement_status": "SETTLED"
       }
     ]
   },
@@ -189,7 +217,8 @@
         "total_amount": 20000.0,
         "service_date": "2026-05-13"
       }
-    ]
+    ],
+    "claim_history": []
   },
   {
     "claim_id": "CLM-004",
@@ -222,6 +251,16 @@
         "unit_price": 34500.0,
         "total_amount": 34500.0,
         "service_date": "2026-10-01"
+      }
+    ],
+    "claim_history": [
+      {
+        "previous_claim_id": "CLM-HIST-2026-042",
+        "admission_date": "2026-03-10",
+        "diagnosis": "Acute Gastroenteritis",
+        "hospital_name": "Max Healthcare",
+        "paid_amount": 45000.0,
+        "settlement_status": "SETTLED"
       }
     ]
   },
@@ -297,7 +336,7 @@
         "total_amount": 12000.0,
         "service_date": "2026-10-16"
       }
-    ]
+    ],
+    "claim_history": []
   }
 ]
-

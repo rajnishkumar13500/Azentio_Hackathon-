@@ -19,3 +19,4 @@ class IngestionResult(BaseModel):
     claims: List[Claim] = Field(default_factory=list)
     errors: List[IngestionError] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
+

@@ -294,6 +294,20 @@ class ClaimDataValidator:
 
         # Construct validated Claim
         try:
+            raw_history = data.get("claim_history", [])
+            validated_history = []
+            if isinstance(raw_history, list):
+                for h in raw_history:
+                    if isinstance(h, dict):
+                        validated_history.append({
+                            "previous_claim_id": str(h.get("previous_claim_id", "HIST-001")),
+                            "admission_date": str(h.get("admission_date", "")),
+                            "diagnosis": str(h.get("diagnosis", "Prior Settlement")),
+                            "hospital_name": h.get("hospital_name"),
+                            "paid_amount": float(h.get("paid_amount", 0.0) or 0.0),
+                            "settlement_status": str(h.get("settlement_status", "SETTLED")),
+                        })
+
             claim_obj = Claim(
                 claim_id=claim_id,
                 case_title=data.get("case_title", f"Claim {claim_id}"),
@@ -316,6 +330,7 @@ class ClaimDataValidator:
                     "proposed_settlement_amount": float(inc_data.get("proposed_settlement_amount", sum(item.total_amount for item in validated_line_items))),
                 },
                 line_items=validated_line_items,
+                claim_history=validated_history,
             )
             return claim_obj, [], warnings
         except Exception as e:
@@ -329,3 +344,4 @@ class ClaimDataValidator:
                 )
             )
             return None, errors, warnings
+

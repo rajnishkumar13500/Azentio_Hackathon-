@@ -75,3 +75,4 @@ def test_api_upload_and_validate():
     rep1 = data["validation_reports"][0]
     assert rep1["claim_id"] == "CLM-CSV-101"
     assert rep1["summary"]["total_claimed"] == 99000.0
+
