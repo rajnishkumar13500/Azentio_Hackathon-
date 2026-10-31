@@ -72,6 +72,10 @@ class Normaliser:
                 if cleaned is not None:
                     norm[id_field] = cleaned
 
+        # Document OCR often yields invoice_reference without invoice_id.
+        if record_type == "INVOICE" and not norm.get("invoice_id") and norm.get("invoice_reference"):
+            norm["invoice_id"] = norm["invoice_reference"]
+
         # Standardise Dates
         for date_field in ["incident_date", "effective_from", "effective_to", "invoice_date", "settlement_date", "event_date"]:
             if date_field in norm and norm[date_field] is not None:

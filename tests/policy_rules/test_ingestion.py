@@ -101,6 +101,24 @@ def test_ingest_pdf():
         assert len(result.claims) >= 1
         assert result.format_detected == "pdf"
 
+
+def test_api_upload_hospital_bill_pdf_lands_in_studio_portfolio():
+    pdf_path = Path(__file__).resolve().parents[2] / "claims-ingestion" / "sample_data" / "documents" / "hospital_bill.pdf"
+    assert pdf_path.exists()
+    with open(pdf_path, "rb") as f:
+        response = client.post(
+            "/api/v1/ingest/upload-and-validate",
+            files={"file": ("hospital_bill.pdf", f, "application/pdf")},
+        )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ingestion_status"] in ("SUCCESS", "PARTIAL_SUCCESS")
+    assert data["ingestion_result"]["valid_records_count"] >= 1
+    claim_ids = [r["claim_id"] for r in data["validation_reports"]]
+    assert any(cid.startswith("CLM-") for cid in claim_ids)
+    errors = [e.get("error_message", "") for e in data["ingestion_result"].get("errors", [])]
+    assert not any("Invoice ID is required" in msg for msg in errors)
+
 def test_ingest_image_png():
     png_path = Path(__file__).resolve().parents[2] / "claims-ingestion" / "sample_data" / "documents" / "hospital_bill.png"
     if png_path.exists():
