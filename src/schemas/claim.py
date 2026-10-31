@@ -37,3 +37,4 @@ class Claim(BaseModel):
     claimant: Claimant
     incident_details: IncidentDetails
     line_items: List[LineItem] = Field(default_factory=list)
+

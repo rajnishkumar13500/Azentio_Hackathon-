@@ -51,3 +51,4 @@ class ProportionateDeductionRule(BasePolicyRule):
 
     def evaluate(self, claim: Claim, policy: Policy, context: Optional[dict] = None) -> list:
         return []
+

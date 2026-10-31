@@ -157,3 +157,4 @@ def test_benefit_limit_balance_capping(standard_policy):
     assert result.status == RuleStatus.BREACHED
     assert result.admissible_amount == 50000.0
     assert result.discrepancy_amount == 30000.0
+

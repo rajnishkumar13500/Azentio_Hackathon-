@@ -14,9 +14,9 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-from typing import Dict, Any, Optional
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from typing import Dict, Any, Optional, List
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from rich.console import Console
 from rich.table import Table
@@ -26,6 +26,7 @@ from rich.text import Text
 from src.config import settings
 from src.schemas import Claim, Policy, ValidationReport
 from src.engine import validation_engine
+from src.ingestion import ingestion_service, IngestionResult
 
 console = Console()
 
@@ -97,6 +98,68 @@ def validate_demo_claim(claim_id: str):
     claim = Claim(**matched_claim)
     policy = Policy(**policies_data[claim.policy_id])
     return validation_engine.validate_claim(claim, policy)
+
+@app.post("/api/v1/ingest/upload", response_model=IngestionResult)
+async def upload_claims_file(file: UploadFile = File(...)):
+    """
+    Ingests and validates claims data across CSV, Excel (.xlsx), JSON, or text documents.
+    Validates identifiers, amounts, dates, and mandatory fields without silently ignoring bad records.
+    """
+    content = await file.read()
+    result = ingestion_service.ingest_file(file.filename, content)
+    return result
+
+@app.post("/api/v1/ingest/upload-and-validate")
+async def upload_and_validate(file: UploadFile = File(...)):
+    """
+    Full pipeline: Ingests file -> Validates data integrity -> Runs policy rule engine on valid claims.
+    """
+    content = await file.read()
+    result = ingestion_service.ingest_file(file.filename, content)
+    
+    if not result.success and len(result.claims) == 0:
+        return {
+            "ingestion_status": "FAILED",
+            "ingestion_result": result,
+            "validation_reports": [],
+        }
+
+    policies_data, _ = load_data()
+    validation_reports: List[ValidationReport] = []
+
+    for claim in result.claims:
+        if claim.policy_id not in policies_data:
+            # Fallback to default comprehensive policy if unknown policy cited
+            policy = Policy(**policies_data.get("POL-COMPREHENSIVE-01"))
+        else:
+            policy = Policy(**policies_data[claim.policy_id])
+        report = validation_engine.validate_claim(claim, policy)
+        validation_reports.append(report)
+
+    return {
+        "ingestion_status": "SUCCESS" if result.success else "PARTIAL_SUCCESS",
+        "ingestion_result": result,
+        "validation_reports": validation_reports,
+    }
+
+@app.get("/api/v1/ingest/samples/{file_format}")
+def download_sample_file(file_format: str):
+    samples_dir = settings.DATA_DIR / "samples"
+    mapping = {
+        "csv": ("sample_claims.csv", "text/csv"),
+        "xlsx": ("sample_claims.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+        "txt": ("sample_hospital_invoice.txt", "text/plain"),
+        "invalid": ("sample_invalid_claim.csv", "text/csv"),
+    }
+    fmt = file_format.lower()
+    if fmt not in mapping:
+        raise HTTPException(status_code=404, detail=f"Sample format '{fmt}' not found. Supported: csv, xlsx, txt, invalid.")
+
+    filename, media_type = mapping[fmt]
+    file_path = samples_dir / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Sample file missing from disk.")
+    return FileResponse(file_path, media_type=media_type, filename=filename)
 
 def run_cli_demo():
     policies_data, claims_data = load_data()

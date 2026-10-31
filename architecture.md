@@ -189,3 +189,4 @@ As explicitly required by the hackathon problem statement:
 - **Suspected Leakage (Statistical / Anomaly ₹)**:
   - Discrepancies resulting from provider price outliers (e.g. charging ₹1,25,000 for an appendectomy when the regional benchmark is ₹65,000).
   - The engine flags this as `ANOMALY_SUSPECTED` with the exact statistical delta ($$\text{Billed} - \text{Median}$$), keeping deterministic eligibility intact until a medical auditor approves or dismisses the finding.
+

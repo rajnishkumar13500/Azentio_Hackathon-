@@ -30,3 +30,4 @@ class Policy(BaseModel):
     sub_limits: PolicySubLimits = Field(default_factory=PolicySubLimits)
     waiting_periods: WaitingPeriods = Field(default_factory=WaitingPeriods)
     covered_dependents: List[str] = Field(default_factory=lambda: ["SELF", "SPOUSE", "CHILD_1", "CHILD_2"])
+

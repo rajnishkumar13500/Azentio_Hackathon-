@@ -1,0 +1,32 @@
+================================================================================
+                    MAX SUPER SPECIALITY HOSPITAL SAKET
+                     TAX INVOICE & DISCHARGE SUMMARY
+================================================================================
+Bill / Claim Reference: CLM-DOC-2026-881
+Policy No: POL-COMPREHENSIVE-01
+Invoice Date: 16-Aug-2026
+
+PATIENT INFORMATION:
+Patient Name: Mr. Vivek Singhania
+Age / Gender: 44 Yrs / Male
+Relationship: SELF
+Admission Date: 2026-08-10 (10:30 AM)
+Discharge Date: 2026-08-14 (02:00 PM)
+Attending Consultant: Dr. K. N. Rao (Laparoscopic Surgeon)
+Primary Clinical Diagnosis: Acute Appendicitis with localized peritonitis (ICD-10: K35.8)
+
+ITEMIZED CHARGES:
+--------------------------------------------------------------------------------
+Item # | Category       | Service / Item Description            | Qty | Rate   | Total (INR)
+--------------------------------------------------------------------------------
+1      | ROOM_RENT      | Single Deluxe Room Charges (4 days)   | 4   | 7,500  | 30,000.00
+2      | SURGERY        | Laparoscopic Appendectomy Surgeon Fee  | 1   | 80,000 | 80,000.00
+3      | CONSULTATION   | Daily Doctor Visit / Consultation      | 4   | 3,000  | 12,000.00
+4      | CONSUMABLE     | Disposable PPE Kits & Face Shields     | 4   | 1,200  | 4,800.00
+5      | CONSUMABLE     | Sterile Examination Gloves & Swabs    | 2   | 850    | 1,700.00
+6      | INVESTIGATION  | Pre-Operative Ultrasound & Blood Panel | 1   | 6,500  | 6,500.00
+--------------------------------------------------------------------------------
+TOTAL INVOICE AMOUNT CLAIMED: INR 135,000.00
+Proposed Settlement: INR 145,000.00
+Payment Mode Requested: Cashless Claim Settlement
+================================================================================

@@ -61,3 +61,4 @@ class ValidationReport(BaseModel):
     line_items: List[LineItemValidation] = Field(default_factory=list)
     claim_level_rules: List[RuleResult] = Field(default_factory=list)
     recommendations: List[str] = Field(default_factory=list)
+

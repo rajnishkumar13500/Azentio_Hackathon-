@@ -14,3 +14,4 @@ class BasePolicyRule(ABC):
         Returns a RuleResult or specific evaluation data.
         """
         pass
+

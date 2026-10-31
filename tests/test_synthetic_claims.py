@@ -105,3 +105,4 @@ def test_clm_005_jargon_exclusions_and_anomaly():
     assert s.total_excluded == 17000.0  # 13500 + 3500
     # Benchmark outlier detected (Appendectomy billed at 125,000 vs 110,000 threshold)
     assert s.suspected_leakage_total > 0
+
