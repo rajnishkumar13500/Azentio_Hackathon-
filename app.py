@@ -4,6 +4,15 @@ Launches the interactive dashboard and opens it in your default browser.
 """
 
 import sys
+
+# Ensure UTF-8 output on Windows consoles
+if sys.platform == 'win32':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 import os
 import webbrowser
 import threading
